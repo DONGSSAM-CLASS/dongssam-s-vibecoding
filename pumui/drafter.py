@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import date
 
 import anthropic
@@ -27,12 +28,21 @@ SYSTEM = """당신은 한국 초·중·고등학교 행정실 업무에 능숙�
 - 원문에 없는 값을 지어냈다면 반드시 assumptions에 한 줄씩 적습니다."""
 
 
-def make_client() -> anthropic.AsyncAnthropic:
-    return anthropic.AsyncAnthropic()
+class MissingApiKey(RuntimeError):
+    pass
+
+
+def make_client(settings: Settings) -> anthropic.AsyncAnthropic:
+    """설정 화면에 저장한 API 키(없으면 환경변수)로 클라이언트를 만듭니다."""
+    if settings.api_key:
+        return anthropic.AsyncAnthropic(api_key=settings.api_key)
+    if os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_PROFILE"):
+        return anthropic.AsyncAnthropic()
+    raise MissingApiKey("Claude API 키가 설정되지 않았습니다. [설정]에서 API 키를 입력해 주세요.")
 
 
 async def draft_from_text(text: str, settings: Settings, client: anthropic.AsyncAnthropic | None = None) -> PumuiDraft:
-    client = client or make_client()
+    client = client or make_client(settings)
     extra = {}
     if settings.use_fallbacks:
         extra = {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}

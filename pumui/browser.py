@@ -12,6 +12,7 @@ import logging
 import math
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from PIL import Image
 from playwright.async_api import (
@@ -118,12 +119,13 @@ class GuardBlocked(Exception):
 @dataclass
 class BrowserController:
     viewport: tuple[int, int] = (1440, 900)
-    channel: str = "chrome"
+    channel: str = "auto"
     profile_dir: str = ".browser-profile"
     cdp_url: str = ""
     headless: bool = False
     show_cursor: bool = True
     executable_path: str = ""
+    channel_used: str = ""
 
     final_approved: bool = False
     events: list[str] = field(default_factory=list)
@@ -149,18 +151,7 @@ class BrowserController:
                 args=["--disable-features=Translate", "--lang=ko-KR"],
                 accept_downloads=True,
             )
-            if self.executable_path:
-                kwargs["executable_path"] = self.executable_path
-            channel = None if self.channel in ("", "chromium") or self.executable_path else self.channel
-            try:
-                self._context = await self._pw.chromium.launch_persistent_context(
-                    self.profile_dir, channel=channel, **kwargs)
-            except PlaywrightError as exc:
-                if channel is None:
-                    raise
-                log.warning("%s 실행 실패 → 내장 Chromium으로 대체: %s", channel, exc)
-                self.events.append(f"{channel} 브라우저를 찾지 못해 내장 Chromium으로 실행했습니다.")
-                self._context = await self._pw.chromium.launch_persistent_context(self.profile_dir, **kwargs)
+            self._context = await self._launch(kwargs)
         if self.show_cursor:
             await self._context.add_init_script(CURSOR_SCRIPT)
         self._context.on("page", self._on_new_page)
@@ -172,6 +163,38 @@ class BrowserController:
                 except PlaywrightError:
                     pass
         self._page = self._context.pages[-1] if self._context.pages else await self._context.new_page()
+
+    def _candidates(self) -> list[str | None]:
+        if self.executable_path:
+            return [None]
+        ch = (self.channel or "auto").lower()
+        if ch == "auto":
+            return ["chrome", "msedge", None]
+        if ch == "chromium":
+            return [None]
+        return [ch, None]
+
+    async def _launch(self, kwargs: dict) -> BrowserContext:
+        """크롬 → 엣지 → 내장 Chromium 순으로 실행. 브라우저마다 프로필 폴더를 따로 씁니다."""
+        if self.executable_path:
+            kwargs = {**kwargs, "executable_path": self.executable_path}
+        errors = []
+        for channel in self._candidates():
+            name = channel or "chromium"
+            try:
+                ctx = await self._pw.chromium.launch_persistent_context(
+                    str(Path(self.profile_dir) / name), channel=channel, **kwargs)
+                self.channel_used = name
+                if errors:
+                    self.events.append(f"{name} 브라우저로 실행했습니다.")
+                return ctx
+            except PlaywrightError as exc:
+                msg = str(exc)
+                log.warning("%s 실행 실패: %s", name, msg.splitlines()[0] if msg else exc)
+                if "ProcessSingleton" in msg or "user data directory is already in use" in msg:
+                    raise RuntimeError("자동 작성용 브라우저 창이 이미 열려 있습니다. 그 창을 닫고 다시 시도해 주세요.") from exc
+                errors.append(name)
+        raise RuntimeError("크롬이나 엣지를 실행하지 못했습니다. Chrome 또는 Microsoft Edge가 설치되어 있는지 확인해 주세요.")
 
     async def close(self) -> None:
         try:

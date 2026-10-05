@@ -89,7 +89,7 @@ PLAYBOOK = """당신은 교사를 대신해 K-에듀파인(교육행정 업무�
 """
 
 
-def build_system_prompt(draft: PumuiDraft, stop_at: str, cert_owner: str) -> str:
+def build_system_prompt(draft: PumuiDraft, stop_at: str, cert_owner: str, school_notes: str = "") -> str:
     stop_at_text = (
         "결재요청(상신)까지 진행 — 단, 상신 직전에 반드시 교사 승인" if stop_at == "submit"
         else "품의 저장까지만 진행 (결재요청은 누르지 않음)"
@@ -107,12 +107,17 @@ def build_system_prompt(draft: PumuiDraft, stop_at: str, cert_owner: str) -> str
         ],
         "총액": draft.total,
     }
+    notes = ""
+    if school_notes.strip():
+        notes = ("\n# 우리 학교/교육청 참고사항 (선생님이 직접 적은 내용 — 위 절차와 다르면 이것을 우선)\n"
+                 + school_notes.strip() + "\n")
     return (
         PLAYBOOK.format(
             cert_owner=cert_owner or "(지정 안 됨 — 목록에 하나면 그것, 여러 개면 ask_teacher)",
             total=draft.total,
             stop_at_text=stop_at_text,
         )
+        + notes
         + "\n<품의데이터>\n"
         + json.dumps(data, ensure_ascii=False, indent=2)
         + "\n</품의데이터>\n"

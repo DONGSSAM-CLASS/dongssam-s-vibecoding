@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>에듀파인 자동 품의</title>
+<link rel="icon" href="/static/icon.png">
 <style>
   :root {
     --bg: #f5f6f8; --card: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e2e5eb;
@@ -67,17 +68,43 @@
   dialog .ft { padding: 0 16px 16px; display: flex; gap: 8px; justify-content: flex-end; }
   .banner { background: #fdecea; color: #7b1d14; border: 1px solid #f5c2bc; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display: none; }
   small.hint { color: var(--muted); }
+  header nav { margin-left: 16px; display: flex; gap: 6px; }
+  header nav button { background: transparent; color: #dfe4f2; border: 1px solid #39425f; padding: 5px 12px; font-size: 13px; }
+  header nav button:hover { background: #262e47; }
+  .update { background: #e8f1ff; color: #12366e; border: 1px solid #b9d2fb; padding: 10px 14px; border-radius: 8px; margin: 12px 24px 0; display: none; }
+  dialog.wide { width: min(720px, 94vw); }
+  .form-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 12px; align-items: center; }
+  .form-grid > label { margin: 0; font-size: 13px; color: var(--ink); font-weight: 600; }
+  .form-grid small { grid-column: 2; margin-top: -6px; color: var(--muted); font-size: 12px; }
+  .wiz-steps { display: flex; gap: 6px; margin-bottom: 12px; }
+  .wiz-steps span { flex: 1; text-align: center; font-size: 12px; padding: 4px; border-radius: 12px; background: #eef0f4; color: var(--muted); }
+  .wiz-steps span.on { background: var(--navy); color: #fff; font-weight: 700; }
+  .wiz-page { display: none; } .wiz-page.on { display: block; }
+  .check { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; font-size: 13.5px; }
+  .check input { width: auto; margin-top: 3px; }
+  .msg { font-size: 13px; margin-top: 6px; } .msg.ok { color: var(--ok); } .msg.bad { color: var(--warn); }
+  .hist { max-height: 60vh; overflow: auto; }
+  .hist .it { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .hist .it .t { flex: 1; } .hist .it small { color: var(--muted); }
+  ol.help li { margin-bottom: 6px; }
 </style>
 </head>
 <body>
 <header>
   <h1>에듀파인 자동 품의 <span class="claude">with Claude</span></h1>
+  <nav>
+    <button id="navHistory">최근 품의</button>
+    <button id="navSettings">⚙ 설정</button>
+    <button id="navHelp">도움말</button>
+    <button id="navQuit">종료</button>
+  </nav>
   <div class="meta" id="meta">설정 불러오는 중…</div>
 </header>
+<div class="update" id="update"></div>
 
 <main>
   <section>
-    <div class="banner" id="keyBanner">Claude API 키가 설정되지 않았습니다. 프로그램 폴더의 <b>.env</b> 파일에 <code>ANTHROPIC_API_KEY</code>를 넣고 다시 실행해 주세요.</div>
+    <div class="banner" id="keyBanner">Claude API 키가 아직 없습니다. 오른쪽 위 <b>⚙ 설정</b>에서 API 키를 입력해 주세요.</div>
 
     <div class="card">
       <h2><span class="num">1</span> 품의할 내용을 간단히 적어 주세요</h2>
@@ -130,7 +157,7 @@
         <label><input type="radio" name="stop" value="submit" checked> 결재요청(기안)까지 <small class="hint">— 상신 직전 승인 필요</small></label>
         <label><input type="radio" name="stop" value="save"> 저장까지만</label>
       </div>
-      <div class="opt"><label><input type="checkbox" id="mock"> 연습 모드 (모의 에듀파인에서 먼저 시험해 보기)</label></div>
+      <div class="opt"><label><input type="checkbox" id="mock"> 연습 모드 (모의 에듀파인에서 먼저 시험해 보기 — 처음이시면 꼭 체크!)</label></div>
       <div class="actions">
         <button class="primary" id="btnRun">🚀 에듀파인에 자동 작성</button>
         <button id="btnCancel" disabled>중단</button>
@@ -151,6 +178,101 @@
     </div>
   </section>
 </main>
+
+
+<dialog id="wizDlg" class="wide">
+  <div class="hd">에듀파인 자동 품의 — 처음 설정</div>
+  <div class="bd" style="white-space:normal">
+    <div class="wiz-steps"><span data-w="1">1. 안내·동의</span><span data-w="2">2. Claude API 키</span><span data-w="3">3. 소속 교육청</span><span data-w="4">4. 시작</span></div>
+    <div class="wiz-page" data-w="1">
+      <p>이 프로그램은 선생님 대신 Claude(AI)가 업무포털·K-에듀파인 화면을 보고 마우스와 키보드를 움직여 품의를 작성합니다.</p>
+      <label class="check"><input type="checkbox" class="agree"> 작업 중 화면 <b>스크린샷이 Claude API(Anthropic)로 전송</b>된다는 것을 이해했습니다.</label>
+      <label class="check"><input type="checkbox" class="agree"> 소속 교육청·학교의 <b>정보보안 지침</b>(외부 AI 서비스·업무 자동화 사용)을 확인하고 지키겠습니다.</label>
+      <label class="check"><input type="checkbox" class="agree"> 결재요청(상신)은 제가 직접 승인하며, 품의 내용의 <b>최종 책임은 기안자</b>에게 있습니다.</label>
+      <p style="font-size:12px;color:var(--muted)">이 프로그램은 교육청·한국교육학술정보원의 공식 프로그램이 아닌 교사 제작 도구입니다. 선생님의 설정과 기록은 이 PC에만 저장되며 제작자에게 전송되지 않습니다.</p>
+    </div>
+    <div class="wiz-page" data-w="2">
+      <p>Claude를 쓰려면 <b>본인 API 키</b>가 필요합니다. (사용한 만큼 Anthropic에 요금이 청구됩니다)</p>
+      <ol class="help">
+        <li><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> 에 가입·로그인</li>
+        <li><b>Billing</b>에서 결제 수단 등록 후 크레딧 충전 (예: 5달러)</li>
+        <li><b>API Keys → Create Key</b> 로 키를 만들고 복사 (sk-ant- 로 시작)</li>
+      </ol>
+      <input id="wizKey" type="password" placeholder="sk-ant-..." autocomplete="off">
+      <div class="actions"><button id="wizTest">연결 테스트</button><span class="msg" id="wizKeyMsg"></span></div>
+      <small class="hint">키는 이 PC의 윈도우 계정으로 암호화해 저장합니다.</small>
+    </div>
+    <div class="wiz-page" data-w="3">
+      <label>소속 시·도교육청</label>
+      <select id="wizRegion"></select>
+      <label style="margin-top:12px">인증서 사용자 이름 (선택 — 인증서 목록에 여러 개가 보일 때 고를 이름)</label>
+      <input id="wizOwner" placeholder="예: 홍길동">
+    </div>
+    <div class="wiz-page" data-w="4">
+      <p><b>준비 완료!</b> 처음에는 <b>연습 모드</b>로 한 번 실행해 보세요. 실제 에듀파인과 비슷한 모의 화면에서 Claude가 어떻게 움직이는지 볼 수 있고, 실제 시스템에는 아무것도 남지 않습니다.</p>
+      <p>실제로 쓸 때는 업무용 PC에 K-에듀파인 보안 프로그램(인증서 모듈)이 설치되어 있어야 합니다.</p>
+    </div>
+  </div>
+  <div class="ft"><button id="wizPrev">이전</button><button class="primary" id="wizNext">다음</button></div>
+</dialog>
+
+<dialog id="setDlg" class="wide">
+  <div class="hd">⚙ 설정</div>
+  <div class="bd" style="white-space:normal">
+    <div class="form-grid">
+      <label for="sKey">Claude API 키</label>
+      <div style="display:flex;gap:6px"><input id="sKey" type="password" autocomplete="off"><button id="sTest" style="white-space:nowrap">연결 테스트</button></div>
+      <small id="sKeyMsg">비워 두면 기존 키를 그대로 씁니다.</small>
+      <label for="sModel">AI 모델</label><select id="sModel"></select>
+      <label for="sRegion">소속 교육청</label><select id="sRegion"></select>
+      <label for="sPortal">업무포털 주소</label><input id="sPortal" placeholder="비워 두면 교육청에 맞게 자동">
+      <small id="sPortalHint"></small>
+      <label for="sOwner">인증서 사용자 이름</label><input id="sOwner" placeholder="선택">
+      <label for="sPw">인증서 암호 저장</label><input id="sPw" type="password" autocomplete="off" placeholder="선택 — 비우면 매번 직접 입력">
+      <small id="sPwMsg"></small>
+      <label for="sStop">기본 진행 범위</label>
+      <select id="sStop"><option value="submit">결재요청(기안)까지 — 상신 직전 승인</option><option value="save">저장까지만</option></select>
+      <label for="sBrowser">사용할 브라우저</label>
+      <div style="display:flex;gap:6px"><select id="sBrowser"><option value="auto">자동 (크롬 → 엣지)</option><option value="chrome">Chrome</option><option value="msedge">Microsoft Edge</option></select><button id="sCheck" style="white-space:nowrap">브라우저 점검</button></div>
+      <small id="sCheckMsg">저장한 뒤 점검하면 바뀐 설정으로 확인합니다.</small>
+      <label for="sRetention">기록 보관 기간</label>
+      <div style="display:flex;gap:6px;align-items:center"><input id="sRetention" type="number" min="1" max="365" style="width:90px"> 일 <button id="sOpenRuns" style="margin-left:auto">기록 폴더 열기</button><button id="sOpenLogs">로그 폴더</button></div>
+      <small>작업 기록(스크린샷 포함)은 이 기간이 지나면 자동으로 지워집니다.</small>
+      <label for="sNotes">우리 학교 참고사항</label>
+      <textarea id="sNotes" rows="4" placeholder="Claude가 참고할 우리 교육청/학교만의 화면 특징. 예) 품의목록은 '학교회계 > 품의관리' 메뉴에 있음 / 예산 선택 후 '적용' 버튼을 눌러야 함"></textarea>
+    </div>
+  </div>
+  <div class="ft"><span class="msg" id="setMsg" style="margin-right:auto"></span><button id="setClose">닫기</button><button class="primary" id="setSave">저장</button></div>
+</dialog>
+
+<dialog id="histDlg" class="wide">
+  <div class="hd">최근 품의 (이 PC에서 작성한 것)</div>
+  <div class="bd hist" id="histList" style="white-space:normal"></div>
+  <div class="ft"><button id="histClose">닫기</button></div>
+</dialog>
+
+<dialog id="helpDlg" class="wide">
+  <div class="hd">도움말</div>
+  <div class="bd" style="white-space:normal">
+    <ol class="help">
+      <li><b>품의 내용</b>을 한두 줄로 적고 [Claude로 품의 초안 만들기]를 누릅니다.</li>
+      <li>초안의 제목·품목·금액·예산 단서를 확인·수정합니다. 노란 상자는 Claude가 추정한 값입니다.</li>
+      <li>[에듀파인에 자동 작성]을 누르면 새 브라우저 창이 열립니다. <b>작업 중에는 그 창을 건드리지 마세요.</b></li>
+      <li>인증서 암호 입력이나 예산 선택이 애매할 때는 "Claude가 선생님께 요청합니다" 창이 뜹니다.</li>
+      <li>저장이 끝나면 <b>결재요청 최종 승인</b> 창이 뜹니다. 브라우저 화면을 확인하고 승인하세요.</li>
+    </ol>
+    <p><b>잘 안 될 때</b></p>
+    <ul>
+      <li>"브라우저 창이 이미 열려 있습니다" → 자동 작성용 브라우저 창을 닫고 다시 시도</li>
+      <li>보안 프로그램 설치 안내가 뜸 → 안내대로 설치 후 다시 실행</li>
+      <li>메뉴를 못 찾음 → [설정] › 우리 학교 참고사항에 메뉴 위치를 적어 주세요</li>
+      <li>API 연결 실패 → 학교 방화벽에서 api.anthropic.com 이 막혀 있는지 정보담당자에게 문의</li>
+      <li>문제 보고 시 [설정] › 로그 폴더의 app.log 를 첨부해 주세요 (스크린샷 폴더는 업무 화면이 담겨 있으니 공유 주의)</li>
+    </ul>
+    <p style="font-size:12px;color:var(--muted)" id="aboutLine"></p>
+  </div>
+  <div class="ft"><button id="helpClose">닫기</button></div>
+</dialog>
 
 <dialog id="askDlg">
   <div class="hd">🙋 Claude가 선생님께 요청합니다</div>
@@ -175,8 +297,16 @@ let started = 0, timer = null, askId = null, apprId = null;
 
 $('steps').innerHTML = STEPS.map((s, i) => `<span class="step" data-s="${i + 1}">${CIRC[i]} ${s}</span>`).join('');
 
+// 실행할 때마다 바뀌는 보안 토큰: 주소창의 ?t= 를 읽어 보관하고 주소창에서는 지웁니다
+const TOKEN = (() => {
+  const q = new URLSearchParams(location.search).get('t');
+  try { if (q) sessionStorage.setItem('pumui_t', q); } catch (e) {}
+  if (q) history.replaceState(null, '', '/');
+  try { return q || sessionStorage.getItem('pumui_t') || ''; } catch (e) { return q || ''; }
+})();
 async function api(path, body) {
-  const r = await fetch(path, { method: body === undefined ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const r = await fetch(path, { method: body === undefined ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json', 'X-Pumui-Token': TOKEN }, body: body === undefined ? undefined : JSON.stringify(body) });
+  if (r.status === 403) { document.body.innerHTML = '<div style="padding:40px;font-size:16px">연결이 만료되었습니다. 바탕화면의 <b>에듀파인 자동 품의</b> 아이콘을 다시 눌러 주세요.</div>'; throw new Error('token'); }
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.detail || r.statusText);
   return j;
@@ -184,11 +314,116 @@ async function api(path, body) {
 const won = (n) => n.toLocaleString('ko-KR') + '원';
 const bytes = (s) => [...s].reduce((n, c) => n + (c.charCodeAt(0) > 127 ? 2 : 1), 0);
 
-api('/api/config').then(c => {
-  $('meta').textContent = `${c.region_name}교육청 · ${c.model} · 인증서 암호 ${c.has_cert_password ? '저장됨' : '직접 입력'}`;
-  if (!c.has_api_key) $('keyBanner').style.display = 'block';
-  document.querySelector(`input[name=stop][value=${c.stop_at === 'save' ? 'save' : 'submit'}]`).checked = true;
-});
+let CFG = {};
+async function loadConfig() {
+  CFG = await api('/api/config');
+  $('meta').textContent = `v${CFG.version} · ${CFG.regions[CFG.region] || CFG.region}교육청 · ${CFG.models[CFG.model] ? CFG.model.replace('claude-', '') : CFG.model} · 인증서 암호 ${CFG.cert_password_saved ? '저장됨' : '직접 입력'}`;
+  $('keyBanner').style.display = CFG.api_key_saved ? 'none' : 'block';
+  document.querySelector(`input[name=stop][value=${CFG.stop_at === 'save' ? 'save' : 'submit'}]`).checked = true;
+  if (CFG.update) { $('update').style.display = 'block'; $('update').innerHTML = `🎉 새 버전 <b>${CFG.update.version}</b>이 나왔습니다. <a href="${CFG.update.url}" target="_blank" rel="noopener">내려받기</a>`; }
+  $('aboutLine').textContent = `에듀파인 자동 품의 v${CFG.version} · 설정·기록 위치: ${CFG.data_dir}`;
+  return CFG;
+}
+const fillSelect = (sel, obj, val) => { sel.innerHTML = Object.entries(obj).map(([k, v]) => `<option value="${k}">${v}</option>`).join(''); sel.value = val; };
+
+// ── 처음 설정 마법사 ──
+let wiz = 1;
+function wizShow() {
+  document.querySelectorAll('#wizDlg [data-w]').forEach(el => el.classList.toggle('on', +el.dataset.w === wiz));
+  $('wizPrev').style.visibility = wiz > 1 ? 'visible' : 'hidden';
+  $('wizNext').textContent = wiz === 4 ? '연습 모드로 시작하기' : '다음';
+}
+function openWizard() {
+  fillSelect($('wizRegion'), CFG.regions, CFG.region); $('wizOwner').value = CFG.cert_owner || '';
+  wiz = CFG.agreed ? 2 : 1; if (CFG.agreed && CFG.api_key_saved) wiz = 3;
+  wizShow(); $('wizDlg').showModal();
+}
+$('wizDlg').addEventListener('cancel', (e) => e.preventDefault());
+$('wizPrev').onclick = () => { wiz = Math.max(1, wiz - 1); wizShow(); };
+$('wizTest').onclick = async () => {
+  $('wizKeyMsg').className = 'msg'; $('wizKeyMsg').textContent = '확인 중…';
+  const r = await api('/api/test-key', { api_key: $('wizKey').value.trim() });
+  $('wizKeyMsg').className = 'msg ' + (r.ok ? 'ok' : 'bad'); $('wizKeyMsg').textContent = r.message; return r.ok;
+};
+$('wizNext').onclick = async () => {
+  try {
+    if (wiz === 1) {
+      if ([...document.querySelectorAll('.agree')].some(c => !c.checked)) { alert('세 가지 항목에 모두 동의해 주세요.'); return; }
+      await api('/api/agree', {});
+    } else if (wiz === 2) {
+      const key = $('wizKey').value.trim();
+      if (!key && !CFG.api_key_saved) { alert('API 키를 입력해 주세요.'); return; }
+      if (key) { if (!(await $('wizTest').onclick())) return; await api('/api/settings', { api_key: key }); }
+    } else if (wiz === 3) {
+      await api('/api/settings', { region: $('wizRegion').value, cert_owner: $('wizOwner').value.trim() });
+    } else {
+      $('wizDlg').close(); $('mock').checked = true; await loadConfig(); $('req').focus(); return;
+    }
+    wiz++; wizShow();
+  } catch (e) { if (e.message !== 'token') alert(e.message); }
+};
+
+// ── 설정 ──
+async function openSettings() {
+  await loadConfig();
+  $('sKey').value = ''; $('sKey').placeholder = CFG.api_key_saved ? `저장됨 (${CFG.api_key_hint})` : 'sk-ant-...';
+  $('sKeyMsg').textContent = CFG.api_key_saved ? '비워 두면 기존 키를 그대로 씁니다.' : '아직 저장된 키가 없습니다.'; $('sKeyMsg').className = '';
+  fillSelect($('sModel'), CFG.models, CFG.model); fillSelect($('sRegion'), CFG.regions, CFG.region);
+  $('sPortal').value = CFG.portal_url || ''; $('sPortalHint').textContent = '현재: ' + CFG.portal_url_effective;
+  $('sOwner').value = CFG.cert_owner || ''; $('sPw').value = '';
+  $('sPwMsg').textContent = CFG.cert_password_saved ? '저장된 암호가 있습니다. 지우려면 아래 [암호 삭제]를 누르세요.' : '저장하지 않으면 로그인할 때 직접 입력합니다.';
+  if (CFG.cert_password_saved) $('sPwMsg').innerHTML += ' <a href="#" id="sPwDel">암호 삭제</a>';
+  $('sStop').value = CFG.stop_at; $('sBrowser').value = CFG.browser; $('sRetention').value = CFG.retention_days; $('sNotes').value = CFG.school_notes || '';
+  $('setMsg').textContent = ''; $('setDlg').showModal();
+  const del = document.getElementById('sPwDel');
+  if (del) del.onclick = async (e) => { e.preventDefault(); await api('/api/settings', { cert_password: '' }); openSettings(); };
+}
+$('navSettings').onclick = openSettings;
+$('setClose').onclick = () => $('setDlg').close();
+$('sTest').onclick = async () => {
+  $('sKeyMsg').textContent = '확인 중…';
+  const r = await api('/api/test-key', { api_key: $('sKey').value.trim() });
+  $('sKeyMsg').className = 'msg ' + (r.ok ? 'ok' : 'bad'); $('sKeyMsg').textContent = r.message;
+};
+$('setSave').onclick = async () => {
+  const body = { model: $('sModel').value, region: $('sRegion').value, portal_url: $('sPortal').value.trim(), cert_owner: $('sOwner').value.trim(),
+    stop_at: $('sStop').value, browser: $('sBrowser').value, retention_days: +$('sRetention').value || 30, school_notes: $('sNotes').value };
+  if ($('sKey').value.trim()) body.api_key = $('sKey').value.trim();
+  if ($('sPw').value) body.cert_password = $('sPw').value;
+  try { await api('/api/settings', body); await loadConfig(); $('setMsg').className = 'msg ok'; $('setMsg').textContent = '저장했습니다.'; setTimeout(() => $('setDlg').close(), 600); }
+  catch (e) { $('setMsg').className = 'msg bad'; $('setMsg').textContent = e.message; }
+};
+$('sCheck').onclick = async () => {
+  $('sCheckMsg').className = 'msg'; $('sCheckMsg').textContent = '브라우저를 띄워 점검하는 중… (10초 정도)';
+  try { const r = await api('/api/browser-check', {}); $('sCheckMsg').className = 'msg ' + (r.ok ? 'ok' : 'bad'); $('sCheckMsg').textContent = r.message; }
+  catch (e) { $('sCheckMsg').className = 'msg bad'; $('sCheckMsg').textContent = e.message; }
+};
+$('sOpenRuns').onclick = () => api('/api/open-folder', { which: 'runs' }).catch(e => alert(e.message));
+$('sOpenLogs').onclick = () => api('/api/open-folder', { which: 'logs' }).catch(e => alert(e.message));
+
+// ── 최근 품의 / 도움말 / 종료 ──
+$('navHistory').onclick = async () => {
+  const items = await api('/api/history');
+  const label = { submitted: '상신', saved: '저장', failed: '실패', cancelled: '중단' };
+  $('histList').innerHTML = items.length ? items.map((h, i) => `<div class="it"><div class="t"><b>${h.title.replace(/</g, '&lt;')}</b><br><small>${h.at} · ${(h.total || 0).toLocaleString()}원 · ${label[h.result] || h.result}${h.document_number ? ' · ' + h.document_number : ''}</small></div><button data-i="${i}">다시 쓰기</button></div>`).join('')
+    : '<p>아직 작성한 품의가 없습니다.</p>';
+  $('histList').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const d = JSON.parse(JSON.stringify(items[+b.dataset.i].draft));
+    const t = new Date(); d.request_date = t.toISOString().slice(0, 10); d.due_date = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10); d.assumptions = [];
+    fill(d); $('histDlg').close(); window.scrollTo(0, 0);
+  });
+  $('histDlg').showModal();
+};
+$('histClose').onclick = () => $('histDlg').close();
+$('navHelp').onclick = () => $('helpDlg').showModal();
+$('helpClose').onclick = () => $('helpDlg').close();
+$('navQuit').onclick = async () => {
+  if (!confirm('프로그램을 종료할까요? (자동 작성용 브라우저 창도 닫힙니다)')) return;
+  await api('/api/shutdown', {}).catch(() => {});
+  document.body.innerHTML = '<div style="padding:40px;font-size:16px">프로그램을 종료했습니다. 이 창은 닫으셔도 됩니다.</div>';
+};
+
+loadConfig().then(c => { if (!c.agreed || !c.api_key_saved) openWizard(); }).catch(() => {});
 
 document.querySelectorAll('.chip').forEach(c => c.onclick = () => { $('req').value = c.textContent; });
 
@@ -273,7 +508,7 @@ function setStep(n, msg) {
 }
 function finish() { clearInterval(timer); $('btnRun').disabled = false; $('btnCancel').disabled = true; }
 
-const es = new EventSource('/api/events');
+const es = new EventSource('/api/events?t=' + encodeURIComponent(TOKEN));
 es.onmessage = (m) => {
   const ev = JSON.parse(m.data);
   if (ev.type === 'screen') { $('screen').innerHTML = `<img alt="현재 화면" src="data:image/png;base64,${ev.png}">`; }

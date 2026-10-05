@@ -18,6 +18,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from .agent import EdufineAgent
 from .browser import BrowserController
+from . import paths
 from .config import ROOT, Settings
 from .drafter import draft_from_text
 from .models import PumuiDraft, won
@@ -58,8 +59,11 @@ def print_draft(d: PumuiDraft) -> None:
 
 def serve_mock() -> str:
     """연습용 모의 에듀파인을 로컬에서 띄우고 주소를 돌려줍니다."""
-    handler = partial(SimpleHTTPRequestHandler, directory=str(ROOT / "mock_edufine"))
-    handler.log_message = lambda *a, **k: None  # type: ignore[assignment]
+    class Quiet(SimpleHTTPRequestHandler):
+        def log_message(self, *args) -> None:
+            pass
+
+    handler = partial(Quiet, directory=str(ROOT / "mock_edufine"))
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return f"http://127.0.0.1:{httpd.server_address[1]}/portal.html"
@@ -71,7 +75,7 @@ async def cmd_run(args: argparse.Namespace) -> int:
         s.stop_at = args.stop_at
     if args.mock:
         s = dataclasses.replace(s, portal_url_override=serve_mock(), cert_password=s.cert_password or "1234",
-                                cdp_url="", profile_dir=s.profile_dir.with_name(".browser-profile-mock"))
+                                cdp_url="", school_notes="", profile_dir=paths.profile_dir(mock=True))
     if args.draft_file:
         draft = PumuiDraft.model_validate_json(open(args.draft_file, encoding="utf-8").read()).ensure_overview()
     else:
@@ -95,6 +99,27 @@ async def cmd_run(args: argparse.Namespace) -> int:
         await browser.close()
 
 
+async def browser_selftest(settings: Settings, mock_url: str) -> dict:
+    """브라우저를 띄워 모의 포털을 열고 스크린샷까지 찍어 봅니다 (API 키 불필요)."""
+    browser = BrowserController(viewport=settings.viewport, channel=settings.browser_channel,
+                                profile_dir=str(paths.profile_dir(mock=True)), headless=True,
+                                executable_path=settings.browser_path)
+    await browser.start()
+    try:
+        await browser.goto(mock_url)
+        png, w, h = await browser.screenshot()
+        target = await browser.target_at(w / 2, h / 2)
+        return {"ok": png[:4] == b"\x89PNG", "browser": browser.channel_used, "size": [w, h], "center": target.label()}
+    finally:
+        await browser.close()
+
+
+async def cmd_selftest(args: argparse.Namespace) -> int:
+    result = await browser_selftest(Settings(), serve_mock())
+    print(json.dumps(result, ensure_ascii=False))
+    return 0 if result["ok"] else 1
+
+
 async def cmd_draft(args: argparse.Namespace) -> int:
     draft = await draft_from_text(args.text, Settings())
     print_draft(draft)
@@ -114,6 +139,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--mock", action="store_true", help="연습용 모의 에듀파인에서 실행")
     r.add_argument("--stop-at", choices=["save", "submit"])
     r.add_argument("-y", "--yes", action="store_true", help="초안 확인 질문 생략")
+    sub.add_parser("selftest", help="브라우저 점검 (API 키 불필요)")
     d = sub.add_parser("draft", help="초안만 만들기")
     d.add_argument("text")
     d.add_argument("-o", "--out")
@@ -127,6 +153,8 @@ def main(argv: list[str] | None = None) -> int:
         if not args.text and not args.draft_file:
             p.error("품의 내용 또는 --draft-file 이 필요합니다.")
         return asyncio.run(cmd_run(args))
+    if args.cmd == "selftest":
+        return asyncio.run(cmd_selftest(args))
     return asyncio.run(cmd_draft(args))
 
 

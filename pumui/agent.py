@@ -14,6 +14,7 @@ import anthropic
 
 from .browser import BrowserController, GuardBlocked
 from .config import Settings
+from .drafter import make_client
 from .models import PumuiDraft
 from .playbook import STEPS, build_system_prompt
 
@@ -133,7 +134,7 @@ class EdufineAgent:
         self.s = settings
         self.browser = browser
         self.io = io
-        self.client = client or anthropic.AsyncAnthropic()
+        self.client = client or make_client(settings)
         self.result: dict[str, Any] | None = None
         self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
         self.run_dir = settings.runs_dir / datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -172,7 +173,7 @@ class EdufineAgent:
         draft.ensure_overview()
         self.run_dir.mkdir(parents=True, exist_ok=True)
         (self.run_dir / "draft.json").write_text(draft.model_dump_json(indent=2), encoding="utf-8")
-        system = build_system_prompt(draft, self.s.stop_at, self.s.cert_owner)
+        system = build_system_prompt(draft, self.s.stop_at, self.s.cert_owner, self.s.school_notes)
         kwargs = self._request_kwargs(system)
 
         if self.browser.page.url in ("about:blank", "", "chrome://newtab/"):
