@@ -5,8 +5,9 @@
 
 - 관리자 권한 없이 설치됩니다.
 - "Windows의 PC 보호" 창이 뜨면 **추가 정보 → 실행**을 누르세요.
+- 내려받은 파일이 변조되지 않았는지 `SHA256SUMS.txt`의 해시와 비교할 수 있습니다.
 - 처음 실행하면 설정 마법사가 안내합니다. Claude API 키는 선생님 본인 것으로 발급해 주세요.
-- 자세한 사용법: [사용설명서](https://github.com/DONGSSAM-CLASS/dongssam-s-vibecoding/blob/main/docs/사용설명서.md)
+- 자세한 사용법: [사용설명서](https://github.com/DONGSSAM-CLASS/dongssam-s-vibecoding/blob/v1.0.0/docs/사용설명서.md)
 
 ### 이번 버전
 - 한두 줄 입력 → Claude가 품의 초안(제목·개요·품목·예산 단서) 작성
