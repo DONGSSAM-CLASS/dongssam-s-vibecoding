@@ -57,6 +57,9 @@ Claude가 품의서 초안을 만들고 → 브라우저를 직접 조작해 **�
    테스트 → PyInstaller로 exe 빌드 → exe 실행 점검 → **Setup.exe**(Inno Setup)·**portable.zip** 생성 → **Releases에 게시**합니다.
    태그 없이 `main`에 푸시하면 Actions의 Artifacts에서 시험용 빌드를 받을 수 있습니다.
 
+   태그를 직접 푸시하기 어려우면: **Actions → build → Run workflow** 에서 **release** 를 체크하고 실행하면,
+   테스트·빌드가 통과한 그 커밋에 `v<버전>` 태그와 릴리스가 자동으로 만들어집니다.
+
 > **저장소 공개 여부**: 다른 선생님들이 Releases에서 내려받고 프로그램이 새 버전을 확인하려면 저장소가 **공개(public)** 여야 합니다.
 > 비공개로 둘 경우 Setup.exe를 다른 경로(학교 메신저, 드라이브 등)로 나눠 주세요. 업데이트 안내는 동작하지 않습니다.
 >
