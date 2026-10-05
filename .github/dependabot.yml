@@ -1,0 +1,12 @@
+# 의존성·GitHub Action 보안 업데이트를 매주 PR로 알려 줍니다.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
