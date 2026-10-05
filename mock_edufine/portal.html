@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>업무포털 (연습용 모의 화면)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; background: #f4f6f9; color: #222; }
+  .mockbar { background: #ffe8a3; color: #6a4b00; font-size: 12px; text-align: center; padding: 4px; }
+  header { background: #fff; border-bottom: 1px solid #dde; padding: 10px 24px; display: flex; align-items: center; gap: 10px; }
+  header b { font-size: 18px; color: #1d3f8f; }
+  .wrap { max-width: 980px; margin: 24px auto; background: #fff; border: 1px solid #e3e6ee; padding: 24px; }
+  .banners { display: flex; gap: 16px; }
+  .banner { flex: 1; height: 220px; border-radius: 6px; padding: 18px; font-weight: 700; font-size: 20px; }
+  .b1 { background: linear-gradient(135deg, #8ad7e8, #b9a6f0); color: #1b2a55; }
+  .b2 { background: linear-gradient(135deg, #ffe9a6, #ffd36b); color: #6b3a00; }
+  .loginbtn { display: block; width: 420px; margin: 28px auto 10px; padding: 14px; font-size: 16px; font-weight: 700;
+              color: #fff; background: #1d4fd8; border: 0; border-radius: 4px; cursor: pointer; }
+  .subbtns { display: flex; justify-content: center; gap: 8px; }
+  .subbtns button { background: #3d6be0; color: #fff; border: 0; padding: 7px 14px; font-size: 12px; border-radius: 3px; }
+  .note { font-size: 11px; color: #777; text-align: center; margin-top: 14px; }
+  /* 인증서 창 */
+  #certLayer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.25); }
+  .cert { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); width: 430px; background: #fff;
+          border: 1px solid #7f9cc8; box-shadow: 0 6px 24px rgba(0,0,0,.3); font-size: 12px; }
+  .cert .tt { background: linear-gradient(#2f6fd0, #1b4fa8); color: #fff; padding: 8px 10px; font-weight: 700; }
+  .cert .loc { display: flex; gap: 6px; padding: 10px; border-bottom: 1px solid #e5e5e5; }
+  .cert .loc div { flex: 1; text-align: center; border: 1px solid #ccd; padding: 8px 0; border-radius: 3px; cursor: pointer; }
+  .cert .loc div.on { border-color: #2f6fd0; background: #eaf2ff; }
+  .cert table { width: calc(100% - 20px); margin: 10px; border-collapse: collapse; }
+  .cert th { background: #eef1f6; border: 1px solid #d6dbe4; padding: 5px; }
+  .cert td { border: 1px solid #e3e6ea; padding: 6px; cursor: pointer; }
+  .cert tr.sel td { background: #cfe0ff; }
+  .cert .pw { padding: 6px 10px 12px; display: flex; gap: 8px; align-items: center; }
+  .cert .pw input { flex: 1; padding: 6px; border: 1px solid #aab; }
+  .cert .bt { text-align: right; padding: 0 10px 10px; }
+  .cert .bt button { padding: 5px 16px; margin-left: 4px; }
+  .cert .ok { background: #1b4fa8; color: #fff; border: 1px solid #1b4fa8; }
+  /* 로그인 후 */
+  #main { display: none; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+  .tile { border: 1px solid #d8deea; border-radius: 6px; padding: 26px 10px; text-align: center; font-weight: 700; cursor: pointer; background: #fafcff; }
+  .tile:hover { background: #eaf2ff; }
+</style>
+</head>
+<body>
+<div class="mockbar">※ 연습용 모의 화면입니다. 실제 업무포털·K-에듀파인과 무관하며 입력 내용은 이 브라우저에만 저장됩니다.</div>
+<header><b>OO특별시교육청</b> <span>업무포털</span></header>
+
+<div class="wrap" id="loginView">
+  <div class="banners">
+    <div class="banner b1">조직문화 개선<br>인사철, 선물 대신 따뜻한 말 한마디!</div>
+    <div class="banner b2">잠깐만! 두근두근 새 학기<br>사용하던 인증서, 그대로 '백업'해서 가져가세요!</div>
+  </div>
+  <button class="loginbtn" id="btnCertLogin">» 교육행정 전자서명 인증서 로그인</button>
+  <div class="subbtns"><button>사용자 등록</button><button>전자서명인증센터</button><button>인증서 변경</button><button>인증서 백업</button></div>
+  <div class="note">※ 처음 오신 분들은 원활한 서비스를 위해 사용자 등록 및 인증서 등록을 해주시기 바랍니다.</div>
+</div>
+
+<div class="wrap" id="main">
+  <h3 style="margin:0">업무포털 메인</h3>
+  <div style="font-size:13px;color:#555;margin-top:6px">홍길동 선생님, 환영합니다.</div>
+  <div class="tiles">
+    <div class="tile" id="tileEdufine">K-에듀파인<br><small>업무관리·학교회계</small></div>
+    <div class="tile">나이스<br><small>교무·학사</small></div>
+    <div class="tile">에듀파인 메일</div>
+    <div class="tile">원격업무지원</div>
+  </div>
+  <p style="text-align:right;font-size:12px"><a href="#" id="logout">로그아웃</a></p>
+</div>
+
+<div id="certLayer">
+  <div class="cert">
+    <div class="tt">인증서 선택</div>
+    <div style="padding:8px 10px 0">인증서 위치</div>
+    <div class="loc"><div class="on">하드디스크</div><div>이동식디스크</div><div>저장토큰</div><div>보안토큰</div><div>휴대폰</div></div>
+    <table>
+      <thead><tr><th>구분</th><th>사용자</th><th>만료일</th><th>발급자</th></tr></thead>
+      <tbody id="certRows">
+        <tr data-user="홍길동"><td>일반인증서</td><td>홍길동(OO초등학교)</td><td>2027-07-14</td><td>교육부</td></tr>
+        <tr data-user="김연습"><td>일반인증서</td><td>김연습(연습용)</td><td>2025-02-28</td><td>교육부</td></tr>
+      </tbody>
+    </table>
+    <div class="pw"><label for="certPw">인증서 암호</label><input type="password" id="certPw" autocomplete="off"></div>
+    <div class="bt"><button class="ok" id="certOk">확인</button><button id="certCancel">취소</button></div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const show = () => {
+    const ok = localStorage.getItem('mock_login') === '1';
+    $('loginView').style.display = ok ? 'none' : 'block';
+    $('main').style.display = ok ? 'block' : 'none';
+  };
+  let selected = null;
+  $('btnCertLogin').onclick = () => { $('certLayer').style.display = 'block'; };
+  $('certCancel').onclick = () => { $('certLayer').style.display = 'none'; };
+  document.querySelectorAll('#certRows tr').forEach(tr => tr.onclick = () => {
+    document.querySelectorAll('#certRows tr').forEach(x => x.classList.remove('sel'));
+    tr.classList.add('sel'); selected = tr.dataset.user;
+  });
+  $('certOk').onclick = () => {
+    if (!selected) { alert('인증서를 선택하십시오.'); return; }
+    if (selected === '김연습') { alert('만료된 인증서입니다.'); return; }
+    if (!$('certPw').value) { alert('인증서 암호를 입력하십시오.'); return; }
+    if ($('certPw').value === 'wrong') { alert('인증서 암호가 올바르지 않습니다.'); return; }
+    localStorage.setItem('mock_login', '1');
+    $('certLayer').style.display = 'none';
+    show();
+  };
+  $('tileEdufine').onclick = () => window.open('edufine.html', '_blank');
+  $('logout').onclick = (e) => { e.preventDefault(); localStorage.removeItem('mock_login'); show(); };
+  show();
+</script>
+</body>
+</html>
