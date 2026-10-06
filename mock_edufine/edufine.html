@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>K-에듀파인 (연습용 모의 화면)</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; font-size: 12px; color: #222; }
+  .mockbar { background: #ffe8a3; color: #6a4b00; text-align: center; padding: 3px; font-size: 11px; }
+  .top { display: flex; align-items: center; gap: 16px; padding: 6px 12px; border-bottom: 1px solid #ddd; background: #fff; }
+  .logo { font-size: 20px; font-weight: 800; color: #1550b8; }
+  .logo span { color: #e2541b; }
+  .search { width: 300px; border: 1px solid #bbb; padding: 4px; }
+  .cnt { color: #444; }
+  .menu { display: flex; background: #1f2433; }
+  .menu .bizbar { width: 190px; background: #1d63c9; color: #fff; padding: 8px 12px; font-weight: 700; }
+  .menu a { color: #fff; padding: 8px 18px; text-decoration: none; font-size: 13px; }
+  .body { display: flex; height: calc(100% - 98px); }
+  .left { width: 190px; border-right: 1px solid #ccc; background: #fff; }
+  .ltabs { display: flex; }
+  .ltabs div { flex: 1; text-align: center; padding: 8px 0; border: 1px solid #ccc; cursor: pointer; }
+  .ltabs div.on { background: #1f2433; color: #fff; }
+  .left ul { list-style: none; margin: 0; padding: 0; }
+  .left li { padding: 8px 14px; border-bottom: 1px solid #eee; cursor: pointer; }
+  .left li:hover { background: #eef4ff; }
+  .left li.on { color: #1550b8; font-weight: 700; }
+  .center { flex: 1; position: relative; background: #f7f8fa; }
+  .center iframe { border: 0; width: 100%; height: 100%; display: none; background: #fff; }
+  .dash { padding: 12px; }
+  .dash table { width: 100%; border-collapse: collapse; background: #fff; }
+  .dash th { background: #e9f3e3; border: 1px solid #c9d8c0; padding: 5px; }
+  .dash td { border: 1px solid #e2e2e2; padding: 5px; }
+  .popup { position: absolute; background: #fff; border: 1px solid #3a67b8; box-shadow: 0 4px 18px rgba(0,0,0,.3); width: 360px; }
+  .popup .tt { background: #3a67b8; color: #fff; padding: 7px 10px; font-weight: 700; display: flex; justify-content: space-between; }
+  .popup .tt button { background: none; border: 0; color: #fff; font-size: 14px; cursor: pointer; }
+  .popup .ct { padding: 16px; line-height: 1.7; height: 150px; }
+  .popup .ft { border-top: 1px solid #ddd; padding: 6px 10px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="mockbar">※ 연습용 모의 K-에듀파인입니다. 실제 시스템과 무관합니다.</div>
+<div class="top">
+  <div class="logo">에듀<span>파인</span></div>
+  <input class="search" placeholder="통합검색">
+  <div class="cnt">결재(긴급) 0(0) | 공람 83 | 문서진행 1 | 발송대기 0 | 메모(긴급) 0(0) | 메일 0</div>
+</div>
+<div class="menu">
+  <div class="bizbar">업무관리 ＋</div>
+  <a href="#">문서관리</a><a href="#">메모관리</a><a href="#">과제관리</a><a href="#">업무인계인수</a>
+  <a href="#">업무지원</a><a href="#">내부메일</a><a href="#">기능분류</a><a href="#">자료집계</a>
+</div>
+<div class="body">
+  <div class="left">
+    <div class="ltabs"><div>업무메뉴</div><div class="on">즐겨찾기</div></div>
+    <ul id="favs">
+      <li>문서진행</li>
+      <li>문서등록대장</li>
+      <li id="menuPumui">품의목록</li>
+      <li>검사검수요청목록</li>
+    </ul>
+    <div style="margin-top:30px;padding:10px;background:#eef7d9;line-height:1.8">K-에듀파인 뉴스레터<br>사용자지원서비스(Q&amp;A, FAQ등)<br>중앙상담센터 ☎ 1566-0066</div>
+  </div>
+  <div class="center" id="center">
+    <div class="dash" id="dash">
+      <table>
+        <thead><tr><th>게시일</th><th>제목</th><th>발신기관</th></tr></thead>
+        <tbody>
+          <tr><td>2026-09-02</td><td>「대전진로융합교육원 진로진학지원시스템 구축」 제안서 평가위원 모집 알림</td><td>대전진로융합교육원</td></tr>
+          <tr><td>2026-09-02</td><td>2026년도 제3차 유튜브 라이브(Live) 교육 안내</td><td>공무원연금공단</td></tr>
+          <tr><td>2026-09-02</td><td>『학교운영위원회 업무 경감 프로그램』 배포 및 활용 안내</td><td>-</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <iframe id="contentFrame" title="업무화면"></iframe>
+
+    <div class="popup" id="pop1" style="left:120px;top:40px">
+      <div class="tt">[공지] K-에듀파인 정기 점검 안내 <button data-close="pop1" aria-label="닫기">✕</button></div>
+      <div class="ct">10월 11일(토) 02:00~06:00 시스템 정기 점검으로 서비스가 일시 중단됩니다.</div>
+      <div class="ft"><label><input type="checkbox"> 오늘 하루 열지 않음</label><button data-close="pop1">닫기</button></div>
+    </div>
+    <div class="popup" id="pop2" style="left:520px;top:110px">
+      <div class="tt">학교회계 연말 정산 일정 안내 <button data-close="pop2" aria-label="닫기">✕</button></div>
+      <div class="ct">2026회계연도 집행 마감 일정을 확인하시기 바랍니다.</div>
+      <div class="ft"><span></span><button data-close="pop2">닫기</button></div>
+    </div>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => {
+    document.getElementById(b.dataset.close).style.display = 'none';
+  });
+  document.getElementById('menuPumui').onclick = (e) => {
+    document.querySelectorAll('#favs li').forEach(li => li.classList.remove('on'));
+    e.target.classList.add('on');
+    document.getElementById('dash').style.display = 'none';
+    const f = document.getElementById('contentFrame');
+    f.style.display = 'block';
+    f.src = 'pumui.html';
+  };
+</script>
+</body>
+</html>
