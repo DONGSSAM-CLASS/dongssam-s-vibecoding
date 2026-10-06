@@ -35,7 +35,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Str
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import __version__, paths
+from . import __author__, __version__, paths
 from .agent import EdufineAgent
 from .browser import BrowserController
 from .config import MODELS, REGIONS, Settings, load_user_config, save_user_config
@@ -207,7 +207,7 @@ async def get_config() -> dict[str, Any]:
     cfg = load_user_config()
     return {
         **s.public(),
-        "version": __version__, "agreed": bool(cfg.get("agreed")), "regions": REGIONS, "models": MODELS,
+        "version": __version__, "author": __author__, "agreed": bool(cfg.get("agreed")), "regions": REGIONS, "models": MODELS,
         "running": state.running, "update": state.update, "data_dir": str(paths.data_dir()),
     }
 
@@ -544,9 +544,9 @@ def main(open_browser: bool = True) -> None:
     server = uvicorn.Server(config)
     state.server = server
     url = ui_url()
-    log.info("%s %s 시작: http://%s:%d/", paths.APP_NAME, __version__, HOST, port)
+    log.info("%s %s (제작자: %s) 시작: http://%s:%d/", paths.APP_NAME, __version__, __author__, HOST, port)
     if sys.stdout is not None:
-        print(f"\n  {paths.APP_NAME} v{__version__} 실행 중 → {url}\n  (종료: 화면의 [종료] 버튼 또는 Ctrl+C)\n")
+        print(f"\n  {paths.APP_NAME} v{__version__} · 제작자: {__author__}\n  실행 중 → {url}\n  (종료: 화면의 [종료] 버튼 또는 Ctrl+C)\n")
     if open_browser and os.environ.get("PUMUI_NO_BROWSER") != "1":
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     try:

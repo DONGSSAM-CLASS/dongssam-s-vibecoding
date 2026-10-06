@@ -18,7 +18,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from .agent import EdufineAgent
 from .browser import BrowserController
-from . import paths
+from . import __author__, __version__, paths
 from .config import ROOT, Settings
 from .drafter import draft_from_text
 from .models import PumuiDraft, won
@@ -130,7 +130,7 @@ async def cmd_draft(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="pumui", description="K-에듀파인 자동 품의")
+    p = argparse.ArgumentParser(prog="pumui", description=f"K-에듀파인 자동 품의 v{__version__} (제작자: {__author__})")
     sub = p.add_subparsers(dest="cmd")
     sub.add_parser("serve", help="웹 화면 실행 (기본)")
     r = sub.add_parser("run", help="콘솔에서 바로 실행")
