@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>에듀파인 자동 품의 — Claude in Chrome 안내서</title>
+<style>
+  @font-face { font-family: "Pretendard"; font-weight: 300; src: url("{{FONT_DIR}}/Pretendard-Light.otf"); }
+  @font-face { font-family: "Pretendard"; font-weight: 400; src: url("{{FONT_DIR}}/Pretendard-Regular.otf"); }
+  @font-face { font-family: "Pretendard"; font-weight: 500; src: url("{{FONT_DIR}}/Pretendard-Medium.otf"); }
+  @font-face { font-family: "Pretendard"; font-weight: 600; src: url("{{FONT_DIR}}/Pretendard-SemiBold.otf"); }
+  @font-face { font-family: "Pretendard"; font-weight: 700; src: url("{{FONT_DIR}}/Pretendard-Bold.otf"); }
+  @font-face { font-family: "Pretendard"; font-weight: 800; src: url("{{FONT_DIR}}/Pretendard-ExtraBold.otf"); }
+  @font-face { font-family: "Serif KR"; font-weight: 400; src: url("{{FONT_DIR}}/noto-serif-kr-korean-400-normal.woff2"), url("{{FONT_DIR}}/noto-serif-kr-latin-400-normal.woff2"); }
+  @font-face { font-family: "Serif KR"; font-weight: 600; src: url("{{FONT_DIR}}/noto-serif-kr-korean-600-normal.woff2"), url("{{FONT_DIR}}/noto-serif-kr-latin-600-normal.woff2"); }
+  @font-face { font-family: "Serif KR"; font-weight: 700; src: url("{{FONT_DIR}}/noto-serif-kr-korean-700-normal.woff2"), url("{{FONT_DIR}}/noto-serif-kr-latin-700-normal.woff2"); }
+  @font-face { font-family: "Serif KR"; font-weight: 900; src: url("{{FONT_DIR}}/noto-serif-kr-korean-900-normal.woff2"), url("{{FONT_DIR}}/noto-serif-kr-latin-900-normal.woff2"); }
+
+  :root {
+    --navy: #141a2e;
+    --navy-2: #222a45;
+    --ink: #1f2433;
+    --muted: #6b7286;
+    --rule: #e3dfd6;
+    --paper: #fbf8f3;
+    --orange: #d9774b;
+    --orange-soft: #f6e3d8;
+    --gold: #ffc400;
+    --green: #2f7d58;
+    --red: #b8432f;
+  }
+
+  @page {
+    size: 148mm 210mm;
+    margin: 17mm 15mm 18mm 15mm;
+    @bottom-left {
+      content: "에듀파인 자동 품의 · Claude in Chrome 안내서";
+      font: 400 6.5pt "Pretendard"; color: #9aa0b0; letter-spacing: 0.02em;
+    }
+    @bottom-right {
+      content: counter(page);
+      font: 600 7.5pt "Pretendard"; color: var(--orange);
+    }
+  }
+  @page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  @page opener { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  @page plain { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0; color: var(--ink);
+    font: 400 8.6pt/1.72 "Pretendard", sans-serif;
+    word-break: keep-all; overflow-wrap: break-word;
+    font-feature-settings: "tnum" 0;
+  }
+  p { margin: 0 0 2.6mm; }
+  b, strong { font-weight: 700; }
+  .page-break { break-before: page; }
+
+  /* ── 표지 ─────────────────────────────── */
+  .cover {
+    page: cover; position: relative; width: 148mm; height: 210mm; overflow: hidden;
+    background: radial-gradient(120mm 120mm at 110% -10%, #2d375c 0%, transparent 60%),
+                linear-gradient(160deg, #182038 0%, var(--navy) 55%, #0e1222 100%);
+    color: #fff; padding: 16mm 14mm;
+  }
+  .cover .kicker { font: 600 6.6pt "Pretendard"; letter-spacing: 0.32em; color: #c9cee0; }
+  .cover .kicker b { color: var(--orange); font-weight: 700; }
+  .cover h1 {
+    margin: 9mm 0 0; font: 900 33pt/1.12 "Serif KR"; letter-spacing: -0.02em;
+  }
+  .cover h1 em { font-style: normal; color: var(--orange); }
+  .cover .sub { margin-top: 5mm; font: 400 10.5pt/1.6 "Pretendard"; color: #dfe3ef; }
+  .cover .pill {
+    display: inline-block; margin-top: 6mm; padding: 1.6mm 4mm; border-radius: 10mm;
+    border: 0.3mm solid rgba(255,255,255,0.35); font: 600 7.4pt "Pretendard"; color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .cover .art { position: absolute; right: 9mm; bottom: 34mm; width: 92mm; }
+  .cover .foot {
+    position: absolute; left: 14mm; right: 14mm; bottom: 13mm;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-top: 0.25mm solid rgba(255,255,255,0.18); padding-top: 4mm;
+  }
+  .cover .foot .who { font: 400 7pt "Pretendard"; color: #aeb4c8; }
+  .cover .foot .who b { display: block; margin-top: 0.8mm; font: 700 10pt "Serif KR"; color: #fff; }
+  .cover .foot .ver { font: 500 6.8pt "Pretendard"; color: #aeb4c8; text-align: right; }
+
+  /* ── 장 표지(왼쪽 띠) ──────────────────── */
+  .opener {
+    page: opener; position: relative; width: 148mm; height: 210mm; overflow: hidden;
+    background: var(--paper); padding: 0;
+  }
+  .opener .band { position: absolute; left: 0; top: 0; bottom: 0; width: 15mm; background: var(--navy); }
+  .opener .band::after { content: ""; position: absolute; left: 0; right: 0; top: 54mm; height: 26mm; background: var(--orange); }
+  .opener .inner { position: absolute; left: 28mm; right: 15mm; top: 52mm; }
+  .opener .no { font: 900 64pt/1 "Serif KR"; color: var(--orange); letter-spacing: -0.03em; }
+  .opener .label { margin-top: 3mm; font: 600 6.6pt "Pretendard"; letter-spacing: 0.3em; color: var(--muted); }
+  .opener h2 { margin: 3mm 0 0; font: 900 21pt/1.3 "Serif KR"; color: var(--navy); }
+  .opener .lead { margin-top: 6mm; font: 400 9pt/1.8 "Pretendard"; color: #4a5064; max-width: 92mm; }
+  .opener .list { margin-top: 12mm; border-top: 0.25mm solid var(--rule); }
+  .opener .list::before { content: "이 장에서"; display: block; padding-bottom: 2mm; font: 700 6.4pt "Pretendard"; letter-spacing: 0.2em; color: var(--orange); }
+  .opener .list div { padding: 2.4mm 0; border-bottom: 0.25mm solid var(--rule); font: 500 8pt "Pretendard"; color: #3b4152; }
+  .opener .list span { display: inline-block; width: 9mm; color: var(--orange); font-weight: 700; }
+
+  /* ── 본문 ─────────────────────────────── */
+  .eyebrow { font: 700 6.4pt "Pretendard"; letter-spacing: 0.28em; color: var(--orange); }
+  h3 { margin: 1.5mm 0 4mm; font: 700 13.5pt/1.35 "Serif KR"; color: var(--navy); }
+  h4 { margin: 6mm 0 2.5mm; font: 700 9.6pt/1.4 "Pretendard"; color: var(--navy); display: flex; align-items: center; gap: 2mm; }
+  h4::before { content: ""; width: 1.4mm; height: 3.8mm; background: var(--orange); border-radius: 0.5mm; }
+  .lede { font-size: 9.2pt; color: #3d4356; }
+  .muted { color: var(--muted); }
+  .small { font-size: 7.4pt; }
+
+  table.cmp { width: 100%; border-collapse: collapse; margin: 3mm 0 4mm; font-size: 7.7pt; }
+  table.cmp th, table.cmp td { padding: 2.1mm 2mm; text-align: left; vertical-align: top; border-bottom: 0.25mm solid var(--rule); }
+  table.cmp thead th { font-weight: 700; color: #fff; background: var(--navy); border: none; }
+  table.cmp thead th:first-child { border-radius: 1.5mm 0 0 0; }
+  table.cmp thead th:last-child { border-radius: 0 1.5mm 0 0; }
+  table.cmp thead th.hl { background: var(--orange); }
+  table.cmp tbody th { width: 21mm; color: var(--muted); font-weight: 600; }
+  table.cmp td.hl { background: #fdf3ec; font-weight: 500; }
+
+  .callout {
+    margin: 4mm 0; padding: 3.2mm 4mm; border-radius: 2mm; background: var(--paper);
+    border-left: 1.2mm solid var(--orange); font-size: 8pt; color: #3d4356;
+  }
+  .callout.warn { border-left-color: var(--red); background: #fbefec; }
+  .callout b { color: var(--navy); }
+
+  ol.steps { list-style: none; margin: 2mm 0 3mm; padding: 0; counter-reset: s; }
+  ol.steps > li { position: relative; padding: 0 0 3.6mm 11mm; counter-increment: s; break-inside: avoid; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: -0.3mm; width: 7mm; height: 7mm; border-radius: 50%;
+    background: var(--navy); color: #fff; font: 700 8pt/7mm "Pretendard"; text-align: center;
+  }
+  ol.steps > li::after { content: ""; position: absolute; left: 3.4mm; top: 7.6mm; bottom: 0.8mm; width: 0.25mm; background: var(--rule); }
+  ol.steps > li:last-child::after { display: none; }
+  ol.steps > li b.t { display: block; font-size: 8.9pt; color: var(--navy); }
+  ol.steps .sub { color: #50566a; font-size: 8pt; }
+
+  .flow { margin: 3mm 0; }
+  .flow .row { display: flex; gap: 3mm; padding: 2.2mm 0; border-bottom: 0.25mm dashed var(--rule); break-inside: avoid; }
+  .flow .n { flex: 0 0 9mm; font: 900 13pt/1.1 "Serif KR"; color: var(--orange); }
+  .flow .body { flex: 1; font-size: 8pt; }
+  .flow .body b { color: var(--navy); font-size: 8.6pt; }
+  .tag { display: inline-block; margin-left: 1.5mm; padding: 0.1mm 2mm; border-radius: 3mm; font: 700 6.2pt/1.7 "Pretendard"; vertical-align: 0.4mm; }
+  .tag.you { background: var(--orange); color: #fff; }
+  .tag.claude { background: #e8ebf3; color: var(--navy); }
+
+  .examples { display: grid; gap: 2mm; margin: 2.5mm 0 4mm; }
+  .examples div { padding: 2.4mm 3.5mm; border-radius: 2mm; background: var(--navy); color: #fff; font: 500 7.8pt "Pretendard"; }
+  .examples div::before { content: "/품의  "; color: var(--gold); font-weight: 700; }
+
+  .prompt-head { display: flex; gap: 4mm; align-items: center; margin: 2mm 0 4mm; padding: 3.5mm; border: 0.3mm solid var(--rule); border-radius: 2.5mm; background: #fff; break-inside: avoid; }
+  .prompt-head .qr { flex: 0 0 24mm; height: 24mm; }
+  .prompt-head .qr svg { width: 24mm; height: 24mm; display: block; }
+  .prompt-head .txt { font-size: 7.6pt; color: #3d4356; }
+  .prompt-head .txt b { display: block; font-size: 8.8pt; color: var(--navy); margin-bottom: 1mm; }
+  .prompt-head .url { margin-top: 1.2mm; font: 500 6.2pt "Pretendard"; color: var(--orange); word-break: break-all; }
+  pre.prompt {
+    margin: 0; padding: 4.5mm 4.5mm 4mm; border-radius: 2.5mm; background: var(--paper);
+    border: 0.3mm solid var(--rule); white-space: pre-wrap; word-break: keep-all;
+    font: 400 7.05pt/1.62 "Pretendard"; color: #2b3040;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+
+  .rules { display: grid; gap: 3mm; margin-top: 3mm; }
+  .rules .r { display: flex; gap: 3.5mm; padding: 3.5mm; border-radius: 2.5mm; background: var(--paper); break-inside: avoid; }
+  .rules .ic { flex: 0 0 9mm; height: 9mm; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+  .rules .ic svg { width: 4.6mm; height: 4.6mm; }
+  .rules .r b { display: block; color: var(--navy); font-size: 8.8pt; margin-bottom: 0.6mm; }
+  .rules .r div { font-size: 7.9pt; color: #454b5e; }
+
+  /* ── 차례 ─────────────────────────────── */
+  .toc { margin-top: 6mm; }
+  .toc .item { display: flex; align-items: baseline; gap: 3mm; padding: 3.2mm 0; border-bottom: 0.25mm solid var(--rule); }
+  .toc .no { font: 900 13pt "Serif KR"; color: var(--orange); width: 10mm; }
+  .toc .name { font: 600 9.4pt "Pretendard"; color: var(--navy); }
+  .toc .desc { display: block; font: 400 7.2pt "Pretendard"; color: var(--muted); margin-top: 0.4mm; }
+  .toc .dots { flex: 1; border-bottom: 0.3mm dotted #c9c3b6; transform: translateY(-1mm); }
+  .toc .pg { font: 700 8.4pt "Pretendard"; color: var(--navy); min-width: 6mm; text-align: right; }
+
+  /* ── 메모 / 뒤표지 ─────────────────────── */
+  .notes { page: plain; }
+  .notes .lines { margin-top: 6mm; }
+  .notes .lines div { height: 9mm; border-bottom: 0.25mm solid var(--rule); }
+
+  .back {
+    page: cover; position: relative; width: 148mm; height: 210mm; overflow: hidden;
+    background: linear-gradient(200deg, #182038 0%, var(--navy) 60%, #0e1222 100%); color: #fff;
+  }
+  .back .center { position: absolute; left: 16mm; right: 16mm; top: 58mm; text-align: center; }
+  .back .mark { font: 900 18pt/1.3 "Serif KR"; }
+  .back .mark em { font-style: normal; color: var(--orange); }
+  .back .by { margin-top: 7mm; font: 400 7.4pt "Pretendard"; color: #aeb4c8; letter-spacing: 0.2em; }
+  .back .name { margin-top: 1.5mm; font: 700 12pt "Serif KR"; }
+  .back .qr { margin: 10mm auto 0; width: 26mm; height: 26mm; padding: 2mm; background: #fff; border-radius: 2mm; }
+  .back .qr svg { width: 100%; height: 100%; display: block; }
+  .back .qrcap { margin-top: 2.5mm; font: 400 6.6pt "Pretendard"; color: #aeb4c8; }
+  .back .disc { position: absolute; left: 16mm; right: 16mm; bottom: 14mm; font: 400 6.2pt/1.7 "Pretendard"; color: #8d94ab; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- 표지 -->
+<section class="cover">
+  <div class="kicker"><b>K-EDUFINE</b> · CLAUDE IN CHROME · GUIDE</div>
+  <h1>에듀파인<br><em>자동 품의</em></h1>
+  <div class="sub">Claude 유료 계정으로 쓰는<br>품의 작성 안내서</div>
+  <div class="pill">API 충전 없이 · 바로가기 한 번 저장으로</div>
+
+  <svg class="art" viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="dot" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#fff7c2"/><stop offset=".55" stop-color="#ffc400"/><stop offset="1" stop-color="#f29d00"/></radialGradient>
+      <linearGradient id="card" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eef0f6"/></linearGradient>
+    </defs>
+    <rect x="62" y="22" width="150" height="186" rx="12" fill="#2a3352" transform="rotate(-6 137 115)"/>
+    <rect x="78" y="14" width="150" height="186" rx="12" fill="url(#card)"/>
+    <rect x="96" y="36" width="70" height="9" rx="4.5" fill="#141a2e"/>
+    <rect x="96" y="56" width="112" height="6" rx="3" fill="#c9cee0"/>
+    <rect x="96" y="70" width="98" height="6" rx="3" fill="#c9cee0"/>
+    <rect x="96" y="84" width="106" height="6" rx="3" fill="#c9cee0"/>
+    <rect x="96" y="104" width="114" height="34" rx="6" fill="#fdf3ec"/>
+    <rect x="104" y="113" width="56" height="5" rx="2.5" fill="#d9774b"/>
+    <rect x="104" y="124" width="84" height="5" rx="2.5" fill="#e9c1ad"/>
+    <rect x="96" y="150" width="54" height="16" rx="8" fill="#2f7d58"/>
+    <path d="M110 158 l5 5 l10 -10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="214" cy="164" r="34" fill="none" stroke="#d9774b" stroke-width="2.5" opacity=".55"/>
+    <circle cx="214" cy="164" r="19" fill="url(#dot)"/>
+    <rect x="232" y="176" width="64" height="24" rx="12" fill="#d9774b" stroke="#fff" stroke-width="3"/>
+    <text x="264" y="193" text-anchor="middle" font-family="Pretendard" font-weight="700" font-size="13" fill="#fff">Claude</text>
+  </svg>
+
+  <div class="foot">
+    <div class="who">제작자<b>동쌤(김동은 선생님)</b></div>
+    <div class="ver">{{EDITION}}<br>교사용 · 비공식 안내서</div>
+  </div>
+</section>
+
+<!-- 차례 -->
+<section class="page-break">
+  <div class="eyebrow">CONTENTS</div>
+  <h3>차례</h3>
+  <p class="lede">이 안내서는 Claude <b>유료 계정</b>(Pro·Max·Team·Enterprise)을 가진 선생님이 크롬 확장 프로그램 <b>Claude in Chrome</b>으로 K-에듀파인 품의를 작성하는 방법을 담았습니다. 설치 프로그램도, API 충전도 필요 없습니다.</p>
+  <div class="toc">
+    <div class="item"><span class="no">01</span><span class="name">어떤 방식을 쓸까<span class="desc">설치 프로그램과 Claude in Chrome 비교</span></span><span class="dots"></span><span class="pg">{{PG_01}}</span></div>
+    <div class="item"><span class="no">02</span><span class="name">준비하기<span class="desc">확장 프로그램 설치와 로그인</span></span><span class="dots"></span><span class="pg">{{PG_02}}</span></div>
+    <div class="item"><span class="no">03</span><span class="name">품의 바로가기 저장<span class="desc">지시문 복사·저장과 지시문 전문</span></span><span class="dots"></span><span class="pg">{{PG_03}}</span></div>
+    <div class="item"><span class="no">04</span><span class="name">사용하기<span class="desc">/품의 실행 흐름과 승인 방식</span></span><span class="dots"></span><span class="pg">{{PG_04}}</span></div>
+    <div class="item"><span class="no">05</span><span class="name">잘 안 될 때<span class="desc">증상별 해결 방법</span></span><span class="dots"></span><span class="pg">{{PG_05}}</span></div>
+    <div class="item"><span class="no">06</span><span class="name">꼭 지켜 주세요<span class="desc">정보보안과 책임</span></span><span class="dots"></span><span class="pg">{{PG_06}}</span></div>
+  </div>
+  <div class="callout" style="margin-top:8mm"><b>한눈에 보기</b> — 크롬에 Claude in Chrome 설치 → 지시문을 <b>/품의</b> 바로가기로 저장 → <b>/품의 우드락 10장 장당 3000원</b>처럼 입력 → 초안 확인 → 인증서 로그인만 직접 → Claude가 저장까지 진행 → 결재요청은 선생님이 클릭.</div>
+</section>
+
+<!-- 01 -->
+<section class="opener" data-ch="01">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">01</div>
+    <div class="label">CHOOSE YOUR WAY</div>
+    <h2>어떤 방식을<br>쓸까</h2>
+    <div class="lead">같은 일을 하는 두 가지 방법이 있습니다. 이미 Claude 유료 계정이 있다면 이 안내서의 방식으로 추가 비용 없이 시작할 수 있습니다.</div>
+    <div class="list"><div><span>01</span>두 방식의 비용·준비·안전장치 비교</div><div><span>02</span>이런 선생님께 추천합니다</div><div><span>03</span>유료 플랜 사용량 한도 안내</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">COMPARISON</div>
+  <h3>설치 프로그램 vs Claude in Chrome</h3>
+  <table class="cmp">
+    <thead><tr><th></th><th>설치 프로그램 (API 키)</th><th class="hl">Claude in Chrome (유료 계정)</th></tr></thead>
+    <tbody>
+      <tr><th>비용</th><td>쓴 만큼 API 크레딧 충전</td><td class="hl">쓰고 있는 유료 플랜 안에서 사용 (충전 없음)</td></tr>
+      <tr><th>준비</th><td>설치 파일 + API 키 발급</td><td class="hl">크롬 확장 프로그램 + 바로가기 저장</td></tr>
+      <tr><th>결재요청 보호</th><td>승인 전 클릭을 프로그램이 강제로 차단</td><td class="hl">기본은 <b>저장까지만</b>, 결재요청은 선생님이 직접</td></tr>
+      <tr><th>연습 모드</th><td>있음 (모의 에듀파인)</td><td class="hl">없음 — 처음엔 수동 승인으로 한 단계씩</td></tr>
+      <tr><th>금액 계산</th><td>프로그램이 계산</td><td class="hl">Claude가 계산 → 초안 단계에서 꼭 검토</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><b>이런 분께 추천합니다.</b> 이미 Claude Pro·Max 등 유료 계정이 있는 분, 품의를 자주 작성해 API 충전이 부담되는 분.</div>
+  <div class="callout"><b>참고</b> — 유료 플랜에도 사용량 한도가 있습니다. 한도에 닿으면 잠시 뒤 다시 사용할 수 있습니다.</div>
+</section>
+
+<!-- 02 -->
+<section class="opener" data-ch="02">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">02</div>
+    <div class="label">GETTING READY</div>
+    <h2>준비하기</h2>
+    <div class="lead">처음 한 번만 하면 됩니다. 평소 업무포털에 접속하던 PC의 크롬에서 진행하세요.</div>
+    <div class="list"><div><span>01</span>Google Chrome과 확장 프로그램 설치</div><div><span>02</span>유료 계정 로그인과 툴바 고정</div><div><span>03</span>업무포털 보안 프로그램 확인</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">SETUP · 처음 한 번</div>
+  <h3>확장 프로그램 설치와 로그인</h3>
+  <ol class="steps">
+    <li><b class="t">Google Chrome을 엽니다</b><span class="sub">엣지·웨일 등 다른 브라우저와 휴대폰은 지원하지 않습니다.</span></li>
+    <li><b class="t">Claude in Chrome 설치</b><span class="sub">크롬 웹 스토어에서 'Claude in Chrome'을 검색해 <b>Chrome에 추가</b>를 누릅니다.</span></li>
+    <li><b class="t">유료 계정으로 로그인</b><span class="sub">Pro·Max·Team·Enterprise 플랜의 Claude 계정으로 로그인합니다.</span></li>
+    <li><b class="t">툴바에 고정</b><span class="sub">주소창 오른쪽 퍼즐 조각 아이콘 → Claude 옆 압정을 눌러 고정합니다.</span></li>
+    <li><b class="t">업무포털 접속 확인</b><span class="sub">이 크롬으로 업무포털에 한 번 접속해, 인증서 로그인용 보안 프로그램이 설치되어 있는지 확인합니다.</span></li>
+  </ol>
+  <div class="callout"><b>팁</b> — 업무포털 주소를 즐겨찾기에 등록해 두면 매번 찾지 않아도 됩니다.</div>
+</section>
+
+<!-- 03 -->
+<section class="opener" data-ch="03">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">03</div>
+    <div class="label">SAVE THE SHORTCUT</div>
+    <h2>품의 바로가기<br>저장</h2>
+    <div class="lead">지시문을 바로가기로 한 번 저장해 두면, 다음부터는 입력칸에 <b>/품의</b>만 치면 됩니다.</div>
+    <div class="list"><div><span>01</span>Claude 창 열기와 지시문 복사</div><div><span>02</span>/품의 바로가기로 저장</div><div><span>03</span>우리 학교 참고사항 적기</div><div><span>04</span>지시문 전문</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">SHORTCUT · 처음 한 번</div>
+  <h3>지시문을 /품의 바로가기로</h3>
+  <ol class="steps">
+    <li><b class="t">Claude 창 열기</b><span class="sub">오른쪽 위 Claude 아이콘을 눌러 옆 창(사이드 패널)을 엽니다.</span></li>
+    <li><b class="t">지시문 복사</b><span class="sub">아래 QR 코드나 주소로 웹 안내서를 열고, 지시문 상자 오른쪽 위 복사 버튼을 누릅니다. PDF에서 복사하면 줄바꿈이 흐트러질 수 있습니다.</span></li>
+    <li><b class="t">바로가기로 저장</b><span class="sub">Claude 창 입력칸에 붙여 넣고 바로가기(shortcut)로 저장합니다. 이름은 <b>품의</b>. 저장한 바로가기는 입력칸에 <b>/</b>를 치면 나오고, 확장 프로그램 설정에서 고칠 수 있습니다.</span></li>
+    <li><b class="t">우리 학교 참고사항 적기</b><span class="sub">지시문 맨 아래에 메뉴 위치 등 우리 학교·교육청만의 특징을 적어 두면 Claude가 그대로 따릅니다.</span></li>
+  </ol>
+  <div class="prompt-head">
+    <div class="qr">{{QR_SVG}}</div>
+    <div class="txt"><b>지시문 원문 바로가기</b>휴대폰 카메라로 QR을 찍거나 아래 주소를 열면 복사 버튼이 있는 웹 안내서가 열립니다.<div class="url">{{GUIDE_URL_SHORT}}</div></div>
+  </div>
+</section>
+<section class="page-break">
+  <div class="eyebrow">FULL TEXT</div>
+  <h3>품의 바로가기 지시문 전문</h3>
+  <pre class="prompt">{{PROMPT}}</pre>
+</section>
+
+<!-- 04 -->
+<section class="opener" data-ch="04">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">04</div>
+    <div class="label">HOW IT WORKS</div>
+    <h2>사용하기</h2>
+    <div class="lead">/품의 뒤에 품의 내용을 적어 보내면, Claude가 초안을 먼저 보여 주고 확인을 받은 뒤 업무포털을 조작합니다.</div>
+    <div class="list"><div><span>01</span>/품의 입력 예시</div><div><span>02</span>초안 확인부터 저장까지 8단계</div><div><span>03</span>선생님 차례와 Claude 차례</div><div><span>04</span>승인 방식 추천</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">RUN</div>
+  <h3>이렇게 입력하세요</h3>
+  <div class="examples">
+    <div>기술 수업 롤링볼 재료 우드락 450x450 10장 장당 3000원, 과학 교과활동 예산</div>
+    <div>과학실 실험용 비커 500ml 20개, 일회용 장갑 5박스 구입</div>
+  </div>
+  <h4>진행 흐름</h4>
+  <div class="flow">
+    <div class="row"><div class="n">0</div><div class="body"><b>초안 확인</b><span class="tag you">선생님 차례</span><br>제목·품목·금액·한글 금액·개요·예산 단서를 채팅으로 확인합니다. 틀린 값은 "단가는 3,500원이야"처럼 고쳐 달라고 하세요.</div></div>
+    <div class="row"><div class="n">1</div><div class="body"><b>인증서 로그인</b><span class="tag you">선생님 차례</span><br>인증서 선택과 암호 입력은 직접 하고, 끝나면 "완료"라고 말합니다.</div></div>
+    <div class="row"><div class="n">2</div><div class="body"><b>메인 화면·팝업 정리</b><span class="tag claude">Claude</span></div></div>
+    <div class="row"><div class="n">3</div><div class="body"><b>품의목록 → 신규</b><span class="tag claude">Claude</span></div></div>
+    <div class="row"><div class="n">4</div><div class="body"><b>제목·개요·일자 입력</b><span class="tag claude">Claude</span></div></div>
+    <div class="row"><div class="n">5</div><div class="body"><b>예산 선택</b><span class="tag claude">Claude</span><br>후보가 애매하거나 잔액이 부족하면 Claude가 물어봅니다.</div></div>
+    <div class="row"><div class="n">6</div><div class="body"><b>품목 입력 → 저장</b><span class="tag claude">Claude</span><br>요구금액이 초안 합계와 같은지 확인한 뒤 저장합니다.</div></div>
+    <div class="row"><div class="n">7</div><div class="body"><b>결재요청</b><span class="tag you">선생님 차례</span><br>Claude가 요약을 보여 주고 멈춥니다. 화면을 확인한 뒤 <b>[결재요청]은 직접</b> 누르세요.</div></div>
+  </div>
+</section>
+<section class="page-break">
+  <div class="eyebrow">PERMISSIONS</div>
+  <h3>승인 방식 추천</h3>
+  <p>Claude 창의 승인 방식 메뉴에서 고를 수 있습니다.</p>
+  <table class="cmp">
+    <thead><tr><th style="width:23mm">언제</th><th>방식</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><th>처음 1~2번</th><td><b>수동 승인</b><br><span class="muted small">Manually approve</span></td><td>클릭·입력마다 허용을 눌러야 해서 느리지만, 한 단계씩 지켜볼 수 있습니다.</td></tr>
+      <tr><th>익숙해진 뒤</th><td><b>자동 승인</b><br><span class="muted small">Automatically approve</span></td><td>Claude가 위험한 동작을 스스로 막고, 필요할 때만 확인을 요청합니다.</td></tr>
+      <tr><th>쓰지 마세요</th><td><b>승인 생략</b><br><span class="muted small">Skip all approvals</span></td><td>안전 확인 없이 진행되어 업무 시스템에는 권하지 않습니다.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">사이트 접근을 물어보면 업무포털·K-에듀파인 주소에 한해 <b>이 사이트에서 항상 허용</b>을 고르면 편합니다.</div>
+  <div class="callout"><b>처음엔 이렇게 연습하세요.</b> 저장까지만 해 보고, 만들어진 품의를 확인한 뒤 K-에듀파인에서 직접 삭제합니다.</div>
+</section>
+
+<!-- 05 -->
+<section class="opener" data-ch="05">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">05</div>
+    <div class="label">TROUBLESHOOTING</div>
+    <h2>잘 안 될 때</h2>
+    <div class="lead">대부분은 지시문의 '우리 학교 참고사항'에 한 줄을 적거나, 해당 단계만 직접 처리하면 해결됩니다.</div>
+    <div class="list"><div><span>01</span>메뉴를 못 찾을 때</div><div><span>02</span>인증서·보안 프로그램 문제</div><div><span>03</span>Claude가 멈출 때와 금액 오류</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">FAQ</div>
+  <h3>증상별 해결 방법</h3>
+  <table class="cmp">
+    <thead><tr><th style="width:42mm">증상</th><th>해결</th></tr></thead>
+    <tbody>
+      <tr><td><b>Claude가 메뉴를 못 찾음</b></td><td>지시문 맨 아래 '우리 학교 참고사항'에 메뉴 위치를 적어 바로가기를 고쳐 저장합니다.</td></tr>
+      <tr><td><b>인증서 창이 안 보이거나 보안 프로그램 설치 안내가 뜸</b></td><td>이 크롬에서 업무포털에 직접 한 번 로그인해 보안 프로그램을 먼저 설치합니다.</td></tr>
+      <tr><td><b>"이 작업은 할 수 없습니다"처럼 멈춤</b></td><td>Claude in Chrome은 구매·금융 거래 등 일부 동작을 아예 막습니다. 그 단계는 직접 클릭합니다.</td></tr>
+      <tr><td><b>금액이 틀리게 들어감</b></td><td>초안 단계에서 금액을 고친 뒤 다시 진행합니다. 저장 전 화면의 요구금액을 꼭 확인합니다.</td></tr>
+      <tr><td><b>사용량 한도 안내가 뜸</b></td><td>유료 플랜 사용량 한도에 닿은 것입니다. 잠시 뒤 다시 시도합니다.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 06 -->
+<section class="opener" data-ch="06">
+  <div class="band"></div>
+  <div class="inner">
+    <div class="no">06</div>
+    <div class="label">BEFORE YOU START</div>
+    <h2>꼭 지켜 주세요</h2>
+    <div class="lead">편리한 만큼, 업무 시스템을 다루는 일이라는 점을 잊지 마세요.</div>
+    <div class="list"><div><span>01</span>정보보안 지침 확인</div><div><span>02</span>인증서 암호는 직접</div><div><span>03</span>상신 전 직접 확인</div></div>
+  </div>
+</section>
+<section>
+  <div class="eyebrow">SECURITY &amp; RESPONSIBILITY</div>
+  <h3>정보보안과 책임</h3>
+  <div class="rules">
+    <div class="r"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div><div><b>정보보안 지침 확인</b>작업 중 화면 내용이 Claude(Anthropic)로 전송됩니다. 소속 교육청의 정보보안 지침(외부 AI 서비스·업무 자동화)을 먼저 확인하세요.</div></div>
+    <div class="r"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><b>인증서 암호는 직접</b>인증서 암호는 선생님이 직접 입력하세요. Claude에게 채팅으로 암호를 알려 주지 마세요.</div></div>
+    <div class="r"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><div><b>상신 전 직접 확인</b>결재요청·상신 전에 화면의 값을 직접 확인하세요. 품의 내용의 책임은 기안자에게 있습니다.</div></div>
+    <div class="r"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"/><path d="M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg></div><div><b>비공식 교사 제작 자료</b>이 안내서와 지시문은 동쌤(김동은 선생님)이 만든 교사 제작 자료이며, 교육청·한국교육학술정보원·Anthropic의 공식 자료가 아닙니다.</div></div>
+  </div>
+</section>
+
+{{NOTES}}
+
+<!-- 뒤표지 -->
+<section class="back">
+  <div class="center">
+    <div class="mark">에듀파인 <em>자동 품의</em></div>
+    <div class="by">제작자</div>
+    <div class="name">동쌤(김동은 선생님)</div>
+    <div class="qr">{{QR_SVG}}</div>
+    <div class="qrcap">최신 안내서와 지시문 원문</div>
+  </div>
+  <div class="disc">이 안내서는 교사 제작 비공식 자료입니다. Claude, Claude in Chrome은 Anthropic의 서비스이며,<br>K-에듀파인은 교육부·한국교육학술정보원의 시스템입니다. {{EDITION}}</div>
+</section>
+
+</body>
+</html>
