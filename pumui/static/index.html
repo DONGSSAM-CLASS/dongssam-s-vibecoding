@@ -87,6 +87,8 @@
   .hist .it { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
   .hist .it .t { flex: 1; } .hist .it small { color: var(--muted); }
   ol.help li { margin-bottom: 6px; }
+  footer.credit { text-align: center; color: var(--muted); font-size: 12px; padding: 4px 24px 20px; }
+  footer.credit b { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -178,6 +180,7 @@
     </div>
   </section>
 </main>
+<footer class="credit" id="credit">제작자: <b>동쌤(김동은 선생님)</b></footer>
 
 
 <dialog id="wizDlg" class="wide">
@@ -189,7 +192,7 @@
       <label class="check"><input type="checkbox" class="agree"> 작업 중 화면 <b>스크린샷이 Claude API(Anthropic)로 전송</b>된다는 것을 이해했습니다.</label>
       <label class="check"><input type="checkbox" class="agree"> 소속 교육청·학교의 <b>정보보안 지침</b>(외부 AI 서비스·업무 자동화 사용)을 확인하고 지키겠습니다.</label>
       <label class="check"><input type="checkbox" class="agree"> 결재요청(상신)은 제가 직접 승인하며, 품의 내용의 <b>최종 책임은 기안자</b>에게 있습니다.</label>
-      <p style="font-size:12px;color:var(--muted)">이 프로그램은 교육청·한국교육학술정보원의 공식 프로그램이 아닌 교사 제작 도구입니다. 선생님의 설정과 기록은 이 PC에만 저장되며 제작자에게 전송되지 않습니다.</p>
+      <p style="font-size:12px;color:var(--muted)">이 프로그램은 <b>동쌤(김동은 선생님)</b>이 만든 교사 제작 도구이며, 교육청·한국교육학술정보원의 공식 프로그램이 아닙니다. 선생님의 설정과 기록은 이 PC에만 저장되며 제작자에게 전송되지 않습니다.</p>
     </div>
     <div class="wiz-page" data-w="2">
       <p>Claude를 쓰려면 <b>본인 API 키</b>가 필요합니다. (사용한 만큼 Anthropic에 요금이 청구됩니다)</p>
@@ -321,7 +324,10 @@ async function loadConfig() {
   $('keyBanner').style.display = CFG.api_key_saved ? 'none' : 'block';
   document.querySelector(`input[name=stop][value=${CFG.stop_at === 'save' ? 'save' : 'submit'}]`).checked = true;
   if (CFG.update) { $('update').style.display = 'block'; $('update').innerHTML = `🎉 새 버전 <b>${CFG.update.version}</b>이 나왔습니다. <a href="${CFG.update.url}" target="_blank" rel="noopener">내려받기</a>`; }
-  $('aboutLine').textContent = `에듀파인 자동 품의 v${CFG.version} · 설정·기록 위치: ${CFG.data_dir}`;
+  $('aboutLine').textContent = `에듀파인 자동 품의 v${CFG.version} · 제작자: ${CFG.author} · 설정·기록 위치: ${CFG.data_dir}`;
+  $('credit').innerHTML = '';
+  $('credit').append('에듀파인 자동 품의 v' + CFG.version + ' · 제작자: ');
+  const who = document.createElement('b'); who.textContent = CFG.author; $('credit').append(who);
   return CFG;
 }
 const fillSelect = (sel, obj, val) => { sel.innerHTML = Object.entries(obj).map(([k, v]) => `<option value="${k}">${v}</option>`).join(''); sel.value = val; };

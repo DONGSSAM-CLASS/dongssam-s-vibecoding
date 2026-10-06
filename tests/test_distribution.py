@@ -86,6 +86,8 @@ def test_server_requires_token_and_host(client):
     assert c.get("/api/config", headers={"X-Pumui-Token": "wrong"}).status_code == 403
     ok = c.get("/api/config", headers={"X-Pumui-Token": state.token})
     assert ok.status_code == 200 and "api_key" not in ok.json()
+    assert ok.json()["author"] == "동쌤(김동은 선생님)"
+    assert "제작자" in c.get("/").text
     assert c.get(f"/api/events?t=wrong").status_code == 403
     # 다른 사이트가 DNS 리바인딩으로 접근하는 경우 차단
     assert c.get("/", headers={"Host": "evil.example:8765"}).status_code == 403
