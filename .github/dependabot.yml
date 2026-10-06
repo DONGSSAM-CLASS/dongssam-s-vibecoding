@@ -1,12 +1,15 @@
 # 의존성·GitHub Action 보안 업데이트를 매주 PR로 알려 줍니다.
+# target-branch: 저장소 기본 브랜치와 상관없이 항상 main을 대상으로 PR을 엽니다.
 version: 2
 updates:
   - package-ecosystem: pip
     directory: /
+    target-branch: main
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /
+    target-branch: main
     schedule:
       interval: weekly
