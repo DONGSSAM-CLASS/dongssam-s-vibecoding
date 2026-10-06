@@ -6,6 +6,8 @@ Claude **유료 계정(Pro·Max·Team·Enterprise)** 이 있으면 API 키를 �
 크롬 확장 프로그램 **Claude in Chrome** 으로 K-에듀파인 품의를 작성할 수 있습니다.
 설치 프로그램 없이, 아래 **품의 바로가기 지시문**을 한 번 저장해 두고 `/품의` 로 불러 쓰는 방식입니다.
 
+> 📘 인쇄·배포용 책자: **[에듀파인 자동 품의 — Claude in Chrome 안내서 (PDF, A5)](에듀파인_자동품의_Claude_in_Chrome_안내서.pdf)**
+
 ---
 
 ## 1. 어떤 방식을 쓸까?
