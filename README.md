@@ -9,7 +9,14 @@ Claude가 품의서 초안을 만들고 → 브라우저를 직접 조작해 **�
 
 ---
 
-## 선생님들께 — 설치와 사용
+## 선생님들께 — 두 가지 사용 방법
+
+| 방법 | 이런 분께 | 안내 |
+|---|---|---|
+| **A. 설치 프로그램** (API 키) | 쓴 만큼만 내고 싶은 분, 연습 모드·상신 차단 등 안전장치가 필요한 분 | 아래 설치 순서 · [사용설명서](docs/사용설명서.md) |
+| **B. Claude in Chrome** (유료 계정) | 이미 Claude Pro·Max 등 유료 계정이 있어 **충전 없이** 쓰고 싶은 분 | **[Claude in Chrome 사용법](docs/Claude_in_Chrome_사용법.md)** — 바로가기 지시문 복사·저장만 하면 됨 |
+
+### A. 설치 프로그램
 
 1. **[Releases](https://github.com/DONGSSAM-CLASS/dongssam-s-vibecoding/releases)** 에서 `EdufineAutoPumui-Setup-버전.exe` 내려받아 실행 (관리자 권한 불필요)
 2. 바탕화면 **에듀파인 자동 품의** 아이콘 실행 → 처음 설정 마법사(동의 → API 키 → 교육청)
