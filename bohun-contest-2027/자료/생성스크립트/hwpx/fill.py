@@ -4,7 +4,8 @@ usage: python3 fill.py <unzipped form dir> <out.hwpx>"""
 import sys, os, re, copy, math, zipfile, shutil
 from lxml import etree
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import content as C
+import importlib
+C = importlib.import_module(os.environ.get('CONTENT', 'content'))
 
 SRC, OUT = sys.argv[1], sys.argv[2]
 HP = 'http://www.hancom.co.kr/hwpml/2011/paragraph'
@@ -138,8 +139,8 @@ tb = tbl_of(P0[8]); tc = cells(tb)[(0, 0)]
 tplp, _, _ = cell_style(tc)
 sub = tc.find('hp:subList', NS)
 for p in sub.findall('hp:p', NS): sub.remove(p)
-sub.append(para(tplp, [(C.TITLE[0], '29')], '13'))
-sub.append(para(tplp, [(C.TITLE[1], '9')], '29'))
+for _txt, _cpr, _ppr in C.TITLE:
+    sub.append(para(tplp, [(_txt, _cpr)], _ppr))
 tb = tbl_of(P0[15]); cc = cells(tb)
 set_cell(cc[(0, 1)], C.KEYWORD, '27', '37')
 set_cell(cc[(1, 1)], C.DESC, '27', '37')
@@ -350,7 +351,7 @@ for li in range(1, 5):
         new_body.append(mat_label_para(n, label)); n += 1
         new_body += body_paras(['- ' + x for x in lines])
     new_body.append(copy.deepcopy(P1[39]))
-new_body += body_paras(['※ 수업 PPT(16:9, 23장), 학습지 묶음(9쪽), 사전·사후 설문 분석 시트는 본 수업안과 함께 압축파일로 제출한다.'])
+new_body += body_paras([C.FINAL_NOTE])
 
 # Ⅳ 참고문헌
 new_body += [P1[49], P1[50]]
@@ -383,7 +384,7 @@ with open(os.path.join(SRC, 'Preview', 'PrvText.txt'), 'w', encoding='utf-8') as
     f.write('\r\n'.join(prv)[:1024])
 hpf = os.path.join(SRC, 'Contents', 'content.hpf')
 h = open(hpf, encoding='utf-8').read()
-h = re.sub(r'<opf:title>.*?</opf:title>', '<opf:title>%s : %s</opf:title>' % (C.TITLE[0], C.TITLE[1]), h)
+h = re.sub(r'<opf:title>.*?</opf:title>', '<opf:title>%s</opf:title>' % ' '.join(x[0] for x in C.TITLE), h)
 open(hpf, 'w', encoding='utf-8').write(h)
 
 # ---------- 패키징 (mimetype 무압축·맨 앞) ----------
