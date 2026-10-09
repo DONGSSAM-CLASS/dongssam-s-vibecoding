@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { L, isIndoor } from './layout.js';
-import { addBox, addBoxC, removeCollider } from './collision.js';
+import { addBox, addBoxC, addCyl, removeCollider } from './collision.js';
+import { buildStudent, animateStudent, defaultPortrait } from './student.js';
 import { hit } from './input.js';
 import * as TX from './textures.js';
 import { mulberry32 } from './util.js';
@@ -570,7 +571,51 @@ export class Interactables {
   }
 
   // ---------- 매 프레임 ----------
+  // 같은 반 친구(선택하지 않은 쪽 학생): 운동장 동쪽 끝에서 기다리며 단서를 알려 줌
+  spawnFriend(playerGender) {
+    const g = this.g;
+    if (this.friend) { g.scene.remove(this.friend.model); removeCollider(this.friend.col); this.list.splice(this.list.indexOf(this.friend.ia), 1); }
+    const gender = playerGender === 'male' ? 'female' : 'male';
+    const name = gender === 'male' ? '최서준' : '이하윤';
+    const model = buildStudent(gender, { name });
+    model.traverse((o) => { if (o.isMesh) o.layers.enable(1); });
+    const x = 35.2, z = 20.4;
+    model.position.set(x, 0, z);
+    g.scene.add(model);
+    const col = addCyl(x, z, 0.3, 0, 1.7);
+    const lines = () => {
+      const st = g.quest.stage;
+      if (st === 0) return '너도 봤어? 어젯밤부터 <b>등나무 쉼터 꼭대기 단</b>에 있는 오래된 반닫이에서 이상한 빛이 새어 나온대.<br>난 무서워서 못 가겠어… 네가 한번 열어 봐 줄래?';
+      if (st === 1 && !g.quest.hintsRead) return '악령이 정말 나타났어! <b>본관 중앙현관 게시판</b>에 역사 선생님 메모가 붙어 있대. 유물이 숨은 곳이 적혀 있을 거야.<br>그리고 악령은 햇빛 아래에서 조금 약해진대.';
+      if (st === 1) return `벌써 유물을 ${g.relics.owned.size}개나 찾았구나! 밤에는 악령이 더 많아지니까 <b>팥</b>이랑 <b>쑥</b>을 꼭 챙겨.<br>팥 3개에 쑥 1개면 <b>팥죽</b>도 만들 수 있어 (가방 I).`;
+      if (st === 2 || st === 3) return '운동장 한가운데에 봉인석이 솟았어! 어둑시니는 <b>쳐다볼수록 커진대</b>.<br>신기전이나 금동대향로처럼 보지 않고도 맞힐 수 있는 유물을 써 봐!';
+      return '고마워! 네 덕분에 학교에 다시 아침이 왔어. 유물 도감(I)에서 유물 이야기를 다시 읽어 보자.';
+    };
+    const ia = this.add({
+      id: 'friend', kind: 'npc', pos: new THREE.Vector3(x, 1.4, z), r: 2.6, room: 'outside',
+      label: () => `${name}에게 말 걸기`,
+      action: () => {
+        g.audio.play('click');
+        g.ui.openModal(`<div class="talk"><img src="${defaultPortrait(gender, 'face')}" alt="${name}"><div><div class="meta">같은 반 친구</div><h2 style="font-size:24px;margin:2px 0 8px">${name}</h2><div class="desc" style="margin:0">${lines()}</div></div></div>`);
+      },
+    });
+    this.friend = { model, col, ia, phase: 0 };
+  }
+
   update(dt, active) {
+    // 친구: 가볍게 숨 쉬며 플레이어 쪽을 봄
+    if (this.friend) {
+      const f = this.friend, P = this.g.player;
+      f.phase += dt;
+      const dx = P.pos.x - f.model.position.x, dz = P.pos.z - f.model.position.z;
+      const want = Math.hypot(dx, dz) < 12 ? Math.atan2(dx, dz) : -2.2;
+      let d = want - f.model.rotation.y;
+      while (d > Math.PI) d -= Math.PI * 2;
+      while (d < -Math.PI) d += Math.PI * 2;
+      f.model.rotation.y += d * Math.min(1, dt * 2.5);
+      animateStudent(f.model, f.phase * 0.8, 0.04, 0);
+      f.model.userData.headG.rotation.x = Math.sin(f.phase * 0.7) * 0.04;
+    }
     const g = this.g, P = g.player;
     const eye = P.eyePos;
     const f = P.forward(new THREE.Vector3());

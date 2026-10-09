@@ -192,11 +192,7 @@ class Game {
     // 캐릭터 선택
     for (const g of ['male', 'female']) {
       const img = document.querySelector(`[data-photo="${g}"]`);
-      img.src = defaultPortrait(g);
-      // assets/players/players.json 에 등록된 사진이 있으면 사용
-      if (location.protocol !== 'file:') fetch('assets/players/players.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).then((m) => {
-        if (m && m[g] && !this.photos[g]) { const src = 'assets/players/' + m[g]; this.photos[g] = src; img.src = src; }
-      }).catch(() => {});
+      img.src = defaultPortrait(g, 'card');
       try { const saved = localStorage.getItem('bundong3d.photo.' + g); if (saved) { this.photos[g] = saved; img.src = saved; } } catch (e) { /* 무시 */ }
       const input2 = document.querySelector(`[data-upload="${g}"]`);
       input2.onchange = () => {
@@ -260,8 +256,10 @@ class Game {
 
   startGame() {
     if (!this.gender) return;
-    this.playerName = ($('playerName').value || '').trim() || (this.gender === 'female' ? '번동중 여학생' : '번동중 남학생');
+    this.playerName = ($('playerName').value || '').trim() || '김번동';
+    this.player.name = this.playerName;
     this.player.setGender(this.gender);
+    this.interact.spawnFriend(this.gender);
     this.ui.setPlayer(this.playerName, this.gender, this.photos[this.gender]);
     const P = this.player;
     P.pos.set(L.spawn.x, 0, L.spawn.z);
@@ -408,8 +406,10 @@ class Game {
     if (!d || d.v !== 1) return false;
     if (peek) return true;
     this.gender = d.gender || 'male';
-    this.playerName = d.name || '학생';
+    this.playerName = d.name || '김번동';
+    this.player.name = this.playerName;
     this.player.setGender(this.gender);
+    this.interact.spawnFriend(this.gender);
     this.ui.setPlayer(this.playerName, this.gender, this.photos[this.gender]);
     const P = this.player;
     P.pos.set(...d.pos);

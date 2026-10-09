@@ -3,7 +3,7 @@ import { L, surfaceAt, isIndoor, inPond } from './layout.js';
 import { resolve, groundAt, ceilingAt } from './collision.js';
 import { input, down, hit } from './input.js';
 import { settings } from './settings.js';
-import { buildArms, buildStudent } from './student.js';
+import { buildArms, buildStudent, animateStudent } from './student.js';
 import { clamp, damp, lerp } from './util.js';
 
 // 1인칭 플레이어: 이동·점프·앉기·달리기, 체력/기력, 시점 모델(팔+유물)
@@ -61,7 +61,7 @@ export class Player {
     this.flash.castShadow = false;
     game.scene.add(this.flash, this.flash.target);
 
-    // 그림자 전용 몸
+    // 내 몸(그림자 + 내려다보면 보이는 다리)
     this.body = null;
   }
 
@@ -71,8 +71,13 @@ export class Player {
     this.arms = buildArms(gender);
     this.vmRoot.add(this.arms);
     if (this.body) this.g.scene.remove(this.body);
-    this.body = buildStudent(gender);
-    this.body.traverse((o) => { o.layers.set(1); });
+    this.body = buildStudent(gender, { name: this.name });
+    // 머리·팔은 그림자에만, 몸통·다리는 내려다보면 보이도록(카메라 층 0 + 그림자 층 1)
+    const hidden = new Set([...this.body.userData.parts.head, ...this.body.userData.parts.arms]);
+    this.body.traverse((o) => {
+      o.layers.set(1);
+      if (o.isMesh && !hidden.has(o)) o.layers.enable(0);
+    });
     this.g.scene.add(this.body);
     if (this.held) this.hold(this.held);
   }
@@ -237,9 +242,10 @@ export class Player {
 
     // 그림자용 몸
     if (this.body) {
-      this.body.position.set(this.pos.x, this.pos.y, this.pos.z);
+      // 카메라가 몸 안쪽에 들어가지 않게 살짝 뒤로
+      this.body.position.set(this.pos.x + Math.sin(this.yaw) * 0.12, this.pos.y, this.pos.z + Math.cos(this.yaw) * 0.12);
       this.body.rotation.y = this.yaw + Math.PI;
-      this.body.scale.y = 1 - this.crouch * 0.35;
+      animateStudent(this.body, this.bob, this.onGround ? this.bobAmt : 0.3, this.crouch);
     }
 
     // 손전등
