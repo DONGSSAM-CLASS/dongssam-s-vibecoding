@@ -1,0 +1,3 @@
+# 한 파일 실행본(dist/bundong3d.html)은 저장소에 포함
+!dist/
+node_modules/

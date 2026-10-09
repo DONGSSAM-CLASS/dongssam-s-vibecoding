@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>번동중 퇴마록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js",
+    "three/addons/": "./vendor/addons/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- 로딩 -->
+<div id="loading" class="screen">
+  <div class="load-box">
+    <div class="load-title">번동중 퇴마록</div>
+    <div class="load-bar"><div id="loadFill"></div></div>
+    <div id="loadText">학교를 짓는 중…</div>
+  </div>
+</div>
+
+<!-- 타이틀 -->
+<div id="title" class="screen hidden">
+  <div class="title-wrap">
+    <div class="title-sub">번동중학교에 악령이 침입했다</div>
+    <h1 class="title-main">번동중 퇴마록</h1>
+    <div class="title-hanja">樊洞中 退魔錄</div>
+    <div class="title-btns">
+      <button id="btnNew" class="btn primary">새로 시작</button>
+      <button id="btnContinue" class="btn hidden">이어하기</button>
+      <button id="btnHowTitle" class="btn">조작법</button>
+    </div>
+    <div class="title-foot">학교 곳곳에 숨겨진 우리 역사 유물을 찾아, 유물의 힘으로 악령을 정화하세요.</div>
+  </div>
+</div>
+
+<!-- 캐릭터 선택 -->
+<div id="select" class="screen hidden">
+  <div class="sel-wrap">
+    <h2>나는 번동중학교 학생입니다</h2>
+    <div class="sel-cards">
+      <div class="sel-card" data-gender="male">
+        <div class="sel-photo"><img alt="남학생 사진" data-photo="male"></div>
+        <div class="sel-name">남학생</div>
+        <label class="btn small">사진 바꾸기<input type="file" accept="image/*" data-upload="male" hidden></label>
+      </div>
+      <div class="sel-card" data-gender="female">
+        <div class="sel-photo"><img alt="여학생 사진" data-photo="female"></div>
+        <div class="sel-name">여학생</div>
+        <label class="btn small">사진 바꾸기<input type="file" accept="image/*" data-upload="female" hidden></label>
+      </div>
+    </div>
+    <div class="sel-row">
+      <label>이름 <input id="playerName" maxlength="10" placeholder="이름을 입력하세요" value=""></label>
+    </div>
+    <div class="sel-row">
+      <button id="btnBackTitle" class="btn">뒤로</button>
+      <button id="btnStart" class="btn primary" disabled>학교로 들어가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="crosshair"></div>
+  <div id="vignette"></div>
+  <div id="hitFlash"></div>
+  <div id="hudTL">
+    <img id="hudPortrait" alt="">
+    <div class="hud-bars">
+      <div id="hudName">학생</div>
+      <div class="bar hp"><div id="hpFill"></div><span id="hpText">100</span></div>
+      <div class="bar st"><div id="stFill"></div></div>
+      <div class="bar sh hidden" id="shBar"><div id="shFill"></div></div>
+      <div id="buffs"></div>
+    </div>
+  </div>
+  <div id="hudTop">
+    <div id="compass"><div id="compassStrip"></div><div id="compassMark"></div></div>
+    <div id="clockRow"><span id="clock">08:20</span><span id="weatherIcon">☀</span><span id="weatherName">맑음</span></div>
+  </div>
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="quest"></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="toasts"></div>
+  <div id="bossBar" class="hidden"><div class="boss-name">어둑시니</div><div class="bar boss"><div id="bossFill"></div></div></div>
+  <div id="hotbar"></div>
+  <div id="consumables">
+    <div class="cons" id="consPat"><b>G</b> 팥 <span>0</span></div>
+    <div class="cons" id="consSsuk"><b>H</b> 쑥 <span>0</span></div>
+    <div class="cons" id="consJuk"><b>J</b> 팥죽 <span>0</span></div>
+  </div>
+  <div id="purified">정화 <span>0</span></div>
+</div>
+
+<!-- 가방 -->
+<div id="bag" class="panel hidden">
+  <div class="panel-head">
+    <div class="tabs"><button class="tab on" data-tab="items">가방</button><button class="tab" data-tab="codex">유물 도감</button></div>
+    <button class="close" data-close="bag">✕</button>
+  </div>
+  <div id="bagItems" class="tabpane">
+    <div id="bagCap"></div>
+    <div id="bagGrid"></div>
+    <div id="bagDetail">아이템을 선택하세요.</div>
+    <div id="craft">
+      <h4>만들기</h4>
+      <div id="craftList"></div>
+    </div>
+  </div>
+  <div id="bagCodex" class="tabpane hidden"></div>
+</div>
+
+<!-- 지도 -->
+<div id="mapPanel" class="panel hidden">
+  <div class="panel-head"><div>번동중학교 지도</div><button class="close" data-close="mapPanel">✕</button></div>
+  <canvas id="bigmap" width="900" height="640"></canvas>
+</div>
+
+<!-- 유물 획득 카드 / 게시판 -->
+<div id="modal" class="hidden">
+  <div class="modal-box">
+    <div id="modalBody"></div>
+    <button id="modalOk" class="btn primary">확인 (E)</button>
+  </div>
+</div>
+
+<!-- 일시정지 -->
+<div id="pause" class="screen dim hidden">
+  <div class="pause-box">
+    <h2>일시정지</h2>
+    <div class="pause-tabs">
+      <button class="tab on" data-ptab="menu">메뉴</button>
+      <button class="tab" data-ptab="settings">설정</button>
+      <button class="tab" data-ptab="how">조작법</button>
+    </div>
+    <div class="ppane" data-pane="menu">
+      <button id="btnResume" class="btn primary">계속하기</button>
+      <button id="btnSave" class="btn">저장하기</button>
+      <button id="btnToTitle" class="btn">처음 화면으로</button>
+    </div>
+    <div class="ppane hidden" data-pane="settings">
+      <label>마우스 감도 <input type="range" id="setSens" min="0.2" max="3" step="0.05"></label>
+      <label>시야각(FOV) <input type="range" id="setFov" min="60" max="100" step="1"></label>
+      <label>전체 소리 <input type="range" id="setVol" min="0" max="1" step="0.05"></label>
+      <label>그래픽 품질
+        <select id="setQuality"><option value="low">낮음 (노트북)</option><option value="medium">보통</option><option value="high">높음</option></select>
+      </label>
+      <label>하루 길이
+        <select id="setDay"><option value="360">6분</option><option value="720">12분</option><option value="1440">24분</option></select>
+      </label>
+      <label>날씨
+        <select id="setWeather"><option value="auto">자동으로 바뀜</option><option value="clear">맑음</option><option value="cloudy">흐림</option><option value="rain">비</option><option value="storm">뇌우</option><option value="fog">안개</option><option value="snow">눈</option></select>
+      </label>
+      <label>시간 건너뛰기 <span><button class="btn small" id="btnSkipDay">아침으로</button> <button class="btn small" id="btnSkipNight">밤으로</button></span></label>
+      <label class="chk"><input type="checkbox" id="setInvert"> 마우스 상하 반전</label>
+    </div>
+    <div class="ppane hidden how" data-pane="how"></div>
+  </div>
+</div>
+
+<!-- 조작법(타이틀) -->
+<div id="howTitle" class="screen dim hidden">
+  <div class="pause-box"><h2>조작법</h2><div class="how"></div><button class="btn primary" data-close="howTitle">닫기</button></div>
+</div>
+
+<!-- 사망 / 승리 -->
+<div id="dead" class="screen dim hidden">
+  <div class="pause-box center"><h2>기절했다…</h2><p>보건실에서 깨어납니다. 모은 유물과 아이템은 그대로입니다.</p><button id="btnRespawn" class="btn primary">다시 일어나기</button></div>
+</div>
+<div id="victory" class="screen dim hidden">
+  <div class="pause-box center">
+    <h2>어둑시니를 물리쳤다!</h2>
+    <div id="victoryText"></div>
+    <button id="btnFreeRoam" class="btn primary">계속 돌아다니기</button>
+    <button id="btnVictoryTitle" class="btn">처음 화면으로</button>
+  </div>
+</div>
+
+<div id="clickToPlay" class="hidden">클릭하면 게임으로 돌아갑니다</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
