@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { L, isIndoor } from './layout.js';
 import { addBox, addBoxC, addCyl, removeCollider } from './collision.js';
 import { buildStudent, animateStudent, defaultPortrait } from './student.js';
+import { instanceStudent, animateMeshyStudent } from './models.js';
 import { hit } from './input.js';
 import * as TX from './textures.js';
 import { mulberry32 } from './util.js';
@@ -577,7 +578,9 @@ export class Interactables {
     if (this.friend) { g.scene.remove(this.friend.model); removeCollider(this.friend.col); this.list.splice(this.list.indexOf(this.friend.ia), 1); }
     const gender = playerGender === 'male' ? 'female' : 'male';
     const name = gender === 'male' ? '최서준' : '이하윤';
-    const model = buildStudent(gender, { name });
+    // Meshy 모델이 있으면 그것을, 없으면 코드로 만든 학생 모델을 씀
+    const meshy = g.studentModels && g.studentModels[gender];
+    const model = meshy ? instanceStudent(meshy) : buildStudent(gender, { name });
     model.traverse((o) => { if (o.isMesh) o.layers.enable(1); });
     const x = 35.2, z = 20.4;
     model.position.set(x, 0, z);
@@ -613,8 +616,11 @@ export class Interactables {
       while (d > Math.PI) d -= Math.PI * 2;
       while (d < -Math.PI) d += Math.PI * 2;
       f.model.rotation.y += d * Math.min(1, dt * 2.5);
-      animateStudent(f.model, f.phase * 0.8, 0.04, 0);
-      f.model.userData.headG.rotation.x = Math.sin(f.phase * 0.7) * 0.04;
+      if (f.model.userData.meshy) animateMeshyStudent(f.model, dt, 0);
+      else {
+        animateStudent(f.model, f.phase * 0.8, 0.04, 0);
+        f.model.userData.headG.rotation.x = Math.sin(f.phase * 0.7) * 0.04;
+      }
     }
     const g = this.g, P = g.player;
     const eye = P.eyePos;

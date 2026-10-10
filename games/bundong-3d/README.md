@@ -89,18 +89,34 @@
 - **기본 사진 자체를 바꾸려면**: `assets/players/male.jpg`, `female.jpg`(얼굴만 자른 `male_face.jpg`, `female_face.jpg`는 선택)를 바꾼 뒤
   `node tools/embed-photos.mjs` → `node tools/build-single.mjs` 를 실행합니다.
 
-## 유물 3D 모델 바꾸기 (Meshy AI 등)
+## Meshy AI로 사실적인 3D 모델 만들기
 
-지금 유물은 실제 유물의 생김새(금동대향로의 용 받침·연꽃 몸체·산봉우리 뚜껑·봉황, 다뉴세문경의 빗금 무늬와 꼭지 등)를 참고해 코드로 만든 3D 모델입니다.
-Meshy AI 같은 도구로 만든 **GLB 파일**이 있으면 코드를 고치지 않고 바꿀 수 있습니다.
+학생 캐릭터와 유물 7점을 Meshy AI로 만든 실사풍 3D 모델(GLB)로 바꿀 수 있습니다. 게임은 GLB가 있으면 자동으로 그 모델을 쓰고, 없으면 코드로 만든 모델을 씁니다.
 
-1. GLB 파일을 `assets/relics/` 에 넣습니다. (예: `censer.glb`)
-2. `assets/relics/manifest.json` 에 적습니다.
-   ```json
-   { "censer": "censer.glb", "sword": "sword.glb" }
-   ```
-   이름: `sword`(사인참사검) `mirror`(다뉴세문경) `censer`(금동대향로) `jade`(곡옥) `bomb`(비격진천뢰) `rocket`(신기전) `sundial`(앙부일구)
-3. 크기와 위치는 자동으로 원래 모델에 맞춰집니다. (서버로 실행할 때 적용)
+**준비 (한 번만)**
+1. Meshy 웹사이트에 로그인 → API 메뉴에서 **API 키** 발급 (Meshy MCP·API는 계정 비밀번호가 아니라 이 키로 작동합니다)
+2. 키는 채팅이나 코드에 붙여 넣지 말고, Claude Code 클라우드 환경 설정의 비밀값(환경 변수)으로 `MESHY_API_KEY` 이름으로 등록
+3. 같은 설정의 네트워크 허용 도메인에 `api.meshy.ai` 와 `assets.meshy.ai` 추가
+4. 새 세션을 열면 저장소의 `.mcp.json` 에 적힌 **Meshy 공식 MCP 서버**(`@meshy-ai/meshy-mcp-server`)가 연결됩니다
+
+**만들기**: MCP로 Claude에게 맡기거나, 직접 스크립트를 실행합니다(크레딧이 듭니다).
+```
+node tools/meshy-generate.mjs students        # 학생 사진 → 3D 캐릭터 + 사람 뼈대 + 걷기 동작
+node tools/meshy-generate.mjs relics          # 유물 7점 (assets/relics/ref/<이름>.jpg 가 있으면 그 사진 기준)
+```
+- 학생은 정면 사진 한 장으로도 만들어지지만, **옆·뒤 사진**(`assets/players/male_side.jpg`, `male_back.jpg` 등)을 함께 넣으면 여러 장 기반으로 더 정확해집니다.
+- 유물은 실제 유물 사진을 `assets/relics/ref/` 에 넣으면 사진 기반으로, 없으면 유물 설명문으로 만듭니다.
+- 결과: `assets/players/*.glb` + `models.json`, `assets/relics/*.glb` + `manifest.json`. 크기와 위치는 게임이 자동으로 맞춥니다.
+- 지금은 친구 NPC(뼈대·걷기 동작 포함)와 손에 드는 유물에 적용됩니다. 내 그림자·내려다본 다리는 코드로 만든 모델을 씁니다.
+- GLB는 용량이 커서 서버로 실행할 때(`index.html`)만 불러옵니다. 한 파일 실행본(`dist/bundong3d.html`)은 코드로 만든 모델을 씁니다.
+
+**직접 GLB를 넣을 때** — 이름: `sword`(사인참사검) `mirror`(다뉴세문경) `censer`(금동대향로) `jade`(곡옥) `bomb`(비격진천뢰) `rocket`(신기전) `sundial`(앙부일구)
+```json
+// assets/relics/manifest.json
+{ "censer": "censer.glb" }
+// assets/players/models.json  (rotY: 모델이 뒤를 보면 3.14)
+{ "male": { "model": "male.glb", "walk": "male_walk.glb", "height": 1.72, "rotY": 0 } }
+```
 
 ## 폴더 구조
 
@@ -127,6 +143,8 @@ js/photos.js        학생 사진(자동 생성 — tools/embed-photos.mjs)
 js/audio.js         소리 합성
 tools/build-single.mjs   한 파일 HTML 만들기 (npm i -D esbuild 후 node tools/build-single.mjs)
 tools/embed-photos.mjs   학생 사진을 js/photos.js 에 담기
+tools/meshy-generate.mjs Meshy AI로 학생·유물 3D 모델 만들기(MESHY_API_KEY 필요)
+js/models.js        Meshy 등 외부 학생 GLB 불러오기·걷기 동작
 ```
 
 ## 알려진 한계

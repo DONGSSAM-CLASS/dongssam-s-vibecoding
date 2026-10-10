@@ -23,6 +23,7 @@ import { AudioEngine } from './audio.js';
 import { initInput, input, lock, unlock, endFrame, hit } from './input.js';
 import * as TX from './textures.js';
 import { defaultPortrait } from './student.js';
+import { loadStudentModels } from './models.js';
 import { clamp } from './util.js';
 
 const SAVE_KEY = 'bundong3d.save';
@@ -89,6 +90,7 @@ class Game {
     this.sky.sun.shadow.camera.layers.enable(1);
     this.relics = new Relics(this);
     await this.relics.loadOverrides();
+    this.studentModels = await loadStudentModels();
     this.relics.renderIcons();
     this.inventory = new Inventory(this);
     this.ghosts = new Ghosts(this);
