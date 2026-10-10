@@ -193,3 +193,9 @@ button { font-family: inherit; }
 .talk img { width: 110px; height: 110px; border-radius: 12px; object-fit: cover; border: 2px solid var(--gold); flex: none; }
 .talk > div { min-width: 0; }
 @media (max-width: 520px) { .talk { flex-direction: column; align-items: center; text-align: center; } }
+
+.history-sources{font-size:12px;line-height:1.65;margin:8px 0;color:#c9c2b2}.history-sources a{color:#e7c77a;text-decoration:underline}
+
+#modalOk{position:sticky;bottom:0;z-index:1;box-shadow:0 -6px 16px #18212c}
+
+.modal-box{display:flex;flex-direction:column;overflow:hidden}#modalBody{overflow-y:auto;min-height:0}#modalOk{position:static;flex:0 0 auto;align-self:center;margin-top:14px;box-shadow:none}

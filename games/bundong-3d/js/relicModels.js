@@ -1,8 +1,9 @@
+import { historicalCenser, historicalSundial } from './historicalModels.js';
 import * as THREE from 'three';
 import { makeCanvas, toTex } from './textures.js';
 import { mulberry32, tfbm } from './util.js';
 
-// 실제 유물의 생김새를 참고해 절차적으로 만든 3D 모델
+// 공식 자료의 주요 형태를 참고한 교육용 3D 재구성. 근거·한계는 history.js
 // (assets/relics/manifest.json 에 GLB가 등록되면 그 모델로 교체됨 — Meshy AI 등으로 만든 모델용)
 
 const gold = () => new THREE.MeshStandardMaterial({ color: 0xd2a94e, metalness: 1, roughness: 0.3 });
@@ -15,23 +16,13 @@ function swordBladeTexture() {
   const g = ctx.createLinearGradient(0, 0, W, 0);
   g.addColorStop(0, '#8e959c'); g.addColorStop(0.5, '#e4e8ec'); g.addColorStop(1, '#8e959c');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  // 금 상감 별자리(북두칠성 등 28수) — 점과 선
-  const rnd = mulberry32(4);
-  ctx.strokeStyle = '#e2b84a'; ctx.fillStyle = '#f2cf6a'; ctx.lineWidth = 2.2;
-  let y = 60;
-  while (y < H * 0.62) {
-    const n = 3 + Math.floor(rnd() * 5);
-    const pts = [];
-    for (let i = 0; i < n; i++) pts.push([W * (0.3 + rnd() * 0.4), y + i * (10 + rnd() * 14)]);
-    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
-    pts.forEach((p) => { ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, Math.PI * 2); ctx.fill(); });
-    y += n * 18 + 30;
-  }
-  // 주문 글자(세로)
-  ctx.font = '900 28px "Noto Serif KR", serif';
-  ctx.textAlign = 'center';
-  const txt = '四寅斬邪乾降精坤援靈';
-  for (let i = 0; i < txt.length; i++) ctx.fillText(txt[i], W / 2, H * 0.66 + i * 34);
+  // 창덕26666의 칠성문·명문을 참고한 도식. 실제 선각의 정밀 복제는 아님.
+  ctx.strokeStyle='#e2b84a'; ctx.fillStyle='#e2b84a'; ctx.lineWidth=2;
+  const points=[[35,80],[76,100],[84,162],[41,176],[28,266],[50,358],[80,443]];
+  ctx.beginPath(); points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p)); ctx.stroke();
+  for(const p of points){ctx.beginPath();ctx.arc(...p,3.5,0,Math.PI*2);ctx.fill();}
+  ctx.font='700 25px "Noto Serif KR", serif'; ctx.textAlign='center';
+  for(const [i,ch] of [...'四寅斬邪劍'].entries())ctx.fillText(ch,W/2,610+i*58);
   return c;
 }
 
@@ -65,14 +56,14 @@ export function buildSword() {
   grp.add(blade);
   grp.userData.glowMat = bladeMat;
   // 코등이
-  const guard = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.012, 20), gold());
+  const guard = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.012, 32), new THREE.MeshStandardMaterial({ color: 0x999da1, metalness: .85, roughness: .4 }));
   guard.scale.set(1.25, 1, 0.8);
   grp.add(guard);
   // 손잡이(감은 끈)
   const hc = makeCanvas(64, 256);
   const hx = hc.getContext('2d');
-  hx.fillStyle = '#2a1712'; hx.fillRect(0, 0, 64, 256);
-  hx.strokeStyle = '#6b3a22'; hx.lineWidth = 5;
+  hx.fillStyle = '#303036'; hx.fillRect(0, 0, 64, 256);
+  hx.strokeStyle = '#c1c3be'; hx.lineWidth = 5;
   for (let y = -64; y < 320; y += 18) { hx.beginPath(); hx.moveTo(0, y); hx.lineTo(64, y + 32); hx.moveTo(64, y); hx.lineTo(0, y + 32); hx.stroke(); }
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.017, 0.19, 12), new THREE.MeshStandardMaterial({ map: toTex(hc), roughness: 0.8 }));
   handle.position.y = -0.1;
@@ -86,6 +77,11 @@ export function buildSword() {
   pommel.position.y = -0.21;
   pommel.scale.y = 0.6;
   grp.add(pommel);
+  // 교육용 자루 끝 여의두 윤곽. 소장품의 세부 은상감은 간략화.
+  for (const x of [-0.014, 0.014]) {
+    const lobe = new THREE.Mesh(new THREE.SphereGeometry(0.017, 16, 10), new THREE.MeshStandardMaterial({color:0xbfc0bc,metalness:.85,roughness:.4}));
+    lobe.position.set(x, -0.207, 0); lobe.scale.z=.5; grp.add(lobe);
+  }
   // 술(장식 끈)
   const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.012, 0.09, 6), new THREE.MeshStandardMaterial({ color: 0xa61e2a, roughness: 0.9 }));
   tassel.position.set(0, -0.26, 0);
@@ -102,10 +98,10 @@ function mirrorTexture() {
   const cx = S / 2, cy = S / 2;
   ctx.strokeStyle = '#2f3a28';
   // 동심원 구획
-  const zones = [0.1, 0.22, 0.36, 0.46, 0.49];
+  const zones = [0.0, 0.24, 0.29, 0.49];
   ctx.lineWidth = 3;
   for (const z of zones) { ctx.beginPath(); ctx.arc(cx, cy, z * S, 0, Math.PI * 2); ctx.stroke(); }
-  // 각 구획의 아주 가는 빗금 삼각 무늬(1만 3천여 개의 선)
+  // 각 구획의 집선 삼각 무늬(교육용으로 간략화)
   ctx.lineWidth = 1.1;
   for (let zi = 0; zi < zones.length - 1; zi++) {
     const r0 = zones[zi] * S, r1 = zones[zi + 1] * S;
@@ -143,7 +139,7 @@ export function buildMirror() {
   const grp = new THREE.Group();
   const R = 0.106;
   const tex = toTex(mirrorTexture());
-  const back = new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 1.2, metalness: 0.75, roughness: 0.5 });
+  const back = new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.00025, metalness: 0.75, roughness: 0.5 });
   const front = new THREE.MeshStandardMaterial({ color: 0x9a8f6a, metalness: 1, roughness: 0.12 });
   const rim = new THREE.MeshStandardMaterial({ color: 0x6c7656, metalness: 0.8, roughness: 0.45 });
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 0.008, 64), [rim, back, front]);
@@ -155,7 +151,7 @@ export function buildMirror() {
   // 꼭지 두 개(다뉴)
   for (const s of [-1, 1]) {
     const k = new THREE.Mesh(new THREE.TorusGeometry(0.011, 0.004, 8, 16, Math.PI), rim);
-    k.position.set(s * 0.018, -0.005, 0.005);
+    k.position.set(s * 0.023, 0.027, 0.009);
     k.rotation.set(0, Math.PI / 2, 0);
     k.rotateZ(0);
     grp.add(k);
@@ -165,102 +161,12 @@ export function buildMirror() {
 }
 
 // ---------- 백제 금동대향로 ----------
-export function buildCenser() {
-  const grp = new THREE.Group();
-  const gm = new THREE.MeshStandardMaterial({ color: 0xc9a14a, metalness: 1, roughness: 0.34 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x8d6d2c, metalness: 1, roughness: 0.5 });
-  // 받침: 용(몸을 틀고 머리를 들어 연꽃 줄기를 문 모습)
-  const dragon = new THREE.Mesh(new THREE.TorusKnotGeometry(0.06, 0.014, 96, 10, 2, 5), dark);
-  dragon.scale.set(1, 0.45, 1);
-  dragon.position.y = 0.03;
-  grp.add(dragon);
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.018, 0.08, 10), dark);
-  neck.position.set(0, 0.09, 0);
-  grp.add(neck);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.02, 12, 8), dark);
-  head.position.set(0, 0.135, 0.008);
-  head.scale.set(1, 0.8, 1.4);
-  grp.add(head);
-  // 몸체: 연꽃 봉오리 모양 그릇 + 꽃잎 세 줄
-  const bodyPts = [];
-  for (let i = 0; i <= 12; i++) { const t = i / 12; bodyPts.push(new THREE.Vector2(0.015 + Math.sin(t * Math.PI * 0.5) * 0.075, 0.14 + t * 0.09)); }
-  const body = new THREE.Mesh(new THREE.LatheGeometry(bodyPts, 40), gm);
-  grp.add(body);
-  for (let row = 0; row < 3; row++) {
-    const n = 8 + row * 2;
-    for (let k = 0; k < n; k++) {
-      const a = (k / n) * Math.PI * 2 + row * 0.2;
-      const r = 0.035 + row * 0.022, y = 0.155 + row * 0.024;
-      const p = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 6), gm);
-      p.scale.set(0.9, 1.4, 0.35);
-      p.position.set(Math.cos(a) * r, y, Math.sin(a) * r);
-      p.lookAt(Math.cos(a) * r * 3, y + 0.03, Math.sin(a) * r * 3);
-      grp.add(p);
-    }
-  }
-  // 뚜껑: 겹겹의 산봉우리(약 74개 봉우리)
-  const lidPts = [];
-  for (let i = 0; i <= 14; i++) { const t = i / 14; lidPts.push(new THREE.Vector2(Math.cos(t * Math.PI * 0.5) * 0.088 + 0.002, 0.23 + Math.sin(t * Math.PI * 0.5) * 0.12)); }
-  const lid = new THREE.Mesh(new THREE.LatheGeometry(lidPts, 40), gm);
-  grp.add(lid);
-  const rnd = mulberry32(287);
-  let peaks = 0;
-  for (let row = 0; row < 6; row++) {
-    const t = 0.08 + row * 0.15;
-    const ang = t * Math.PI * 0.5;
-    const r = Math.cos(ang) * 0.088, y = 0.23 + Math.sin(ang) * 0.12;
-    const n = Math.max(4, Math.round(16 - row * 2.2));
-    for (let k = 0; k < n && peaks < 74; k++, peaks++) {
-      const a = (k / n) * Math.PI * 2 + row * 0.37 + rnd() * 0.2;
-      const h = 0.026 + rnd() * 0.014;
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.014 + rnd() * 0.004, h, 6), rnd() < 0.2 ? dark : gm);
-      cone.position.set(Math.cos(a) * r, y + h * 0.3, Math.sin(a) * r);
-      cone.lookAt(Math.cos(a) * r * 1.6, y + 0.12, Math.sin(a) * r * 1.6);
-      cone.rotateX(Math.PI / 2);
-      grp.add(cone);
-    }
-  }
-  // 다섯 악사(작은 인물)
-  for (let k = 0; k < 5; k++) {
-    const a = (k / 5) * Math.PI * 2;
-    const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.005, 0.01, 3, 6), dark);
-    m.position.set(Math.cos(a) * 0.035, 0.345, Math.sin(a) * 0.035);
-    grp.add(m);
-  }
-  // 봉황(꼭대기)
-  const ph = new THREE.Group();
-  ph.position.y = 0.36;
-  const pb = new THREE.Mesh(new THREE.SphereGeometry(0.02, 12, 8), gm);
-  pb.scale.set(0.8, 1, 1.3);
-  pb.position.y = 0.02;
-  ph.add(pb);
-  const pn = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.008, 0.04, 8), gm);
-  pn.position.set(0, 0.05, 0.015); pn.rotation.x = 0.4;
-  ph.add(pn);
-  const phd = new THREE.Mesh(new THREE.SphereGeometry(0.009, 8, 6), gm);
-  phd.position.set(0, 0.072, 0.024);
-  ph.add(phd);
-  for (const s of [-1, 1]) {
-    const wing = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 6), gm);
-    wing.scale.set(0.25, 0.7, 1);
-    wing.position.set(s * 0.02, 0.035, -0.005);
-    wing.rotation.set(-0.5, 0, s * 0.5);
-    ph.add(wing);
-  }
-  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06, 8, 1, true), gm);
-  tail.position.set(0, 0.04, -0.035); tail.rotation.x = -2.3;
-  ph.add(tail);
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), gm);
-  orb.position.y = 0.0;
-  ph.add(orb);
-  grp.add(ph);
-  return grp;
-}
+export function buildCenser() { return historicalCenser(); }
 
 // ---------- 곡옥(신라 금관의 굽은 옥) ----------
 export function buildJade() {
   const grp = new THREE.Group();
-  const jade = new THREE.MeshPhysicalMaterial({ color: 0x2f9e6a, roughness: 0.12, metalness: 0, transmission: 0.35, thickness: 0.03, ior: 1.6, clearcoat: 1, clearcoatRoughness: 0.05, emissive: 0x1f7a4a, emissiveIntensity: 0.15 });
+  const jade = new THREE.MeshPhysicalMaterial({ color: 0x2f9e6a, roughness: 0.12, metalness: 0, transmission: 0.35, thickness: 0.03, ior: 1.6, clearcoat: 1, clearcoatRoughness: 0.05, emissive: 0x1f7a4a, emissiveIntensity: 0 });
   // 머리(둥근 부분)에서 꼬리로 가늘어지는 'C' 모양
   const curve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(0, 0.02, 0), new THREE.Vector3(0.018, 0.012, 0), new THREE.Vector3(0.022, -0.008, 0),
@@ -318,17 +224,19 @@ export function buildBomb() {
   }
   ctx.putImageData(img, 0, 0);
   const iron = new THREE.MeshStandardMaterial({ map: toTex(c), metalness: 0.65, roughness: 0.65 });
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.1, 32, 20), iron);
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.105, 48, 32), iron);
   grp.add(ball);
-  const seam = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.006, 6, 40), iron);
+  const seam = new THREE.Mesh(new THREE.TorusGeometry(0.104, 0.0012, 6, 64), iron);
   seam.rotation.x = Math.PI / 2;
   grp.add(seam);
   const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.02, 12), iron);
   hole.position.y = 0.098;
   grp.add(hole);
-  const fuse = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0.1, 0), new THREE.Vector3(0.01, 0.13, 0), new THREE.Vector3(0.03, 0.15, 0.01)]), 8, 0.004, 6), new THREE.MeshStandardMaterial({ color: 0x7a5a32, roughness: 0.9 }));
-  grp.add(fuse);
-  grp.userData.fuseTip = new THREE.Vector3(0.03, 0.15, 0.01);
+  // 내부 목곡·죽통은 외부에서 보이지 않는다. 심지 대신 장전구 뚜껑.
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.006, 20), iron);
+  lid.position.y = 0.111;
+  grp.add(lid);
+  grp.userData.fuseTip = new THREE.Vector3(0, 0.115, 0);
   return grp;
 }
 
@@ -338,7 +246,7 @@ export function buildRocket(scale = 1) {
   const bamboo = new THREE.MeshStandardMaterial({ color: 0xb59a5c, roughness: 0.7 });
   const paper = new THREE.MeshStandardMaterial({ color: 0xd8cdb0, roughness: 0.9 });
   const cord = new THREE.MeshStandardMaterial({ color: 0x8a2a20, roughness: 0.8 });
-  const L = 1.0 * scale;
+  const L = 1.3793 * scale;
   const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.006 * scale, 0.006 * scale, L, 6), bamboo);
   shaft.position.y = L / 2;
   grp.add(shaft);
@@ -349,10 +257,14 @@ export function buildRocket(scale = 1) {
     grp.add(n);
   }
   // 약통(종이 화약통)
-  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.016 * scale, 0.016 * scale, 0.16 * scale, 12), paper);
-  tube.position.set(0.018 * scale, L * 0.78, 0);
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.01365 * scale, 0.01365 * scale, 0.1962 * scale, 12), paper);
+  tube.position.set(0.018 * scale, L - 0.0981 * scale, 0);
+  // 중신기전의 약통 앞에는 종이 폭발통(소발화)이 붙는다.
+  const charge = new THREE.Mesh(new THREE.CylinderGeometry(0.018 * scale, 0.018 * scale, 0.055 * scale, 16), paper);
+  charge.position.set(0.018 * scale, L + 0.0275 * scale, 0);
+  grp.add(charge);
   grp.add(tube);
-  for (const y of [0.72, 0.84]) {
+  for (const y of [0.875, 0.97]) {
     const b = new THREE.Mesh(new THREE.TorusGeometry(0.017 * scale, 0.002 * scale, 4, 12), cord);
     b.position.set(0.018 * scale, L * y, 0);
     b.rotation.x = Math.PI / 2;
@@ -373,58 +285,9 @@ export function buildRocket(scale = 1) {
 }
 
 // ---------- 앙부일구 ----------
-function sundialTexture() {
-  const S = 512;
-  const c = makeCanvas(S, S);
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#3b3326'; ctx.fillRect(0, 0, S, S);
-  ctx.strokeStyle = '#e6d9a8'; ctx.lineWidth = 2;
-  // 절기선(가로 13줄)과 시각선(세로)
-  for (let i = 0; i < 13; i++) { const y = S * (0.25 + i * 0.035); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(S, y); ctx.stroke(); }
-  for (let i = 0; i <= 28; i++) { const x = (i / 28) * S; ctx.beginPath(); ctx.moveTo(x, S * 0.25); ctx.lineTo(x, S * 0.67); ctx.stroke(); }
-  ctx.fillStyle = '#e6d9a8';
-  ctx.font = '700 22px "Noto Serif KR", serif';
-  const sh = '卯辰巳午未申酉';
-  for (let i = 0; i < sh.length; i++) ctx.fillText(sh[i], (i / sh.length) * S + 26, S * 0.22);
-  return c;
-}
-
-export function buildSundial() {
-  const grp = new THREE.Group();
-  const bronze = new THREE.MeshStandardMaterial({ color: 0x5a4a32, metalness: 0.85, roughness: 0.42 });
-  const inner = new THREE.MeshStandardMaterial({ map: toTex(sundialTexture()), metalness: 0.5, roughness: 0.5, side: THREE.BackSide });
-  const R = 0.12;
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(R, 40, 20, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), bronze);
-  grp.add(bowl);
-  const bowlIn = new THREE.Mesh(new THREE.SphereGeometry(R * 0.97, 40, 20, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), inner);
-  grp.add(bowlIn);
-  const rim = new THREE.Mesh(new THREE.RingGeometry(R * 0.97, R * 1.18, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x6a5838, metalness: 0.85, roughness: 0.35, side: THREE.DoubleSide }));
-  grp.add(rim);
-  // 다리 4개(용 다리 모양)
-  for (let k = 0; k < 4; k++) {
-    const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
-    const leg = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
-      new THREE.Vector3(Math.cos(a) * R * 0.75, -R * 0.55, Math.sin(a) * R * 0.75),
-      new THREE.Vector3(Math.cos(a) * R * 1.05, -R * 0.9, Math.sin(a) * R * 1.05),
-      new THREE.Vector3(Math.cos(a) * R * 1.0, -R * 1.25, Math.sin(a) * R * 1.0)]), 8, 0.009, 6), bronze);
-    grp.add(leg);
-  }
-  // 십자 받침
-  for (const r of [0, Math.PI / 2]) {
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(R * 2.2, 0.012, 0.02), bronze);
-    bar.position.y = -R * 1.25;
-    bar.rotation.y = r + Math.PI / 4;
-    grp.add(bar);
-  }
-  // 영침(그림자 바늘): 북극을 향해 기울어짐(서울 위도 약 37.5°)
-  const gn = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, R * 1.05, 6), new THREE.MeshStandardMaterial({ color: 0xd8c27a, metalness: 1, roughness: 0.25 }));
-  gn.position.set(0, -R * 0.16, -R * 0.42);
-  gn.rotation.x = -(Math.PI / 2 - 0.65);
-  grp.add(gn);
-  return grp;
-}
+export function buildSundial() { return historicalSundial(); }
 
 export const BUILDERS = {
-  sword: buildSword, mirror: buildMirror, censer: buildCenser, jade: buildJade,
-  bomb: buildBomb, rocket: () => buildRocket(1), sundial: buildSundial,
+  sword: buildSword, mirror: buildMirror, censer: historicalCenser, jade: buildJade,
+  bomb: buildBomb, rocket: () => buildRocket(1), sundial: historicalSundial,
 };

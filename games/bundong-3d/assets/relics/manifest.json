@@ -1,9 +1,9 @@
 {
-  "sword": "sword.glb",
-  "mirror": "mirror.glb",
-  "censer": "censer.glb",
-  "jade": "jade.glb",
-  "bomb": "bomb.glb",
-  "rocket": "rocket.glb",
-  "sundial": "sundial.glb"
+  "sword": "historical/sword.glb",
+  "mirror": "historical/mirror.glb",
+  "censer": "historical/censer.glb",
+  "jade": "historical/jade.glb",
+  "bomb": "historical/bomb.glb",
+  "rocket": "historical/rocket.glb",
+  "sundial": "historical/sundial.glb"
 }

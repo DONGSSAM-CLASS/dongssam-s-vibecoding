@@ -6,7 +6,7 @@ import * as TX from './textures.js';
 import { mulberry32 } from './util.js';
 
 // 본관(영상 속 파란 체크 유리 외벽 + "희망과 감동을 주는 번동중학교" 간판), 계단탑, 별관, 동관
-// 1층은 실제로 들어가서 돌아다닐 수 있음
+// 1층 실내는 게임용 배치: 실제 도면 미확인
 export function buildSchool(scene) {
   const group = new THREE.Group();
   group.name = 'school';
@@ -232,7 +232,7 @@ export function buildSchool(scene) {
   }), 1.0);
   box(annexMat, A.x0, A.x1, 0, 16, A.z0, A.z1, true, wallUV(A.x1 - A.x0));
 
-  // ---------- 동관(베이지) + 태양광 차양 ----------
+  // ---------- 동관(영상에 보이는 색·창) + 둥근 금속 차양 ----------
   const Eb = L.east;
   const eastMat = nightGlow(new THREE.MeshStandardMaterial({
     map: TX.toTex(TX.windowWall({ wm: Eb.x1 - Eb.x0, hm: 14, fh: 3.5, base: '#a89d91', win: '#3f4a55', winW: 1.8, gap: 1.3, seed: 41 })),
@@ -244,18 +244,16 @@ export function buildSchool(scene) {
   // 동관 앞 계단과 출입구
   for (let i = 0; i < 4; i++) box(concrete, 52, 56, 0, (i + 1) * 0.3, Eb.z1 + 3 - i * 0.6, Eb.z1 + 3.6 - i * 0.6 + 0.0);
   box(concrete, 50, 58, 0, 1.2, Eb.z1, Eb.z1 + 1.2);
-  // 태양광 패널 차양(영상: 스탠드 북쪽 끝)
-  const panelMat = new THREE.MeshStandardMaterial({ color: 0x2a3f6a, roughness: 0.2, metalness: 0.6 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0x8b9095, roughness: 0.4, metalness: 0.7 });
+  // 영상 00:04에 보이는 둥근 은회색 차양. 태양광 설비라는 근거는 확인되지 않음.
+  const steel = new THREE.MeshStandardMaterial({ color: 0x9ca3a6, roughness: 0.42, metalness: 0.65, side: THREE.DoubleSide });
   for (const [x, z] of [[53, -36], [59, -36], [53, -31], [59, -31]]) {
     batch.add(new THREE.CylinderGeometry(0.08, 0.08, 3.6, 8), steel, new THREE.Matrix4().makeTranslation(x, 1.8, z));
     addBox(x - 0.1, x + 0.1, z - 0.1, z + 0.1, 0, 3.6);
   }
-  {
-    const g = new THREE.BoxGeometry(8.4, 0.08, 6.4);
-    const m = new THREE.Matrix4().compose(new THREE.Vector3(56, 3.8, -33.5), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, 0, 0)), new THREE.Vector3(1, 1, 1));
-    batch.add(g, panelMat, m);
-    for (let i = 0; i < 5; i++) batch.add(new THREE.BoxGeometry(8.4, 0.02, 0.04), steel, new THREE.Matrix4().compose(new THREE.Vector3(56, 3.86, -36.3 + i * 1.4), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, 0, 0)), new THREE.Vector3(1, 1, 1)));
+  for (const z of [-35,-32]) {
+    const roof = new THREE.CylinderGeometry(10.4, 10.4, 2.8, 32, 1, true, -.4, .8);
+    roof.rotateX(-Math.PI/2);
+    batch.add(roof, steel, new THREE.Matrix4().makeTranslation(56, -6, z), true, true);
   }
 
   // ---------- 실내 ----------

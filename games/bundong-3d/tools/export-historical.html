@@ -1,0 +1,47 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>고증 유물 GLB 내보내기</title><script type="importmap">{"imports":{"three":"../vendor/three.module.min.js","three/addons/":"../vendor/addons/"}}</script><body><h1>고증 유물 GLB 내보내기</h1><p>추가 유료 호출 없이 코드 모델을 GLB로 저장합니다. 출처는 유물 도감과 HISTORICAL_ACCURACY.md에 있습니다.</p><button id="export">7점 저장</button><pre id="status"></pre><script type="module">
+import * as THREE from 'three';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+import {BUILDERS} from '../js/relicModels.js';
+import {HISTORY} from '../js/history.js';
+window.exportRelic=async function(id){
+  const model=BUILDERS[id]();model.updateMatrixWorld(true);
+  // 조각이 많은 향로·해시계도 재질별로 합쳐 렌더링 비용을 줄인다.
+  const byMat=new Map();
+  model.traverse(o=>{
+    if(!o.isMesh)return;
+    const mats=Array.isArray(o.material)?o.material:[o.material];
+    for(let mi=0;mi<mats.length;mi++){
+      let geo=o.geometry.clone();
+      if(mats.length>1){
+        const source=geo.index?geo.toNonIndexed():geo;
+        const groups=source.groups.filter(g=>g.materialIndex===mi);
+        if(!groups.length)continue;
+        const compact=new THREE.BufferGeometry();
+        for(const [key,attr] of Object.entries(source.attributes)){
+          const vals=[];for(const group of groups)for(let i=group.start;i<group.start+group.count;i++)for(let k=0;k<attr.itemSize;k++)vals.push(attr.array[i*attr.itemSize+k]);
+          compact.setAttribute(key,new THREE.Float32BufferAttribute(vals,attr.itemSize));
+        }
+        geo=compact;
+      }
+      geo.applyMatrix4(o.matrixWorld);
+      if(geo.index)geo=geo.toNonIndexed();
+      if(!geo.attributes.uv)geo.setAttribute('uv',new THREE.Float32BufferAttribute(new Float32Array(geo.attributes.position.count*2),2));
+      const list=byMat.get(mats[mi])||[];list.push(geo);byMat.set(mats[mi],list);
+    }
+  });
+  const out=new THREE.Group();out.name=HISTORY[id].name||id;
+  for(const [mat,geos] of byMat){const m=new THREE.Mesh(mergeGeometries(geos,false),mat);out.add(m);}
+  out.userData={reconstruction:'교육용 재구성 · 박물관 스캔 아님',sources:HISTORY[id].sources,modelNote:HISTORY[id].modelNote};
+  const buffer=await new GLTFExporter().parseAsync(out,{binary:true,maxTextureSize:1024});
+  let triangles=0;out.traverse(o=>{if(o.isMesh)triangles+=o.geometry.attributes.position.count/3;});
+  return {bytes:Array.from(new Uint8Array(buffer)),triangles};
+};
+document.querySelector('#export').onclick=async()=>{
+  for(const id of Object.keys(BUILDERS)){
+    const r=await window.exportRelic(id);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([new Uint8Array(r.bytes)],{type:'model/gltf-binary'}));a.download=id+'.glb';a.click();
+    document.querySelector('#status').textContent+=id+': '+r.bytes.length+'바이트 · '+r.triangles+'삼각형\n';
+  }
+};
+</script></body></html>

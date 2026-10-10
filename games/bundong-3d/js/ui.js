@@ -1,3 +1,4 @@
+import { FICTION_NOTE } from './history.js';
 import { L } from './layout.js';
 import { RELICS, relicById } from './relics.js';
 import { ITEMS, RECIPES } from './inventory.js';
@@ -348,7 +349,10 @@ export class UI {
       ${img ? `<img class="relic-img" src="${img}" alt="${r.name}">` : ''}
       <div class="meta">${r.era} · ${r.where}</div>
       <div class="desc">${r.desc}</div>
-      <div class="skill">${r.skill}</div>`);
+      <div class="meta" style="margin-top:10px">${r.modelNote}</div>
+      ${historySources(r)}
+      <div class="skill"><b>게임 속 창작 스킬</b><br>${r.skill}</div>
+      <div class="meta">${FICTION_NOTE}</div>`);
   }
 
   board(title, text) {
@@ -419,7 +423,7 @@ export class UI {
         ${own && R.icons[r.id] ? `<img src="${R.icons[r.id]}" alt="">` : ''}
         <h3>${i + 1}. ${own ? r.name : '???'}</h3>
         <div class="meta">${own ? `${r.hanja} · ${r.era}<br>${r.where}` : '아직 찾지 못한 유물'}</div>
-        ${own ? `<div>${r.desc}</div><div class="skill" style="margin-top:6px">${r.skill}</div>` : ''}
+        ${own ? `<div>${r.desc}</div><div class="meta" style="margin-top:8px">${r.modelNote}</div>${historySources(r)}<div class="skill" style="margin-top:6px"><b>게임 속 창작 스킬</b><br>${r.skill}</div><div class="meta">${FICTION_NOTE}</div>` : ''}
       </div>`;
     }).join('') + `</div>`;
   }
@@ -460,4 +464,8 @@ export class UI {
       };
     });
   }
+}
+
+function historySources(r) {
+  return '<div class="history-sources">자료: ' + r.sources.map(s => `<a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.title}</a>`).join(' · ') + '</div>';
 }

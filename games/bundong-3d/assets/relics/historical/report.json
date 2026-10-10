@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-10",
+  "method": "공식 소장품 자료 기반 코드 재구성",
+  "credits": 0,
+  "assets": [
+    {
+      "id": "sword",
+      "bytes": 253808,
+      "triangles": 1060
+    },
+    {
+      "id": "mirror",
+      "bytes": 602576,
+      "triangles": 1792
+    },
+    {
+      "id": "censer",
+      "bytes": 2746136,
+      "triangles": 27708
+    },
+    {
+      "id": "jade",
+      "bytes": 213684,
+      "triangles": 2184
+    },
+    {
+      "id": "bomb",
+      "bytes": 392908,
+      "triangles": 3872
+    },
+    {
+      "id": "rocket",
+      "bytes": 51888,
+      "triangles": 466
+    },
+    {
+      "id": "sundial",
+      "bytes": 1983956,
+      "triangles": 20640
+    }
+  ],
+  "limitations": "교육용 간략화. 박물관 스캔 또는 정밀 복제 아님."
+}

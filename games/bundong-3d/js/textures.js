@@ -364,7 +364,7 @@ export function signBand(wm, hm, textX0, textX1) {
   }
   ctx.fillStyle = 'rgba(255,255,255,0.12)';
   ctx.fillRect(0, 0, W, 0.15 * pxm);
-  ctx.fillStyle = '#2c1f1b';
+  ctx.fillStyle = '#f3f0e8';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   const text = '희망과 감동을 주는 번동중학교';
@@ -390,24 +390,27 @@ export function towerTexture(wm, hm, lit = false) {
   ctx.fillRect(0, 0, W, H);
   if (lit) {
     ctx.fillStyle = '#f5f0e0';
-    for (let f = 0; f < 5; f++) ctx.fillRect(W * 0.62, H - (f * 3.8 + 2.6) * pxm, W * 0.22, 1.2 * pxm);
+    for (let f=0;f<4;f++) { const yy=H*(.14+f*.19); ctx.fillRect(W*.26,yy+H*.04,W*.23,H*.13); ctx.fillRect(W*.63,yy,W*.2,H*.11); }
     return c;
   }
-  // 주황·노랑 패널 기둥
-  const px0 = W * 0.2, pw = W * 0.38;
-  const cols = ['#e88f2c', '#f0a73a', '#f3b84c', '#eaa035', '#f6c35a'];
-  const rnd = mulberry32(31);
-  for (let y = H * 0.06, i = 0; y < H * 0.93; y += 1.45 * pxm, i++) {
-    ctx.fillStyle = cols[Math.floor(rnd() * cols.length)];
-    ctx.fillRect(px0, y, pw, 1.35 * pxm);
+  // 제공 영상 00:04: 회색 테두리 안의 황토색 세로 띠와 엇갈린 녹색 창.
+  ctx.fillStyle='#ad7628'; ctx.fillRect(W*.25,H*.04,W*.59,H*.87);
+  ctx.fillStyle='#dc9f3c'; ctx.fillRect(W*.47,H*.12,W*.16,H*.73);
+  const glass=ctx.createLinearGradient(0,0,W,H);
+  glass.addColorStop(0,'#304d4c'); glass.addColorStop(1,'#62817a');
+  for(let f=0;f<4;f++){
+    const yy=H*(.14+f*.19);
+    ctx.fillStyle=glass;
+    ctx.fillRect(W*.26,yy+H*.04,W*.23,H*.13);
+    ctx.fillRect(W*.63,yy,W*.2,H*.11);
+    ctx.fillStyle='#a9ada8';
+    ctx.fillRect(W*.25,yy+H*.165,W*.35,H*.018);
+    ctx.fillRect(W*.57,yy+H*.11,W*.28,H*.025);
+    ctx.fillStyle='#c5c9c0';
+    for(let j=1;j<4;j++)ctx.fillRect(W*.26+j*W*.057,yy+H*.11,1,H*.057);
+    ctx.fillRect(W*.26,yy+H*.11,W*.23,2);
   }
-  // 파란 유리 세로창
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#5f8fd6'); g.addColorStop(1, '#2e5a9e');
-  ctx.fillStyle = g;
-  ctx.fillRect(W * 0.62, H * 0.06, W * 0.22, H * 0.87);
-  ctx.fillStyle = '#e6e6e2';
-  for (let y = H * 0.06; y < H * 0.93; y += 1.9 * pxm) ctx.fillRect(W * 0.62, y, W * 0.22, 3);
+  ctx.fillStyle='#a6a7a2';ctx.fillRect(W*.37,H*.88,W*.4,H*.065);
   grain(ctx, W, H, 0.25, 'overlay');
   return c;
 }
