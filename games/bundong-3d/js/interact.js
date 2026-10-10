@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { L, isIndoor } from './layout.js';
-import { addBox, addBoxC, addCyl, removeCollider } from './collision.js';
+import { addBox, addBoxC, addCyl, removeCollider, moveCyl } from './collision.js';
 import { buildStudent, animateStudent, defaultPortrait } from './student.js';
 import { instanceStudent, animateMeshyStudent } from './models.js';
 import { hit } from './input.js';
@@ -602,21 +602,32 @@ export class Interactables {
         g.ui.openModal(`<div class="talk"><img src="${defaultPortrait(gender, 'face')}" alt="${name}"><div><div class="meta">같은 반 친구</div><h2 style="font-size:24px;margin:2px 0 8px">${name}</h2><div class="desc" style="margin:0">${lines()}</div></div></div>`);
       },
     });
-    this.friend = { model, col, ia, phase: 0 };
+    this.friend = { model, col, ia, phase: 0, homeX: x, walkDirection: -1 };
   }
 
   update(dt, active) {
-    // 친구: 가볍게 숨 쉬며 플레이어 쪽을 봄
+    // 친구: 가까이 오면 멈추고 바라봄. GLB 친구는 운동장 가장자리를 짧게 걸음
     if (this.friend) {
       const f = this.friend, P = this.g.player;
       f.phase += dt;
       const dx = P.pos.x - f.model.position.x, dz = P.pos.z - f.model.position.z;
-      const want = Math.hypot(dx, dz) < 12 ? Math.atan2(dx, dz) : -2.2;
+      let speed = 0;
+      if (f.model.userData.meshy?.walk && Math.hypot(dx, dz) > 4.5 && this.g.quest.stage < 3) {
+        if (f.model.position.x <= f.homeX - 1.2) f.walkDirection = 1;
+        if (f.model.position.x >= f.homeX + 1.2) f.walkDirection = -1;
+        const before = f.model.position.x;
+        f.model.position.x = THREE.MathUtils.clamp(before + f.walkDirection * dt * 0.65, f.homeX - 1.2, f.homeX + 1.2);
+        speed = Math.abs(f.model.position.x - before) / Math.max(dt, 0.001);
+        moveCyl(f.col, f.model.position.x, f.model.position.z);
+        f.ia.pos.x = f.model.position.x;
+        f.ia.pos.z = f.model.position.z;
+      }
+      const want = speed > 0.01 ? f.walkDirection * Math.PI / 2 : Math.hypot(dx, dz) < 12 ? Math.atan2(dx, dz) : -2.2;
       let d = want - f.model.rotation.y;
       while (d > Math.PI) d -= Math.PI * 2;
       while (d < -Math.PI) d += Math.PI * 2;
       f.model.rotation.y += d * Math.min(1, dt * 2.5);
-      if (f.model.userData.meshy) animateMeshyStudent(f.model, dt, 0);
+      if (f.model.userData.meshy) animateMeshyStudent(f.model, dt, speed);
       else {
         animateStudent(f.model, f.phase * 0.8, 0.04, 0);
         f.model.userData.headG.rotation.x = Math.sin(f.phase * 0.7) * 0.04;

@@ -20,10 +20,22 @@ export async function loadStudentModels() {
     const m = man[g];
     if (!m || !m.model) continue;
     try {
-      const gltf = await loader.loadAsync('assets/players/' + m.model);
-      const clips = [...gltf.animations];
+      let gltf;
+      const clips = [];
       if (m.walk) {
-        try { clips.push(...(await loader.loadAsync('assets/players/' + m.walk)).animations.map((c) => { c.name = 'walk'; return c; })); } catch (e) { /* 걷기 없음 */ }
+        try {
+          const walking = await loader.loadAsync('assets/players/' + m.walk);
+          if (walking.animations.length) {
+            // 동작이 만들어진 뼈대를 함께 사용해 이름·바인딩 불일치를 방지
+            gltf = walking;
+            clips.length = 0;
+            clips.push(...walking.animations.map((c) => { c.name = 'walk'; return c; }));
+          }
+        } catch (e) { console.warn('학생 걷기 불러오기 실패', g, e); }
+      }
+      if (!gltf) {
+        gltf = await loader.loadAsync('assets/players/' + m.model);
+        clips.push(...gltf.animations);
       }
       out[g] = { scene: gltf.scene, clips, height: m.height || (g === 'male' ? 1.72 : 1.64), rotY: m.rotY || 0 };
     } catch (e) { console.warn('학생 모델 불러오기 실패', g, e); }
@@ -36,24 +48,54 @@ export function instanceStudent(src) {
   const inner = SkeletonUtils.clone(src.scene);
   inner.traverse((o) => {
     if (o.isMesh) {
+      // 사진 질감은 유지하되 교복·피부가 금속처럼 반짝이는 현상을 보정
+      o.material = o.material.clone();
+      o.material.metalness = 0;
+      o.material.metalnessMap = null;
+      o.material.roughnessMap = null;
+      o.material.roughness = 0.85;
+      if (o.material.normalScale) o.material.normalScale.setScalar(0.35);
+      // Meshy의 잘게 나뉜 UV에서 밉맵이 빈 흰 영역을 섞는 현상을 방지
+      for (const texture of [o.material.map, o.material.normalMap]) {
+        if (!texture) continue;
+        texture.minFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false;
+        texture.needsUpdate = true;
+      }
       o.castShadow = true;
       o.receiveShadow = true;
       o.frustumCulled = false;
     }
   });
-  inner.rotation.y = src.rotY;
-  inner.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(inner);
+  // 애니메이션 대상과 크기·방향 보정 그룹을 분리
+  const pivot = new THREE.Group();
+  pivot.add(inner);
+  pivot.rotation.y = src.rotY;
+  pivot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(pivot);
   const h = box.max.y - box.min.y || 1;
   const s = src.height / h;
-  inner.scale.multiplyScalar(s);
-  inner.position.y = -box.min.y * s;
+  pivot.scale.setScalar(s);
+  pivot.position.set(-(box.min.x + box.max.x) * 0.5 * s, -box.min.y * s, -(box.min.z + box.max.z) * 0.5 * s);
   const root = new THREE.Group();
-  root.add(inner);
+  root.add(pivot);
   const mixer = new THREE.AnimationMixer(inner);
+  const standingLegs = [];
+  inner.traverse((o) => {
+    if (o.isBone && /^(Hips|(?:Left|Right)(?:UpLeg|Leg|Foot|ToeBase))$/.test(o.name)) {
+      standingLegs.push({ bone: o, position: o.position.clone(), quaternion: o.quaternion.clone() });
+    }
+  });
   const walkClip = src.clips.find((c) => /walk/i.test(c.name)) || src.clips[0];
   const walk = walkClip ? mixer.clipAction(walkClip) : null;
-  root.userData.meshy = { mixer, walk };
+  if (walk) {
+    // 걷기 첫 자세를 정지 자세로 사용. stop()은 원래 T 자세를 복원함
+    walk.play();
+    walk.paused = true;
+    mixer.update(0);
+  }
+  root.userData.meshy = { mixer, walk, standingLegs };
+  animateMeshyStudent(root, 0, 0);
   return root;
 }
 
@@ -63,9 +105,19 @@ export function animateMeshyStudent(root, dt, amt) {
   if (!m) return;
   if (m.walk) {
     if (amt > 0.05) {
-      if (!m.walk.isRunning()) m.walk.play();
-      m.walk.timeScale = 0.6 + amt * 0.8;
-    } else if (m.walk.isRunning()) m.walk.stop();
+      m.walk.paused = false;
+      m.walk.timeScale = Math.max(0.15, amt / 0.9);
+    } else {
+      m.walk.paused = true;
+      m.walk.time = 0;
+    }
   }
   m.mixer.update(dt);
+  if (amt <= 0.05) {
+    // 멈출 때는 팔을 내려놓은 동작을 유지하고 다리·골반만 기본 기립 자세로 복원
+    for (const pose of m.standingLegs) {
+      pose.bone.position.copy(pose.position);
+      pose.bone.quaternion.copy(pose.quaternion);
+    }
+  }
 }

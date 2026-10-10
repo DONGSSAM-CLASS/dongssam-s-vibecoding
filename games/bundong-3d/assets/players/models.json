@@ -1,0 +1,4 @@
+{
+  "male": { "model": "male.glb", "walk": "male_walk.glb", "height": 1.72, "rotY": 0 },
+  "female": { "model": "female.glb", "walk": "female_walk.glb", "height": 1.64, "rotY": 0 }
+}

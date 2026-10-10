@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-10-10",
+  "approvedCredits": 280,
+  "consumedCredits": 280,
+  "balanceAfter": 412,
+  "targetFormat": "glb",
+  "textureMaxSize": 2048,
+  "note": "유물은 설명문 기반 AI 재구성으로, 실물의 세부 형태와 글자를 정확히 재현한 박물관 스캔이 아닙니다.",
+  "students": {
+    "male": {
+      "imageTask": "01a12374-5a2e-7128-b5e4-c986994eb6ce",
+      "rigTask": "01a12377-a8ea-7566-a32e-73f709f13a44",
+      "credits": 35,
+      "model": "meshy-7",
+      "source": "male.jpg"
+    },
+    "female": {
+      "imageTask": "01a12374-7cc1-733f-9b8e-7523995cacad",
+      "rigTask": "01a12376-e81c-7080-8d0f-2142692a29fb",
+      "credits": 35,
+      "model": "meshy-7",
+      "source": "female.jpg"
+    }
+  },
+  "relics": {
+    "sword": {
+      "previewTask": "01a12374-c5c2-7753-b0b4-476ad08a9abe",
+      "refineTask": "01a12375-f720-7620-9cc3-895efadca571",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Saingeom four-tiger ritual sword of Joseon Korea, straight double-edged steel blade pointing upward, gold-inlaid constellation dots and lines, small oval gilt bronze guard, dark cord wrapped grip at bottom, realistic museum artifact, no pedestal, no display case, isolated object."
+    },
+    "mirror": {
+      "previewTask": "01a12374-cd35-7434-8415-c39aa5184064",
+      "refineTask": "01a12376-1f6c-75d3-a1b8-e40c384f21a4",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Korean Bronze Age Danyusemungyeong bronze mirror, vertical round flat disc 21 cm, extremely fine geometric triangle hatching in concentric zones on back, two small loop knobs near center, green bronze patina, realistic museum artifact, no stand, isolated object."
+    },
+    "censer": {
+      "previewTask": "01a12374-d476-768c-82f7-f9d4042504ae",
+      "refineTask": "01a12376-20b6-7239-bef8-e663dd256a8f",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Baekje gilt bronze incense burner, upright 62 cm tall, coiled dragon base holding lotus stem, lotus bud body, conical lid of many layered mountain peaks and tiny figures and musicians, phoenix bird at top, antique gold patina, realistic museum artifact, no pedestal."
+    },
+    "jade": {
+      "previewTask": "01a12374-dc13-77a6-8b10-240a0f5c9d42",
+      "refineTask": "01a12376-21f8-75be-9356-bc72bdf2d0ae",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Silla Korean comma shaped curved green jade bead, small hole through rounded head, tiny gold cap with granulation on head, translucent polished jadeite, realistic museum artifact, isolated, no stand, no necklace."
+    },
+    "bomb": {
+      "previewTask": "01a12374-e364-720e-b4cd-dfe3fc997c1a",
+      "refineTask": "01a12376-f650-77e7-b131-e4ed7d31577a",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Bigyeok jincheonroe Joseon Korean cast iron spherical historical artifact, 21 cm diameter, rusty dark iron shell, small opening on top with short wooden fuse plug, realistic museum artifact, isolated object, no stand."
+    },
+    "rocket": {
+      "previewTask": "01a12374-ea9b-72a0-80ec-5ff91cf6372b",
+      "refineTask": "01a12376-23d5-72e6-a543-cc42eef2f9a2",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Singijeon Joseon Korean rocket arrow, long straight bamboo shaft upright with iron arrowhead on top, paper gunpowder tube tied near head with red cord, feather fletching at bottom, realistic historical museum replica, isolated arrow, no stand."
+    },
+    "sundial": {
+      "previewTask": "01a12374-f1eb-712d-a11a-f153790efc64",
+      "refineTask": "01a12376-f78c-73f9-808e-31a643727e36",
+      "credits": 30,
+      "model": "meshy-6",
+      "prompt": "A single Angbu ilgu Joseon Korean bronze sundial, upright hemispherical bowl open upward, engraved hour and season grid lines inside, slanted gnomon needle inside bowl, four curved supporting legs on cross shaped base, dark antique bronze, realistic museum artifact, no pedestal."
+    }
+  }
+}

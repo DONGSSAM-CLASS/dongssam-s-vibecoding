@@ -12,6 +12,7 @@ export const RELICS = [
     skill: '좌클릭 <b>참사검격</b> — 앞을 베어 악령 공격<br>우클릭 <b>이십팔수 검기</b> — 별빛 검기를 멀리 날림 (재사용 5초)',
     icon: '🗡️', cd: 0.5, cd2: 5,
     hold: { pos: [0.0, -0.01, -0.03], rot: [-0.85, 0.2, 0.45], scale: 0.72 },
+    holdGLB: { rot: [-0.75, 0.2, -0.2] },
   },
   {
     id: 'mirror', name: '다뉴세문경', hanja: '多鈕細文鏡', era: '청동기 시대 (기원전 4세기 무렵)', where: '국보 · 숭실대학교 한국기독교박물관 소장',
@@ -33,6 +34,7 @@ export const RELICS = [
     skill: '좌클릭 <b>생명의 결계</b> — 12초 동안 피해를 막는 보호막 + 즉시 회복 (재사용 22초)<br>지니고만 있어도 체력이 천천히 회복',
     icon: '🟢', cd: 22,
     hold: { pos: [0.0, 0.04, -0.04], rot: [0.2, 0.4, 0.0], scale: 2.4 },
+    holdGLB: { rot: [0.2, 0.4, 1.15], scale: 1.8 },
   },
   {
     id: 'bomb', name: '비격진천뢰', hanja: '飛擊震天雷', era: '조선 선조 (16세기 말)', where: '보물 · 실물이 국립박물관 등에 전함',
@@ -54,6 +56,7 @@ export const RELICS = [
     skill: '좌클릭 <b>시간의 그림자</b> — 9초 동안 주변 악령의 시간이 느려짐 (재사용 28초)',
     icon: '🕰️', cd: 28,
     hold: { pos: [0.0, 0.0, -0.06], rot: [0.35, 0.0, 0.0], scale: 0.85 },
+    holdGLB: { pos: [0, 0.1, -0.1], rot: [0.2, 0.15, 0], scale: 0.7 },
   },
 ];
 
@@ -116,9 +119,11 @@ export class Relics {
     const inner = this.build(id);
     const wrap = new THREE.Group();
     wrap.add(inner);
-    wrap.position.set(...r.hold.pos);
-    wrap.rotation.set(...r.hold.rot);
-    wrap.scale.setScalar(r.hold.scale);
+    // 생성 모델의 손잡이·받침 위치를 따로 보정. 기본 모델의 자세는 유지
+    const hold = this.overrides[id] ? { ...r.hold, ...r.holdGLB } : r.hold;
+    wrap.position.set(...hold.pos);
+    wrap.rotation.set(...hold.rot);
+    wrap.scale.setScalar(hold.scale);
     wrap.userData.inner = inner;
     this.models[id] = wrap;
     return wrap;

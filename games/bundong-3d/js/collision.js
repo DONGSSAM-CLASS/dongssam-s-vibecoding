@@ -49,6 +49,13 @@ export function removeCollider(c) {
   if (i >= 0) all.splice(i, 1);
 }
 
+// 움직이는 친구의 원기둥 충돌체를 공간 격자와 함께 갱신
+export function moveCyl(c, x, z) {
+  removeFromGrid(c);
+  Object.assign(c, { x, z, x0: x - c.r, x1: x + c.r, z0: z - c.r, z1: z + c.r });
+  addToGrid(c);
+}
+
 const tmp = [];
 const seen = new Set();
 function nearby(x, z, r) {
