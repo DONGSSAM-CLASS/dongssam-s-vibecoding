@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>역사 웹앱 워크숍 학습지</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#F3F7FC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 청사진(blueprint) 학습지 — 옅은 모눈 바탕 위에 남색 2px 선으로 그린 종이 한 장.
+   쪽마다 푸른 점 하나, 그림자도 푸른빛. 색은 푸른 계열만 씁니다. */
+:root{
+  --paper:#F3F7FC; --grid:#DFE9F6; --card:#FFFFFF; --ink:#0B2545; --muted:#4A6283; --line:#C9D8EC;
+  --blue:#1D5FD1; --blue-ink:#123F91; --on-blue:#FFFFFF; --sky:#DCEBFF; --soft:#EEF4FC; --ice:#7FAEEB;
+  --shadow:#BFD5F3; --deep:#0B2545; --on-deep:#FFFFFF; --veil:rgba(11,37,69,.55); --header:rgba(255,255,255,.92);
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#071730; --grid:#0E2647; --card:#0D2343; --ink:#E3EEFF; --muted:#9DB4D6; --line:#25466F;
+    --blue:#4C8DF6; --blue-ink:#8DB9FF; --on-blue:#04122A; --sky:#163A68; --soft:#0A1F3D; --ice:#6FA6F5;
+    --shadow:#031024; --deep:#8DB9FF; --on-deep:#04122A; --veil:rgba(2,10,24,.7); --header:rgba(7,23,48,.92);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#071730; --grid:#0E2647; --card:#0D2343; --ink:#E3EEFF; --muted:#9DB4D6; --line:#25466F;
+  --blue:#4C8DF6; --blue-ink:#8DB9FF; --on-blue:#04122A; --sky:#163A68; --soft:#0A1F3D; --ice:#6FA6F5;
+  --shadow:#031024; --deep:#8DB9FF; --on-deep:#04122A; --veil:rgba(2,10,24,.7); --header:rgba(7,23,48,.92);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100%;color:var(--ink);font:16px/1.65 var(--body);word-break:keep-all;overflow-wrap:anywhere;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--header)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--blue-ink)}
+:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ── 위 머리띠: 이름 · 저장 상태 · ⋯ 메뉴 + 한 칸씩 보기 막대 ── */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:var(--header);
+  border-bottom:2px solid var(--ink);backdrop-filter:blur(6px)}
+.nav,.stepbar{display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.nav{padding-block:10px}
+.brand{font-family:var(--display);font-size:17px;color:var(--blue-ink);white-space:nowrap;letter-spacing:.01em}
+.status{flex:1;min-width:0;font-size:12.5px;color:var(--muted);line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.status.warn{color:var(--blue-ink);font-weight:700}
+.iconbtn{flex:0 0 auto;font-size:20px;line-height:1;padding:6px 13px;border-radius:8px;background:var(--card);
+  border:2px solid var(--ink);box-shadow:2px 2px 0 var(--shadow)}
+.stepbar{padding-block:8px 10px;border-top:1px solid var(--line)}
+.stepbar .arrow{flex:0 0 auto;font-size:18px;font-weight:700;padding:6px 14px;border-radius:8px;background:var(--card);
+  border:2px solid var(--ink);box-shadow:2px 2px 0 var(--shadow)}
+.stepbar .arrow:disabled{opacity:.3;box-shadow:none;cursor:default}
+.stepmid{flex:1;min-width:0}
+#stepTitle{font-family:var(--display);font-size:16px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.dots button{width:18px;height:6px;border-radius:3px;border:0;padding:0;background:var(--line)}
+.dots button.done{background:var(--ice)}
+.dots button.on{background:var(--blue);width:26px}
+#stepCount{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timer{flex:0 0 auto;font:700 22px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--blue-ink);
+  background:var(--sky);border:2px solid var(--ink);border-radius:8px;padding:6px 10px}
+.timer.done{background:var(--blue);color:var(--on-blue);animation:pulse 1s ease-in-out 3}
+@keyframes pulse{50%{transform:scale(1.08)}}
+
+.menu{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(100% + 6px);z-index:9;display:flex;flex-direction:column;gap:6px;
+  background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:10px;min-width:220px;box-shadow:6px 6px 0 var(--shadow)}
+.menu button{display:block;width:100%;text-align:left;font-size:14px;padding:9px 11px;border-radius:7px;background:var(--soft);
+  border:1px solid var(--line)}
+.menu button:hover{border-color:var(--blue)}
+.menu .sep{font-size:11px;letter-spacing:.06em;color:var(--muted);padding:6px 4px 0}
+.menu .row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.menu .row button{text-align:center;padding:8px 4px}
+
+/* ── 종이 한 장 ── */
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.sheet{max-width:780px;margin:0 auto;background:var(--card);border:2px solid var(--ink);border-radius:10px;
+  box-shadow:7px 7px 0 var(--shadow);padding:28px clamp(18px,4vw,40px) 36px}
+.head{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px;display:grid;gap:6px}
+.head small{font-size:13px;color:var(--muted)}
+.head .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--blue-ink);font-weight:700}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,5vw,36px);line-height:1.25;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.35;margin:34px 0 12px;display:flex;align-items:center;gap:10px;text-wrap:balance}
+h2::before{content:"";flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:var(--blue);border:2px solid var(--ink)}
+.step{display:grid;gap:14px}
+.q{display:block;font-weight:700;font-size:15.5px;line-height:1.55}
+.qwrap{display:grid;gap:7px}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.hint b{color:var(--ink)}
+textarea,input.line,select.line{display:block;width:100%;padding:11px 12px;border:2px solid var(--ink);border-radius:6px;
+  background:var(--card);font-size:16px;line-height:1.6}
+textarea{resize:vertical;min-height:64px}
+textarea.tall{min-height:220px;font-size:14px;background:var(--soft)}
+textarea:focus,input.line:focus,select.line:focus{outline:3px solid var(--ice);outline-offset:1px}
+select.line{cursor:pointer;font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;font-size:14px;font-weight:700;
+  border-radius:6px;border:2px solid var(--ink);background:var(--blue);color:var(--on-blue);box-shadow:2px 2px 0 var(--ink);text-decoration:none;line-height:1.3}
+.btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn.deep{background:var(--deep);color:var(--on-deep)}
+.btn:disabled{opacity:.4;box-shadow:none;cursor:default}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.state{font-size:13px;color:var(--blue-ink);font-weight:700}
+.state.warn{color:var(--ink);background:var(--sky);padding:2px 8px;border-radius:4px}
+.state.warn::before{content:"! "}
+
+/* 고르기 칩 */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button{padding:8px 15px;border:2px solid var(--line);border-radius:99px;background:var(--card);font-size:14.5px}
+.chips button:hover{border-color:var(--blue)}
+.chips button.on{background:var(--blue);border-color:var(--ink);color:var(--on-blue);font-weight:700;box-shadow:2px 2px 0 var(--ink)}
+
+/* 작품 아카이브 */
+.arch{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.arch a{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);border:2px solid var(--ink);border-radius:8px;overflow:hidden;
+  background:var(--card);box-shadow:3px 3px 0 var(--shadow);transition:transform .15s,box-shadow .15s}
+.arch a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
+.tile{aspect-ratio:16/9;max-width:100%;display:grid;place-items:center;border-bottom:2px solid var(--ink);
+  background:hsl(var(--h,214) 70% 90%);background-image:linear-gradient(hsl(var(--h,214) 60% 82%) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--h,214) 60% 82%) 1px,transparent 1px);background-size:14px 14px}
+.tile b{font-family:var(--display);font-weight:400;font-size:34px;color:hsl(var(--h,214) 65% 28%)}
+.arch span{padding:8px 10px 10px;font-size:14px;font-weight:700;line-height:1.35}
+.arch i{display:block;font-style:normal;font-size:11.5px;color:var(--blue-ink)}
+.credit{font-size:12.5px;color:var(--muted);margin:0}
+.big{display:block;text-align:center;padding:18px;font-family:var(--display);font-size:22px;text-decoration:none;color:var(--on-blue);
+  background:var(--blue);border:2px solid var(--ink);border-radius:8px;box-shadow:4px 4px 0 var(--ink)}
+.big:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+
+/* 프롬프트 만들기 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kdesc{font-size:13.5px;color:var(--muted)}
+.multi{display:flex;flex-wrap:wrap;gap:6px}
+.multi button{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:2px solid var(--line);border-radius:99px;background:var(--card);font-size:14px}
+.multi button.on{border-color:var(--ink);background:var(--sky);font-weight:700}
+.multi button i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:12px}
+.level{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.level button{padding:12px 10px;border:2px solid var(--line);border-radius:8px;background:var(--card);text-align:left;font-size:15px;font-weight:700;line-height:1.35}
+.level button small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.level button.on{border-color:var(--ink);background:var(--sky);box-shadow:3px 3px 0 var(--ink)}
+.builder{padding:12px 14px;background:var(--soft);border:2px solid var(--ink);border-radius:8px}
+.fixes{display:grid;gap:8px}
+.fixes .chips button{font-size:13.5px}
+
+/* 배포 따라 하기 */
+.dsteps{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:d}
+.dsteps li{counter-increment:d;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:15px;line-height:1.6}
+.dsteps li::before{content:counter(d);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--sky);
+  border:2px solid var(--ink);font-weight:700;font-size:13px;margin-top:1px}
+.dsteps label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.dsteps input{margin-top:6px;width:18px;height:18px;accent-color:var(--blue);flex:0 0 auto}
+.dsteps input:checked+span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--ice)}
+.note{background:var(--soft);border:2px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.7}
+
+/* 작품 카드 · 갤러리 */
+.pickfile{padding:12px;border:2px dashed var(--line);border-radius:8px;background:var(--soft);display:grid;gap:8px}
+.pickfile input[type=file]{font-size:13px;max-width:100%}
+.shotprev{display:flex;align-items:center;gap:10px}
+.shotprev img{width:150px;max-width:100%;aspect-ratio:16/10;object-fit:cover;border:2px solid var(--ink);border-radius:6px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.work{border:2px solid var(--ink);border-radius:8px;background:var(--card);overflow:hidden;display:flex;flex-direction:column;box-shadow:3px 3px 0 var(--shadow)}
+.work .tile{position:relative}
+.work .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.work .info{padding:10px 12px 12px;display:grid;gap:3px;font-size:13.5px}
+.work .name{font-weight:700;font-size:15px}
+.work .maker,.work .desc{color:var(--muted);font-size:12.5px}
+.work .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.pill{font-size:12.5px;padding:5px 11px;border-radius:99px;border:2px solid var(--ink);background:var(--card);font-weight:700;text-decoration:none;color:var(--ink)}
+.pill.like.on{background:var(--blue);color:var(--on-blue)}
+.pill.quiet{border-color:var(--line);color:var(--muted);font-weight:500}
+.pill.quiet.arm{border-color:var(--ink);background:var(--sky);color:var(--ink);font-weight:700}
+.empty{grid-column:1/-1;padding:22px;text-align:center;border:2px dashed var(--line);border-radius:8px;color:var(--muted);font-size:14px}
+
+/* 퀴즈 */
+.quiz{display:grid;gap:14px}
+.qcard{border:2px solid var(--ink);border-radius:8px;padding:14px;background:var(--card);display:grid;gap:10px}
+.qcard .qn{font-size:12px;color:var(--blue-ink);font-weight:700;letter-spacing:.05em}
+.qcard .opts{display:grid;gap:7px}
+.qcard .opts button{text-align:left;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--card);font-size:15px;display:flex;gap:10px;align-items:baseline}
+.qcard .opts button b{flex:0 0 auto;font-size:13px;color:var(--muted)}
+.qcard .opts button:not(:disabled):hover{border-color:var(--blue)}
+.qcard .opts button.right{border-color:var(--ink);background:var(--sky);font-weight:700}
+.qcard .opts button.right b::after{content:" ✓";color:var(--blue-ink)}
+.qcard .opts button.wrong{border-style:dashed;color:var(--muted);text-decoration:line-through;animation:shake .35s}
+.qcard .opts button:disabled{cursor:default}
+.qcard .why{font-size:14px;background:var(--soft);border-left:4px solid var(--blue);padding:8px 12px;border-radius:0 6px 6px 0}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.score{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px;border:2px solid var(--ink);border-radius:8px;background:var(--sky)}
+.score b{font-family:var(--display);font-weight:400;font-size:30px;font-variant-numeric:tabular-nums}
+
+/* 설문 별점 */
+.stars{display:flex;gap:4px}
+.stars button{font-size:40px;line-height:1;padding:2px 6px;background:none;border:0;color:var(--line)}
+.stars button.on{color:var(--blue);text-shadow:1px 1px 0 var(--ink)}
+.starword{font-size:14px;color:var(--blue-ink);font-weight:700;min-height:1.4em}
+
+/* 창 */
+dialog{border:2px solid var(--ink);border-radius:10px;padding:22px;width:min(460px,calc(100vw - 32px));background:var(--card);color:var(--ink);box-shadow:8px 8px 0 var(--shadow)}
+dialog::backdrop{background:var(--veil)}
+dialog h3{margin:0 0 8px;font-family:var(--display);font-weight:400;font-size:21px}
+dialog p{font-size:14px;margin:0 0 12px}
+.qrhost{display:grid;place-items:center;margin:8px 0 12px;padding:12px;background:#FFFFFF;border-radius:8px;border:2px solid var(--line)}
+.qrhost img,.qrhost canvas{max-width:100%;height:auto}
+
+/* ── 한 칸씩 보기 ── */
+.one .sheet>h2,.one .head{display:none}
+.one .step{display:none}
+.one .step.now{display:grid;animation:in .25s ease-out}
+.one .sheet{padding-top:24px}
+.one textarea{min-height:110px}
+.one textarea.tall{min-height:240px}
+@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+@media (max-width:620px){
+  .grid2,.level{grid-template-columns:1fr}
+  .arch{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .brand{font-size:15px}
+  .stepbar{gap:8px}
+  .stepbar .arrow{padding:6px 11px}
+  .timer{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  body{background:#fff}
+  .top,.no-print,dialog{display:none!important}
+  .sheet{box-shadow:none;border:0;max-width:none;padding:0}
+  .one .step{display:grid}.one .sheet>h2,.one .head{display:flex}
+}
+</style>
+</head>
+<body>
+
+<header class="top no-print">
+  <div class="nav">
+    <span class="brand">역사 웹앱 학습지</span>
+    <span class="status" id="saveStatus">쓴 답은 이 브라우저에만 저장됩니다.</span>
+    <button class="iconbtn" id="moreBtn" type="button" aria-expanded="false" aria-controls="moreMenu" title="메뉴">⋯</button>
+  </div>
+  <div class="stepbar" id="stepbar">
+    <button class="arrow" id="stepPrev" type="button" aria-label="이전 칸">←</button>
+    <div class="stepmid">
+      <div id="stepTitle"></div>
+      <div class="row" style="gap:8px"><div class="dots" id="dots"></div><span id="stepCount"></span></div>
+    </div>
+    <button class="timer" id="timer" type="button" title="누르면 타이머를 멈춥니다" hidden>00:00</button>
+    <button class="arrow" id="stepNext" type="button" aria-label="다음 칸">→</button>
+  </div>
+  <div class="menu" id="moreMenu" hidden>
+    <button type="button" id="allBtn">전체 보기</button>
+    <button type="button" id="copyAll">내 답 모두 복사</button>
+    <button type="button" id="qrBtn">이 학습지 QR</button>
+    <div class="sep">타이머</div>
+    <div class="row"><button type="button" data-timer="180">3분</button><button type="button" data-timer="300">5분</button><button type="button" data-timer="600">10분</button></div>
+    <div class="sep">이 기기</div>
+    <button type="button" id="clearBtn">이 기기 답변 지우기</button>
+  </div>
+</header>
+
+<main class="wrap">
+<article class="sheet" id="sheet">
+  <div class="head">
+    <span class="eyebrow">역사 교사 연수 · 인터랙티브 학습지</span>
+    <h1>바이브코딩으로 만드는 역사수업 웹앱</h1>
+    <small>진행 동쌤(김동은 선생님) · 말로 설명하면 AI가 웹앱을 만듭니다. 오늘은 한 편을 직접 만들어 배포까지 해 봅니다.</small>
+  </div>
+
+  <h2>1쪽 · 어떤 역사 웹앱?</h2>
+  <section class="step" data-step="c1" data-title="1쪽 · 웹앱 경험과 만들고 싶은 것">
+    <div class="qwrap pick" data-pick="n0" data-options="0번|1–2번|3–5번|6번 이상">
+      <span class="q">AI로 웹앱을 몇 번 만들어 보셨어요?</span>
+    </div>
+    <label class="qwrap"><span class="q">만들면서 어려웠던 점은? 안 해 보셨다면 망설여진 까닭은?</span>
+      <textarea id="f-pain" data-save="pain" placeholder="짧게 써도 좋아요. 예: 오류가 나면 못 고침, 배포를 모름"></textarea></label>
+    <label class="qwrap"><span class="q">어떤 역사 웹앱을 만들어 보고 싶으세요? 만들어 본 적이 있다면 무엇이었나요?</span>
+      <textarea id="f-c1" data-save="c1" placeholder="낱말로 써도 좋아요. 예: 독립운동 방탈출, 조선 신분 시뮬레이션"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="n0,pain,c1">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>2쪽 · 먼저 둘러볼 역사 웹앱</h2>
+  <section class="step" data-step="archive" data-title="2쪽 · 역사 웹앱 둘러보기">
+    <p class="hint">AI와 함께 만든 수업용 웹앱들입니다. 눌러서 바로 체험해 보세요. 새 탭에서 열려요.</p>
+    <div class="arch">
+      <a href="https://nobi-rise-game.pages.dev/" target="_blank" rel="noopener"><div class="tile" style="--h:205"><b>영</b></div><span><i>퀴즈 게임</i>이번 생은 영의정</span></a>
+      <a href="https://bora-games.web.app/banana/index.html" target="_blank" rel="noopener"><div class="tile" style="--h:195"><b>地</b></div><span><i>세계지도 퍼즐</i>도전! 바나나 월드</span></a>
+      <a href="https://tdesk.web.app/app_exchange.html" target="_blank" rel="noopener"><div class="tile" style="--h:222"><b>⚄</b></div><span><i>주사위 보드게임</i>우당탕탕 환율 대모험</span></a>
+      <a href="https://tdesk.web.app/app_atlas.html" target="_blank" rel="noopener"><div class="tile" style="--h:210"><b>史</b></div><span><i>한국사 부도</i>내 손안의 역사부도</span></a>
+      <a href="https://tdesk.web.app/app_atlas_world.html" target="_blank" rel="noopener"><div class="tile" style="--h:200"><b>圖</b></div><span><i>세계사 부도</i>역사부도 · 세계사</span></a>
+      <a href="https://tdesk.web.app/app_debate.html" target="_blank" rel="noopener"><div class="tile" style="--h:228"><b>論</b></div><span><i>논쟁 배틀</i>논쟁 배틀 · 팀전</span></a>
+      <a href="https://our-class-court.vercel.app/" target="_blank" rel="noopener"><div class="tile" style="--h:215"><b>判</b></div><span><i>모의재판</i>우리 반 헌법재판소</span></a>
+      <a href="https://independence-1776-classroom.vercel.app/lesson" target="_blank" rel="noopener"><div class="tile" style="--h:205"><b>1776</b></div><span><i>3D 시뮬레이션 RPG</i>함께 쓰는 독립선언서</span></a>
+      <a href="https://kings-ledger-classroom.vercel.app/" target="_blank" rel="noopener"><div class="tile" style="--h:220"><b>帳</b></div><span><i>3D 시뮬레이션 RPG</i>왕의 장부</span></a>
+      <a href="https://bora-games.web.app/gwangbok/index.html" target="_blank" rel="noopener"><div class="tile" style="--h:198"><b>1945</b></div><span><i>RPG</i>빼앗긴 빛을 되찾다</span></a>
+    </div>
+    <p class="credit">작품: 황금보라 선생님(@tdesk_bora). 내 작품으로 바꾸려면 이 파일의 2쪽 링크를 고치세요.</p>
+  </section>
+
+  <h2>3쪽 · 학생이 되어 체험하기</h2>
+  <section class="step" data-step="play" data-title="3쪽 · 체험 게임 입장">
+    <p class="hint">지금부터는 중학생이 되어 봅니다. 모둠은 교실 화면을 함께 보세요. 오늘은 <b>차 상자를 바다에 던지는 장면</b>까지 합니다.</p>
+    <a class="big" href="https://independence-1776-classroom.vercel.app/lesson" target="_blank" rel="noopener">1776 게임 입장 ↗</a>
+    <p class="hint">[친구들과 함께]를 고르고 모둠끼리 같은 방에 들어갑니다. 게임 속 이름은 별명으로 써 주세요.</p>
+  </section>
+
+  <h2>4쪽 · 게임을 해 본 뒤</h2>
+  <section class="step" data-step="c2" data-title="4쪽 · 게임을 해 보니">
+    <div class="qwrap pick" data-pick="fun" data-options="푹 빠졌다|재밌었다|그저 그랬다|어려웠다">
+      <span class="q">한마디로 고르면?</span>
+    </div>
+    <label class="qwrap"><span class="q">게임을 해 보니 어떠셨나요? 수업에 쓴다면 어디에 넣고 싶나요?</span>
+      <textarea id="f-c2" data-save="c2" placeholder="예: 도입 10분에 쓰면 질문이 저절로 나올 것 같다"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="fun,c2">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>5쪽 · 만들 때 고민할 점</h2>
+  <section class="step" data-step="c4" data-title="5쪽 · 고민해야 할 점">
+    <div class="qwrap pick multi-pick" data-pick="worry" data-multi="1" data-options="사실 정확성|재미와 배움의 균형|학생 기기 환경|수업 시간 안에 끝나기|개인정보|저작권">
+      <span class="q">가장 신경 쓰이는 것을 모두 고르세요.</span>
+    </div>
+    <label class="qwrap"><span class="q">역사 수업용 웹앱을 만들 때 무엇을 고민해야 할까요?</span>
+      <textarea id="f-c4" data-save="c4" placeholder="예: 게임에 빠져 사료를 안 읽고 넘어갈까 걱정"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="worry,c4">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>6쪽 · 역사 교사 미니 해커톤</h2>
+  <section class="step" data-step="make" data-title="6쪽 · 프롬프트 만들기">
+    <p class="hint">고르고 쓰는 대로 아래 프롬프트가 바로 바뀝니다. AI를 부르지 않으니 인터넷이 없어도 됩니다.</p>
+    <label class="qwrap"><span class="q">웹앱 종류</span><select class="line" id="pkKind"></select><span class="kdesc" id="pkDesc"></span></label>
+    <div class="grid2">
+      <div id="pkGrade"></div>
+      <div id="pkMins"></div>
+    </div>
+    <label class="qwrap"><span class="q">단원 · 주제</span><input class="line" id="f-p1" data-save="p1" placeholder="예: 임진왜란"></label>
+    <div id="pkExtra" style="display:grid;gap:14px"></div>
+    <label class="qwrap"><span class="q">학생에게 던질 핵심 질문 (선택)</span><input class="line" id="f-p5" data-save="p5" placeholder="예: 전쟁은 백성의 삶을 어떻게 바꾸었을까?"></label>
+    <div id="pkLook"></div>
+    <label class="qwrap"><span class="q">더 넣고 싶은 것 (선택)</span><textarea id="f-p6" data-save="p6" placeholder="예: 정답을 맞히면 조선 시대 관직이 하나씩 올라가게"></textarea></label>
+    <div class="qwrap"><span class="q">만드는 방식</span>
+      <div class="level no-print" id="pkLevel">
+        <button type="button" data-pl="basic">기초<small>기기 하나 · HTML 파일 하나 · 제미나이 캔버스로 충분</small></button>
+        <button type="button" data-pl="adv">심화<small>학생 여럿이 동시에 · Firebase 실시간 · 에이전트 권장</small></button>
+      </div>
+    </div>
+    <label class="qwrap"><span class="q">완성된 프롬프트 <span class="kdesc" id="pkLen"></span></span><textarea class="tall" id="f-p9" data-save="p9"></textarea></label>
+    <div class="builder row no-print">
+      <button class="btn deep" type="button" id="copyPrompt">복사</button>
+      <a class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener" data-ai="gemini">복사하고 제미나이 열기 ↗</a>
+      <a class="btn ghost" href="https://claude.ai/new" target="_blank" rel="noopener" data-ai="claude">복사하고 클로드 열기 ↗</a>
+      <span class="state" id="buildState"></span>
+    </div>
+    <div class="fixes no-print">
+      <span class="q">만든 뒤 고칠 때 쓰는 말 — 누르면 복사돼요</span>
+      <div class="chips" id="fixChips"></div>
+    </div>
+  </section>
+
+  <h2>7–9쪽 · 배포 · 작품 올리기</h2>
+  <section class="step" data-step="deploy" data-title="7쪽 · 배포 따라 하기">
+    <p class="hint">처음이어도 괜찮아요. 화면을 보며 한 단계씩 같이 합니다. 끝낸 단계는 눌러서 표시하세요. 노트북이 편해요.</p>
+    <ol class="dsteps" id="dsteps">
+      <li><label><input type="checkbox" id="d1" data-check="d1"><span><b>HTML 파일 내려받기</b> — 제미나이 캔버스 오른쪽 위 공유·내보내기 메뉴에서 다운로드. 「다운로드」 폴더에 .html 파일이 생겨요.</span></label></li>
+      <li><label><input type="checkbox" id="d2" data-check="d2"><span><b>네트리파이 드롭 열기</b> — 아래 단추를 누르거나 주소창에 app.netlify.com/drop</span></label></li>
+      <li><label><input type="checkbox" id="d3" data-check="d3"><span><b>먼저 구글 계정으로 로그인</b> — 로그인하고 올려야 사이트가 사라지지 않아요. 카드 등록은 없어요.</span></label></li>
+      <li><label><input type="checkbox" id="d4" data-check="d4"><span><b>점선 상자에 파일 끌어다 놓기</b> — 끌기가 어려우면 상자 안의 file 글자를 눌러 고르기</span></label></li>
+      <li><label><input type="checkbox" id="d5" data-check="d5"><span><b>주소 복사</b> — 몇 초 뒤 …netlify.app 주소가 나오면 Copy</span></label></li>
+      <li><label><input type="checkbox" id="d6" data-check="d6"><span><b>8쪽 링크 칸에 붙여 넣기</b></span></label></li>
+    </ol>
+    <span class="state" id="deployState"></span>
+    <a class="big" href="https://app.netlify.com/drop" target="_blank" rel="noopener">네트리파이 드롭 열기 ↗</a>
+    <div class="note"><b>휴대전화로 만들었다면</b> 배포는 건너뛰고, 캔버스 [공유] → 링크 복사 → 8쪽 링크 칸에 붙여 넣으세요.<br>
+      <b>에이전트</b>(클로드 코드·코덱스)를 쓴다면 “이 폴더의 웹앱을 Vercel(또는 Firebase Hosting)에 배포해 줘” 한마디면 됩니다.</div>
+  </section>
+
+  <section class="step" data-step="work" data-title="8쪽 · 내 작품 카드 만들기">
+    <label class="qwrap"><span class="q">웹앱 이름</span><input class="line" id="f-wname" data-save="work-name" placeholder="예: 임진왜란 방탈출"></label>
+    <label class="qwrap"><span class="q">만든 사람</span><input class="line" id="f-wmaker" data-save="work-maker" placeholder="이름 또는 별명"></label>
+    <label class="qwrap"><span class="q">링크 (배포 주소)</span><input class="line" id="f-wurl" data-save="work-url" type="url" inputmode="url" placeholder="https://…netlify.app"></label>
+    <label class="qwrap"><span class="q">소개글 — 어떤 수업에서, 무엇을 하는 웹앱인가요?</span><input class="line" id="f-wdesc" data-save="work-desc" maxlength="120" placeholder="예: 중2 임진왜란 차시, 모둠이 의병장이 되어 방 5개를 탈출"></label>
+    <div class="pickfile no-print">
+      <label class="q" for="workShot">화면 캡처 (선택) — 올리면 카드 썸네일이 됩니다</label>
+      <input type="file" id="workShot" accept="image/*">
+      <div class="shotprev" id="shotPreview" hidden><img id="shotImg" alt="고른 화면 캡처 미리 보기"><button class="pill quiet" type="button" id="shotClear">사진 빼기</button></div>
+    </div>
+    <div class="row no-print"><button class="btn" type="button" id="workSend">갤러리에 올리기</button><button class="btn ghost" type="button" id="workCancel" hidden>고치기 그만두기</button><span class="state" id="workState"></span></div>
+    <p class="hint">갤러리는 이 기기에 저장됩니다. 모둠 노트북 한 대에 함께 올리거나, 9쪽 [소개 복사]로 패들렛·단톡에 나눠 주세요.</p>
+  </section>
+
+  <section class="step" data-step="gallery" data-title="9쪽 · 작품 갤러리 · 좋아요">
+    <p class="hint">눌러서 체험해 보고, 좋았으면 <b>♥ 좋아요</b>를 눌러 주세요.</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <h2>10쪽 · 마무리 퀴즈</h2>
+  <section class="step" data-step="quiz" data-title="10쪽 · 마무리 퀴즈">
+    <p class="hint">오늘 배운 것을 확인해 봅니다. 고르면 바로 정답과 해설이 나와요.</p>
+    <div class="quiz" id="quiz"></div>
+    <div class="score" id="score"><b id="scoreNum">0 / 6</b><span id="scoreWord">문제를 풀면 점수가 쌓여요.</span><button class="btn ghost" type="button" id="quizReset">다시 풀기</button></div>
+  </section>
+
+  <h2>11쪽 · 연수 만족도</h2>
+  <section class="step" data-step="survey" data-title="11쪽 · 연수 만족도">
+    <span class="q">오늘 연수가 얼마나 도움이 되었나요?</span>
+    <div class="stars no-print" id="stars"><button type="button" data-star="1" aria-label="별 1개">★</button><button type="button" data-star="2" aria-label="별 2개">★</button><button type="button" data-star="3" aria-label="별 3개">★</button><button type="button" data-star="4" aria-label="별 4개">★</button><button type="button" data-star="5" aria-label="별 5개">★</button></div>
+    <span class="starword" id="starWord"></span>
+    <label class="qwrap"><span class="q">좋았던 점</span><textarea id="f-s2" data-save="s2"></textarea></label>
+    <label class="qwrap"><span class="q">개선할 점 또는 더 배우고 싶은 것</span><textarea id="f-s3" data-save="s3"></textarea></label>
+    <div class="row no-print"><button class="btn" type="button" data-copy="star,s2,s3">설문 답 복사</button><span class="state" data-state></span></div>
+    <p class="hint">이름은 들어가지 않습니다. 복사한 내용을 진행자가 알려 준 설문 칸에 붙여 넣어 주세요.</p>
+  </section>
+</article>
+</main>
+
+<dialog id="qrBox">
+  <h3>이 학습지 QR</h3>
+  <p>참가자가 휴대전화로 찍으면 이 학습지가 열립니다. 배포한 주소가 따로 있다면 아래 칸을 고치세요.</p>
+  <div class="qrhost" id="qrHost"></div>
+  <form class="row" id="qrForm">
+    <input class="line" id="qrUrl" type="url" style="flex:1 1 220px" aria-label="QR에 담을 주소">
+    <button class="btn" type="submit">QR 다시 만들기</button>
+  </form>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" data-close>닫기</button></div>
+</dialog>
+
+<dialog id="clearBox">
+  <h3>이 기기 답변 지우기</h3>
+  <p>이 브라우저에 저장된 답, 갤러리, 퀴즈 기록을 모두 지웁니다. 되돌릴 수 없어요. 공용 기기를 다음 사람에게 넘길 때 쓰세요.</p>
+  <div class="row"><button class="btn deep" type="button" id="clearYes">모두 지우기</button><button class="btn ghost" type="button" data-close>그만두기</button></div>
+</dialog>
+
+<dialog id="copyBox">
+  <h3>직접 복사해 주세요</h3>
+  <p>이 브라우저가 자동 복사를 막았어요. 아래 글자가 선택되어 있으니 Ctrl+C(휴대전화는 길게 눌러 복사)로 복사하세요.</p>
+  <textarea id="copyText" class="tall" readonly aria-label="복사할 글"></textarea>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" data-close>닫기</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+'use strict';
+/* 역사 웹앱 워크숍 학습지 — 서버 없이 이 파일 하나로 돌아갑니다.
+   ① 쓴 답은 이 브라우저에 저장 ② 한 칸씩 보기 · 타이머 ③ 고른 대로 프롬프트를 짜 줌(AI를 부르지 않음)
+   ④ 작품 카드 · 좋아요 갤러리(이 기기) ⑤ 바로 채점되는 퀴즈 ⑥ 별점 설문 */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ── 저장 ────────────────────────────────────────────────────────────────
+const KEY = 'blue-hist-ws', WORKS = 'blue-hist-works', QUIZ = 'blue-hist-quiz';
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+function say(t, warn) { const n = $('#saveStatus'); n.textContent = t; n.classList.toggle('warn', !!warn); }
+function setState(el, t, warn) { if (!el) return; el.textContent = t; el.classList.toggle('warn', !!warn); }
+
+let answers = store.get(KEY, {}) || {};
+function save() {
+  if (store.set(KEY, answers)) say('이 브라우저에 저장했어요. 공용 기기라면 끝나고 답변을 지워 주세요.');
+  else say('이 브라우저는 저장이 꺼져 있어요. [내 답 모두 복사]로 옮겨 두세요.', true);
+}
+function setValue(field, value) {
+  answers[field] = value;
+  $$(`[data-save="${field}"]`).forEach(el => { if (el.value !== value) el.value = value; });
+  paintPicks();
+  save();
+}
+$$('[data-save]').forEach(el => {
+  const f = el.dataset.save;
+  if (answers[f] != null) el.value = answers[f];
+  el.addEventListener('input', () => setValue(f, el.value));
+});
+const get = f => String(answers[f] || '').trim().replace(/\s+/g, ' ');
+
+// ── 고르기 칩 ────────────────────────────────────────────────────────────
+$$('.pick').forEach(box => {
+  const field = box.dataset.pick, multi = !!box.dataset.multi;
+  const opts = document.createElement('div');
+  opts.className = 'chips';
+  opts.innerHTML = box.dataset.options.split('|').map(o => `<button type="button" data-opt="${esc(o)}" aria-pressed="false">${esc(o)}</button>`).join('');
+  box.append(opts);
+  opts.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const o = b.dataset.opt;
+    if (multi) {
+      const list = String(answers[field] || '').split(',').filter(Boolean);
+      const at = list.indexOf(o);
+      if (at >= 0) list.splice(at, 1); else list.push(o);
+      setValue(field, list.join(','));
+    } else setValue(field, answers[field] === o ? '' : o);
+  });
+});
+function paintPicks() {
+  $$('.pick').forEach(box => {
+    const list = String(answers[box.dataset.pick] || '').split(',');
+    $$('.chips button', box).forEach(b => { const on = list.includes(b.dataset.opt); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  });
+}
+paintPicks();
+
+// ── 복사 ────────────────────────────────────────────────────────────────
+function openCopyBox(text) {
+  $('#copyText').value = text;
+  $('#copyBox').showModal();
+  setTimeout(() => { $('#copyText').focus(); $('#copyText').select(); }, 30);
+}
+async function copyText(text, stateEl, okMsg = '복사했어요.') {
+  if (!String(text).trim()) { setState(stateEl, '먼저 답을 써 주세요.', true); return false; }
+  try { await navigator.clipboard.writeText(text); setState(stateEl, okMsg); return true; }
+  catch { setState(stateEl, '직접 복사 창을 열었어요.', true); openCopyBox(text); return false; }
+}
+const LABELS = { star: '연수 만족도(별점)' };
+function labelOf(f) {
+  if (LABELS[f]) return LABELS[f];
+  const el = $(`[data-save="${f}"]`) || $(`[data-pick="${f}"]`);
+  const q = el && (el.closest('.qwrap') || el).querySelector('.q');
+  return q ? q.textContent.trim() : f;
+}
+function answerText(fields) {
+  return fields.map(f => {
+    const v = f === 'star' ? (answers.star ? '★'.repeat(answers.star) + ` (${answers.star}/5)` : '') : String(answers[f] || '').trim();
+    return v ? `■ ${labelOf(f)}\n${f === 'worry' ? v.split(',').join(', ') : v}` : '';
+  }).filter(Boolean).join('\n\n');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  copyText(answerText(b.dataset.copy.split(',')), b.parentElement.querySelector('[data-state]'));
+});
+$('#copyAll').onclick = () => {
+  closeMenu();
+  const fields = ['n0', 'pain', 'c1', 'fun', 'c2', 'worry', 'c4', 'p1', 'p5', 'p6', 'work-name', 'work-url', 'work-desc', 'star', 's2', 's3'];
+  const text = answerText(fields);
+  if (!text) { say('아직 쓴 답이 없어요.', true); return; }
+  copyText('[역사 웹앱 워크숍 학습지 — 내 답]\n\n' + text, null).then(ok => { if (ok) say('내 답을 모두 복사했어요.'); });
+};
+
+// ── 프롬프트 재료 ────────────────────────────────────────────────────────
+/* 짜는 원칙: 기능을 깎지 않고, 꼭 들어갈 것만 짧고 구체적으로 적고, 연출은 AI에게 맡긴다.
+   기초 = 기기 하나(HTML 파일 하나) / 심화 = 여럿이 각자 기기로 동시에(Firebase 실시간). */
+const MAP = {
+  world: '세계 지도 경계선은 직접 그리지 말고 https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json 을 topojson-client(https://cdn.jsdelivr.net/npm/topojson-client@3)와 d3(https://cdn.jsdelivr.net/npm/d3@7)로 불러와 그려 줘.',
+  korea: '한반도 지도는 직접 그리지 말고 https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json 에서 South Korea · North Korea를 함께 불러와(topojson-client · d3) 경도 124~131.5, 위도 33~43.5 범위로 크게 보여 줘.'
+};
+const mapOf = v => v.area === '한반도' ? MAP.korea : MAP.world + (v.area && v.area !== '세계' ? ` 그중 ${v.area}가 화면에 크게 보이게 범위를 잡아 줘.` : '');
+const STYLES = [
+  ['시대 분위기에 맞게', v => `${v.topic} 시대의 분위기를 살린 색 세 가지를 정해(예: 조선이면 한지 미색 · 먹색 · 쪽빛) 화면 전체에 같은 규칙으로 써 줘.`],
+  ['한지 · 수묵', () => '한지 결이 보이는 미색 바탕, 붓글씨 느낌의 굵은 제목, 먹색 글씨에 쪽빛 · 주홍 포인트, 붉은 도장 모양 장식.'],
+  ['고지도 · 탐험', () => '바랜 고지도 질감 배경, 갈색 잉크 선, 나침반 · 두루마리 장식으로 보물을 찾아 떠나는 분위기.'],
+  ['근대 신문', () => '옛 신문 지면처럼 단을 나누고, 굵은 명조 제목, 흑백 바탕에 강조색 하나, 호외 띠 장식.'],
+  ['픽셀 게임', () => '8비트 게임 느낌 — 짙은 남색 배경, 픽셀 테두리 대화 상자, 밝은 포인트 색, 점수판과 체력 막대.'],
+  ['박물관 전시실', () => '어두운 전시실에 유물을 비추는 조명, 전시 설명판 같은 카드, 차분한 금색 제목.'],
+  ['밝은 파스텔', () => '파스텔 색, 둥글고 통통한 카드, 스티커 같은 아이콘, 짧고 통통 튀는 애니메이션.']
+];
+const SLIDE_PARTS = [
+  ['표지 · 핵심 질문', '큰 제목과 오늘의 핵심 질문'],
+  ['마음 열기 질문', '학생 경험과 이어지는 질문 하나(예: "너라면?")'],
+  ['배경', '사건이 일어나기 전 상황을 그림 한 장과 세 줄로'],
+  ['지도', '사건이 일어난 곳에 지명 점과 이름표(국경선은 그리지 말 것)'],
+  ['연표', '주요 사건 5~6개를 가로 연표로'],
+  ['사건 전개', '한 장에 한 사건씩 2~4장(무슨 일 · 왜 · 결과)'],
+  ['인물 카드', '주요 인물 2~3명 — 이름 · 한 일 · 남긴 말'],
+  ['사료 읽기', '짧은 사료 인용 + 출처 + 읽기 질문 하나'],
+  ['비교 표', '두 입장(또는 나라 · 시기)을 표로 나란히'],
+  ['모둠 토의', '발문 하나와 토의 타이머(시작 · 멈춤)'],
+  ['확인 퀴즈', '문제 3개 — 누르면 정답과 해설'],
+  ['정리', '오늘 배운 것을 한 문장으로'],
+  ['핵심 질문 다시', '처음 질문에 다시 답하기']
+];
+const SLIDE_DEFAULT = '표지 · 핵심 질문,마음 열기 질문,배경,사건 전개,사료 읽기,모둠 토의,정리,핵심 질문 다시';
+const slideList = v => String(v.parts || SLIDE_DEFAULT).split(',').map(x => x.trim()).filter(Boolean)
+  .map((n, i) => `${i + 1}. ${n}${(SLIDE_PARTS.find(p => p[0] === n) || [, ''])[1] ? ' — ' + SLIDE_PARTS.find(p => p[0] === n)[1] : ''}`);
+
+/* 종류 — x: 추가 칸 [id, 이름, 고르기 목록(null이면 직접 쓰기), 기본값(또는 예시), 'multi'] */
+const KINDS = [
+ { g: '게임', id: 'escape', n: '방탈출', d: '방마다 사료 · 연표 단서를 풀어 자물쇠를 연다', x: [['rooms', '방 수', ['3', '4', '5', '7'], '4']],
+   basic: v => [
+   `'${v.topic}' 방탈출 게임. 학생은 ${v.topic}의 현장에 갇힌 인물이 되어 방 ${v.rooms}개를 차례로 빠져나가.`,
+   '방마다 그 시대의 장소(예: 궁궐 서고, 전쟁터 막사)로 꾸미고, 방 안의 사료 · 연표 · 인물 단서를 눌러 읽고 풀게.',
+   '자물쇠 종류는 방마다 다르게 — 연도 숫자 다이얼, 사건 순서 끌어 맞추기, 사료 속 빈칸 글자, 인물과 업적 짝짓기. 객관식 단추만 되풀이하지 마.',
+   '틀리면 단계별 힌트, 맞히면 자물쇠가 풀리고 문이 열리는 연출. 남은 시간과 진행 상황을 보여 주고, 탈출하면 걸린 시간과 칭호.'],
+   adv: v => [
+   `'${v.topic}' 모둠 대항 방탈출. 모둠마다 각자 기기로 같은 방탈출(방 ${v.rooms}개)에 동시에 들어와 겨뤄.`,
+   '방마다 그 시대의 장소로 꾸미고, 사료 · 연표 · 인물 단서를 풀어야 자물쇠가 열리게. 틀리면 단계별 힌트.',
+   '교사 화면에는 모둠별로 지금 몇 번째 방인지 실시간으로 움직이고, 탈출한 순서대로 순위가 떠.'] },
+ { g: '게임', id: 'quiz', n: '퀴즈 배틀', d: '빨리 맞힐수록 높은 점수', x: [['count', '문제 수', ['10', '15', '20'], '10']],
+   basic: v => [
+   `${v.topic} 퀴즈 배틀 게임. 문제는 ${v.count}개, 쉬운 사실 문제에서 자료 해석 문제로 점점 어렵게.`,
+   '문제마다 제한 시간, 빨리 맞힐수록 높은 점수, 연속 정답 보너스. 답을 고르면 바로 정답 연출과 한 줄 해설.',
+   '두 모둠이 한 화면에서 번갈아 겨루는 [모둠 대결] 모드와, 교실 TV에 크게 띄우는 화면 배치도 넣어 줘.'],
+   adv: v => [
+   `${v.topic} 실시간 퀴즈 배틀. 문제는 ${v.count}개.`,
+   '교사 화면에 문제와 남은 시간이 크게 뜨고, 학생은 각자 휴대전화로 방 번호와 별명을 넣고 들어와 보기를 눌러.',
+   '빨리 맞힐수록 높은 점수, 문제마다 정답 공개와 실시간 순위(상위 5명), 마지막에 시상대.'] },
+ { g: '게임', id: 'choice', n: '그 시대 사람 되어 선택', d: '장면마다 선택하고 그 결과를 겪는다', x: [['role', '학생이 되는 사람', null, '예: 조선의 농민, 보스턴의 상인'], ['scenes', '장면 수', ['3', '4', '6', '8'], '4']],
+   basic: v => [
+   `${v.topic} 시대를 사는 '${v.role || '그 시대의 평범한 사람'}'이 되어 선택하는 이야기 게임. 장면은 ${v.scenes}개.`,
+   '장면마다 실제 사건 속 상황을 짧게 보여 주고, 그 시대 사람이 할 수 있었던 선택지를 줘. 정답을 맞히는 게 아니라 선택에 따라 삶의 지표(생활 · 안전 · 목소리)가 달라지게.',
+   '마지막에 내 선택들과 실제 역사를 나란히 보여 줘. 지어낸 인물은 "가상 인물"로 표시하고, 사건 자체는 바꾸지 마.'],
+   adv: v => [
+   `${v.topic} 시대를 사는 '${v.role || '그 시대의 평범한 사람'}'이 되어 반 전체가 함께 선택하는 이야기 게임. 장면은 ${v.scenes}개.`,
+   '교사 화면에 장면이 뜨면 학생들이 각자 휴대전화로 선택하고, 투표 결과가 실시간 막대로 쌓여. 많이 고른 쪽으로 이야기가 이어져.',
+   '마지막에 우리 반의 선택과 실제 역사를 나란히 비교. 지어낸 인물은 "가상 인물"로 표시.'] },
+ { g: '게임', id: 'board', n: '주사위 보드게임', d: '칸마다 사건 · 문제, 말을 옮기며 진행', x: [['cells', '칸 수', ['16', '20', '30', '40'], '20']],
+   basic: v => [
+   `${v.topic} 주사위 보드게임. 판은 ${v.cells}칸, 2~4모둠이 한 화면에서 번갈아 주사위를 굴려.`,
+   '칸은 시대 순서대로 사건을 놓고, 멈추면 사건 설명과 문제. 특별 칸의 효과는 실제 사건의 결과와 어울리게(예: 개혁 성공 → 앞으로, 전쟁 → 한 번 쉬기).',
+   '주사위가 구르고 말이 움직이는 모습이 보이게. 끝나면 지나온 사건을 연표로 정리.'],
+   adv: v => [
+   `${v.topic} 주사위 보드게임. 판은 ${v.cells}칸, 모둠마다 각자 기기로 들어와 자기 차례에 주사위를 굴려.`,
+   '교사 화면에 공동 보드판이 크게 뜨고 모든 말이 실시간으로 움직여. 멈춘 칸의 문제는 그 모둠 기기에 떠.',
+   '칸은 시대 순서대로 사건을 놓고, 특별 칸 효과는 실제 사건 결과와 어울리게. 끝나면 순위와 지나온 연표.'] },
+ { g: '게임', id: 'debate', n: '논쟁 배틀 · 모의재판', d: '근거 카드로 주장하고 판결한다', x: [['issue', '논쟁 질문', null, '예: 흥선 대원군의 통상 수교 거부 정책은 옳았을까?']],
+   basic: v => [
+   `${v.topic} 논쟁 배틀. 논쟁 질문: "${v.issue || '[논쟁 질문]'}"`,
+   '찬성 · 반대 쪽마다 근거 카드(짧은 사료 인용 + 출처)를 주고, 모둠이 카드를 골라 주장 → 반론 → 판결 순서로 진행.',
+   '판결 뒤 실제 역사에서는 어떻게 되었는지 보여 주고, "내 생각이 바뀌었나?"를 고르게.'],
+   adv: v => [
+   `${v.topic} 실시간 논쟁 배틀. 논쟁 질문: "${v.issue || '[논쟁 질문]'}"`,
+   '학생은 각자 휴대전화로 들어와 입장을 고르고 근거 한 문장을 내. 교사 화면에 찬반 막대와 근거 카드 벽이 실시간으로 쌓여.',
+   '토론 뒤 다시 투표해 처음과 바뀐 비율을 보여 주고, 실제 역사에서는 어떻게 되었는지로 마무리.'] },
+ { g: '게임', id: 'cards', n: '카드 순서 · 짝 맞추기', d: '사건 순서 정렬, 인물과 업적 짝짓기', x: [['mode', '방식', ['사건 순서 맞추기', '인물과 업적 짝짓기', '원인과 결과 짝짓기'], '사건 순서 맞추기'], ['ncard', '카드 수', ['6', '8', '10'], '6']],
+   basic: v => [
+   `${v.topic} '${v.mode}' 카드 게임. 카드는 ${v.ncard}장.`,
+   '카드를 손가락이나 마우스로 끌어다 놓아 맞추고(휴대전화에서도 잘 끌리게), [확인]을 누르면 맞은 카드와 틀린 카드가 연출로 구분돼.',
+   '다 맞히면 카드마다 한 줄 설명이 펼쳐지고, 걸린 시간과 칭호를 줘.'],
+   adv: v => [
+   `${v.topic} '${v.mode}' 카드 게임 — 모둠 대항 실시간. 카드는 ${v.ncard}장.`,
+   '모둠마다 각자 기기로 같은 카드를 맞추고, 교사 화면에 모둠별 진행률과 완성 순위가 실시간으로 떠.',
+   '다 맞힌 모둠 기기에는 카드마다 한 줄 설명이 펼쳐지게.'] },
+ { g: '연표', id: 'timeline', n: '인터랙티브 연표', d: '사건 카드를 누르면 원인과 결과', x: [['period', '기간', null, '예: 1863–1910'], ['nevent', '사건 수', ['6', '8', '12', '16'], '8']],
+   basic: v => [
+   `${v.topic}${v.period ? ` (${v.period})` : ''} 인터랙티브 연표. 사건은 ${v.nevent}개.`,
+   '가로로 흐르는 연표(휴대전화에서는 세로). 사건 카드를 누르면 무슨 일이 · 왜 · 그 결과를 보여 주고, 원인과 결과는 화살표로 이어.',
+   '[빈칸 연표] 모드도 넣어 줘 — 사건 몇 개가 비어 있고, 아래 카드를 끌어다 맞히는 퀴즈. 연도가 학설마다 다르면 "(설에 따라 다름)".'],
+   adv: v => [
+   `${v.topic}${v.period ? ` (${v.period})` : ''} 반 전체가 함께 만드는 실시간 연표. 사건은 ${v.nevent}개.`,
+   '학생은 각자 휴대전화로 사건 하나를 맡아 연도 · 한 줄 설명 · 원인이나 결과를 써서 올려. 교사 화면 연표에 카드가 제자리를 찾아 실시간으로 붙어.',
+   '교사는 카드를 확인(승인)하거나 고칠 수 있고, 완성되면 연표 전체를 크게 보여 줘.'] },
+ { g: '지도', id: 'blank', n: '백지도 퀴즈', d: '한국 · 세계 백지도에서 지명 맞히기', x: [['area', '범위', ['한반도', '세계', '아시아', '유럽', '아메리카'], '한반도']],
+   basic: v => [
+   `${v.topic}를 공부하는 ${v.area} 백지도 퀴즈.`,
+   mapOf(v),
+   '맞혀야 할 지명은 위도 · 경도로 점을 찍고(좌표 표를 따로 정리, 확실하지 않으면 "확인 필요"), 지명 카드를 지도 위 제자리로 끌어다 놓거나 눌러서 맞혀.',
+   '맞히면 지명이 붙고 한 줄 설명, 틀리면 정답 위치가 살짝 깜빡여. 확대 · 이동(손가락 두 개)도 되게.'],
+   adv: v => [
+   `${v.topic}를 공부하는 ${v.area} 백지도 퀴즈 — 반 전체 실시간 대결.`,
+   mapOf(v),
+   '교사 화면에 지명이 하나씩 문제로 뜨면 학생은 각자 휴대전화 지도에서 그 위치를 눌러. 가까울수록 높은 점수, 교사 화면에는 학생들이 찍은 점이 실시간으로 모이고 순위가 떠.',
+   '지명 좌표 표를 따로 정리하고, 확실하지 않으면 "확인 필요".'] },
+ { g: '지도', id: 'histmap', n: '시대별 지명 지도', d: '시대를 넘기면 지명과 경로가 바뀐다', x: [['area', '범위', ['한반도', '세계'], '한반도'], ['era', '시대(쉼표로)', null, '예: 삼국 시대, 남북국 시대, 고려']],
+   basic: v => [
+   `${v.topic} 시대별 지명 지도. 시대: ${v.era || '[시대들]'}.`,
+   mapOf(v),
+   '옛 나라의 영역(국경선)은 직접 그리지 마 — 틀리기 쉬워. 지명은 위도 · 경도로 점과 이름표, 이동 · 교역 경로는 점을 잇는 선으로.',
+   '위쪽 시대 단추(또는 슬라이더)를 넘기면 그 시대의 지명 · 경로가 나타나고, 지명을 누르면 한 줄 설명. 지명 · 시대 · 좌표 표를 따로 정리.'],
+   adv: v => [
+   `${v.topic} 시대별 지명 지도 — 모둠이 함께 채우는 실시간 지도. 시대: ${v.era || '[시대들]'}.`,
+   mapOf(v),
+   '옛 나라의 영역(국경선)은 직접 그리지 마. 모둠마다 각자 기기로 맡은 시대의 지명을 조사해 핀(위도 · 경도 · 한 줄 설명)을 꽂으면 교사 화면 지도에 실시간으로 모여.',
+   '교사 화면에서 시대를 넘기며 모둠들이 꽂은 핀을 비교하고, 교사가 핀을 확인(승인)할 수 있게.'] },
+ { g: '수업 화면', id: 'slides', n: 'HTML 슬라이드', d: '들어갈 장을 고른 순서대로', x: [['parts', '들어갈 장 (고른 순서대로)', SLIDE_PARTS.map(p => p[0]), SLIDE_DEFAULT, 'multi']],
+   basic: v => [
+   `${v.topic} 수업용 HTML 슬라이드. 16:9 화면 가득, 아래 순서로 한 장에 한 메시지:`,
+   ...slideList(v),
+   '사진이 들어갈 자리는 "사진: (무엇)"이라고 적은 상자로 비워 둬 — 내가 직접 넣을게.',
+   '키보드 ←→ · 클릭으로 넘기기, 오른쪽 아래 쪽 번호, 단계가 있는 장은 하나씩 나타나기, N 키로 교사용 발표 메모 열고 닫기.'],
+   adv: v => [
+   `${v.topic} 수업용 HTML 슬라이드 — 학생 휴대전화와 실시간으로 이어지는 판. 16:9, 아래 순서로 한 장에 한 메시지:`,
+   ...slideList(v),
+   '교사가 장을 넘기면 학생 휴대전화도 함께 넘어가고, 질문 · 퀴즈 장에서는 학생이 보낸 답이 슬라이드에 워드 클라우드 · 막대그래프로 실시간으로 쌓여.',
+   '사진 자리는 "사진: (무엇)" 상자로 비워 둬.'] },
+ { g: '수업 화면', id: 'live', n: '라이브 학습지', d: '학생이 폰으로 쓰고 답을 모아 본다', x: [['nq', '문항 수', ['3', '5', '8'], '5']],
+   basic: v => [
+   `${v.topic} 휴대전화 학습지. 문항은 ${v.nq}개(사실 확인 → 자료 해석 → 내 생각).`,
+   '한 문항씩 넘기며 쓰고, 문항마다 사료 · 그림 자리와 힌트 단추. 쓴 답은 그 기기에 저장(새로고침해도 남게).',
+   '끝나면 [답 복사]로 별명과 답을 한 덩어리 글로 복사(패들렛 · 메신저에 붙여 넣게).'],
+   adv: v => [
+   `${v.topic} 라이브 학습지. 문항은 ${v.nq}개(사실 확인 → 자료 해석 → 내 생각).`,
+   '학생은 휴대전화로 답하고, 교사 화면에는 반 전체 답이 실시간으로 쌓여(낱말은 워드 클라우드, 고르기 문항은 막대그래프, 문장은 카드 벽).',
+   '교사가 문항을 하나씩 열면 학생 화면도 그 문항으로 넘어가게.'] },
+ { g: '직접 쓰기', id: 'custom', n: '직접 설명하기', d: '만들고 싶은 웹앱을 내 말로', x: [['idea', '어떤 웹앱인가요?', null, '예: 조선 장터에서 물건을 사고팔며 화폐가 바뀌는 과정을 체험하는 게임']],
+   basic: v => [
+   `${v.topic}를 다루는 웹앱: ${v.idea || '[만들고 싶은 웹앱을 여기에 설명]'}`,
+   '위 설명을 바탕으로 학생이 직접 조작하며 배우는 활동으로 설계해 줘. 화면 구성과 재미 요소는 네가 판단해서 가장 좋게.'],
+   adv: v => [
+   `${v.topic}를 다루는 웹앱: ${v.idea || '[만들고 싶은 웹앱을 여기에 설명]'}`,
+   '학생 여럿이 각자 기기로 동시에 참여하고, 교사 화면에서 반 전체의 활동이 실시간으로 보이게 설계해 줘. 화면 구성과 재미 요소는 네가 판단해서 가장 좋게.'] }
+];
+const FIXES = [
+  ['단추가 안 눌려요', '[누른 단추]를 눌렀는데 아무 일도 일어나지 않아. 원인을 찾아 고쳐 줘. 이미 잘 되는 기능은 그대로 두고, 고친 곳을 한 줄로 알려 줘.'],
+  ['휴대전화에서 깨져요', '휴대전화(가로 390px)에서 글자가 잘리고 단추가 화면 밖으로 나가. 휴대전화에서도 한 화면에 보이게 고쳐 줘. 노트북 화면은 지금처럼 유지해 줘.'],
+  ['사실이 틀린 것 같아요', '[틀린 것 같은 내용]이 맞는지 확인해 줘. 교과서 수준에서 확실하지 않으면 빼고, 고친 내용을 [교사용 사실 확인표]에도 반영해 줘.'],
+  ['더 멋지게', '지금 기능은 그대로 두고 화면을 더 멋지게 다듬어 줘 — 시대 분위기에 맞는 배경과 장식, 정답 · 화면 전환 애니메이션, 끝 화면 연출을 더해 줘.'],
+  ['난이도 조절', '이 앱을 [더 쉽게 / 더 어렵게] 바꿔 줘. 문제 수는 그대로 두고, 힌트 단계와 문장 길이를 조절해 줘.'],
+  ['코드가 끊겼어요', '코드가 중간에 끊겼어. 끊긴 곳 바로 앞부터 이어서 끝까지 완성해 줘.']
+];
+function common(v, level, slides) {
+  const out = [`대상: ${v.grade}, 수업에서 쓰는 시간 ${v.mins}.`, ''];
+  out.push(`[디자인] ${(STYLES.find(s => s[0] === v.style) || [, () => v.style + '.'])[1](v)} 이 분위기를 화면 전체에 일관되게.`);
+  out.push('- 바탕은 분위기에 맞는 은은한 그라데이션과 CSS로 그린 옅은 무늬. 흰 바탕에 기본 단추만 있는 화면은 안 돼.');
+  out.push('- 글꼴: Google Fonts 한글 글꼴(제목 Black Han Sans 또는 Gowun Batang, 본문 Noto Sans KR). 불러오지 못해도 깨지지 않게, 한국어 줄바꿈은 word-break: keep-all. 휴대전화에서도 본문 17px 이상.');
+  out.push('- 그림은 장면마다 주제에 맞게 SVG · CSS로 직접 그려 줘(예: 성벽 · 바다와 배 · 궁궐 지붕 실루엣). 이모지는 그 시대와 나라에 맞는 것만.');
+  out.push('- 단추는 크고 색이 분명하게, 누르면 살짝 눌리는 느낌. 화면 전환은 짧은 페이드, 맞히면 반짝, 틀리면 좌우로 살짝 흔들림.');
+  if (!slides) out.push('- 시작 화면: 큰 제목 · 학생을 그 시대 인물로 부르는 두세 문장("너는 1592년 동래성의…") · [시작]. 끝 화면: 결과(점수 · 걸린 시간) · 결과에 따른 칭호 3단계 · [다시 하기].');
+  out.push('- 실제 인물 · 장소 · 연도 · 짧은 사료 인용으로 끝까지 채워 줘. "문제 1", "여기에 내용" 같은 빈자리는 안 돼.');
+  out.push('');
+  out.push('[사실 확인] 교과서 수준에서 정확하게. 확실하지 않은 연도 · 인물 · 지명은 지어내지 말고 빼거나 "확인 필요"로 표시. 화면 맨 아래에 접히는 [교사용 사실 확인표](사건 · 연도 · 인물)를 넣어 줘.');
+  out.push(v.question ? `[마무리] 마지막 화면에서 핵심 질문 "${v.question}"에 학생이 한 문장으로 답하게.` : '[마무리] 마지막 화면에서 "오늘 무엇을 알게 되었나요?"에 학생이 한 문장으로 답하게.');
+  out.push('[기기] 휴대전화 · 노트북 · 교실 TV에서 모두 잘 보이게 — 큰 글씨, 손가락으로 누르기 좋은 단추, 화면 폭에 맞게.');
+  if (level === 'basic') {
+    out.push('[기술] HTML 파일 하나(CSS · JS 포함)로, 서버 · 로그인 · 외부 AI API 없이 바로 열리게. 외부 이미지 파일은 쓰지 마. 소리는 꺼진 채로 시작하고 켜는 단추를 둬.');
+    out.push('[점검] 다 만든 뒤 모든 단추가 작동하는지, 휴대전화 폭에서 넘치는 곳이 없는지 스스로 확인하고 고쳐서 줘. 코드가 길어 끊기면 내가 "이어서"라고 할게.');
+  } else {
+    out.push('[기술] 학생 화면(index.html)과 교사 화면(teacher.html) 두 쪽. 실시간 저장은 Firebase Firestore(무료 요금제), 배포는 같은 Firebase 프로젝트의 Hosting으로.');
+    out.push('- 수업마다 네 자리 방 번호를 만들고, 교사 화면에 방 번호가 담긴 학생용 QR과 짧은 주소를 크게 띄워 줘. 학생은 이름 대신 별명.');
+    out.push('- Firestore 보안 규칙은 "방 문서 아래 쓰기만, 지우기 불가"로 꼭 필요한 만큼만 열어 줘.');
+    out.push('- 나는 Firebase가 처음이야. 프로젝트 만들기 → 웹 앱 등록 → Firestore 켜기 → 설정값 붙여 넣기 → 배포를 한 단계씩 알려 주고, 네가 할 수 있는 것은 직접 해 줘.');
+    out.push('[점검] 학생 화면 두 개를 동시에 열어 실시간으로 잘 모이는지 확인하고 고쳐서 줘.');
+  }
+  return out;
+}
+function build(kind, v, level) {
+  const slides = kind.id === 'slides';
+  const head = slides
+    ? (level === 'basic' ? '역사 수업에서 교실 화면에 띄울 HTML 슬라이드를 만들어 줘.' : '역사 수업에서 쓸 HTML 슬라이드를 만들어 줘 — 학생 휴대전화와 이어지는 실시간 판.')
+    : (level === 'basic' ? '역사 수업에서 쓸 웹앱을 만들어 줘 — 기기 하나로 혼자 또는 모둠이 함께 하는 판.' : '역사 수업에서 쓸 웹앱을 만들어 줘 — 학생 여럿이 각자 기기로 동시에 들어오는 실시간 판.');
+  const body = (level === 'basic' ? kind.basic : kind.adv)(v);
+  if (v.extra) body.push(`추가로: ${v.extra}`);
+  return [head, '', ...body, '', ...common(v, level, slides)].join('\n');
+}
+
+// ── 6쪽 프롬프트 만들기 화면 ─────────────────────────────────────────────
+const GRADES = ['초등 5–6학년', '중학교 1학년', '중학교 2학년', '중학교 3학년', '고등학교'];
+const MINS = ['10분', '15분', '20분', '한 차시(45분)'];
+const OWN = '직접 쓰기';
+const pkKind = () => KINDS.find(k => k.id === answers.pk) || KINDS[0];
+const pkLevel = () => answers.pl === 'adv' ? 'adv' : 'basic';
+const pkVal = (key, def) => { const c = answers[key] || def; return c === OWN ? (String(answers[key + '-own'] || '').trim() || def) : c; };
+const pkMulti = (id, def) => String(answers['x-' + id] ?? def).split(',').map(x => x.trim()).filter(Boolean);
+function sel(key, label, opts, def) {
+  const cur = answers[key] || def;
+  return `<label class="qwrap"><span class="q">${label}</span><select class="line" id="s-${key}" data-pks="${key}">` +
+    [...opts, OWN].map(o => `<option${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('') + '</select>' +
+    (cur === OWN ? `<input class="line" id="o-${key}" data-pko="${key}" placeholder="직접 써 주세요" value="${esc(answers[key + '-own'] || '')}">` : '') + '</label>';
+}
+function paintPk() {
+  const kind = pkKind();
+  $('#pkKind').innerHTML = [...new Set(KINDS.map(k => k.g))].map(g => `<optgroup label="${g}">` +
+    KINDS.filter(k => k.g === g).map(k => `<option value="${k.id}"${k === kind ? ' selected' : ''}>${k.n}</option>`).join('') + '</optgroup>').join('');
+  $('#pkDesc').textContent = kind.d;
+  $('#pkGrade').innerHTML = sel('pg', '대상', GRADES, '중학교 2학년');
+  $('#pkMins').innerHTML = sel('pm', '수업에서 쓰는 시간', MINS, '15분');
+  $('#pkLook').innerHTML = sel('ps', '디자인', STYLES.map(s => s[0]), STYLES[0][0]);
+  $('#pkExtra').innerHTML = (kind.x || []).map(([id, label, opts, def, multi]) => multi
+    ? `<div class="qwrap"><span class="q">${label}</span><div class="multi">${opts.map(o => {
+        const n = pkMulti(id, def).indexOf(o) + 1;
+        return `<button type="button" data-pkm="${id}" data-opt="${esc(o)}" class="${n ? 'on' : ''}" aria-pressed="${!!n}">${n ? `<i>${n}</i>` : ''}${esc(o)}</button>`;
+      }).join('')}</div><input class="line" id="x-${id}-own" data-pkx="${id}-own" placeholder="다른 장 직접 쓰기 (쉼표로)" value="${esc(answers['x-' + id + '-own'] || '')}"></div>`
+    : opts ? sel('x-' + id, label, opts, def)
+    : id === 'idea'
+      ? `<label class="qwrap"><span class="q">${label}</span><textarea id="x-${id}" data-pkx="${id}" placeholder="${esc(def)}">${esc(answers['x-' + id] || '')}</textarea></label>`
+      : `<label class="qwrap"><span class="q">${label}</span><input class="line" id="x-${id}" data-pkx="${id}" placeholder="${esc(def)}" value="${esc(answers['x-' + id] || '')}"></label>`).join('');
+  $('#pkExtra').hidden = !(kind.x || []).length;
+  $$('#pkLevel [data-pl]').forEach(b => { const on = b.dataset.pl === pkLevel(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+}
+function buildPk() {
+  const kind = pkKind();
+  const v = { topic: get('p1') || '[주제]', grade: pkVal('pg', '중학교 2학년'), mins: pkVal('pm', '15분'), style: pkVal('ps', STYLES[0][0]),
+              question: get('p5'), extra: get('p6') };
+  (kind.x || []).forEach(([id, , opts, def, multi]) => {
+    v[id] = multi ? [...pkMulti(id, def), ...String(answers['x-' + id + '-own'] || '').split(',').map(x => x.trim()).filter(Boolean)].join(',')
+      : opts ? pkVal('x-' + id, def) : String(answers['x-' + id] || '').trim();
+  });
+  setValue('p9', build(kind, v, pkLevel()));
+  $('#pkLen').textContent = `· ${answers.p9.length.toLocaleString()}자`;
+  setState($('#buildState'), get('p1') ? '' : '주제를 쓰면 [주제] 자리가 바뀌어요.', !get('p1'));
+}
+document.addEventListener('click', e => {
+  const m = e.target.closest('[data-pkm]');
+  if (m) {
+    const id = m.dataset.pkm, def = (pkKind().x.find(x => x[0] === id) || [])[3] || '';
+    const list = pkMulti(id, def), at = list.indexOf(m.dataset.opt);
+    if (at >= 0) list.splice(at, 1); else list.push(m.dataset.opt);
+    setValue('x-' + id, list.join(','));
+    paintPk(); buildPk(); return;
+  }
+  const l = e.target.closest('[data-pl]');
+  if (l) { setValue('pl', l.dataset.pl); paintPk(); buildPk(); }
+});
+document.addEventListener('input', e => {
+  const x = e.target.closest('[data-pkx]'), o = e.target.closest('[data-pko]');
+  if (o) { setValue(o.dataset.pko + '-own', o.value); buildPk(); }
+  else if (x) { setValue('x-' + x.dataset.pkx, x.value); buildPk(); }
+  else if (['p1', 'p5', 'p6'].includes(e.target.dataset.save)) buildPk();
+});
+$('#pkKind').addEventListener('change', e => { setValue('pk', e.target.value); paintPk(); buildPk(); });
+document.addEventListener('change', e => {
+  const s = e.target.closest('[data-pks]'); if (!s) return;
+  setValue(s.dataset.pks, s.value); paintPk(); buildPk();
+  if (s.value === OWN) { const o = $(`[data-pko="${s.dataset.pks}"]`); if (o) o.focus(); }
+});
+$('#copyPrompt').onclick = () => copyText(answers.p9 || '', $('#buildState'), '복사했어요. AI 입력창에 붙여 넣으세요.');
+/* AI 단추는 진짜 링크입니다 — 누르는 순간 복사하고, 링크는 그대로 새 탭에서 열립니다 */
+$$('[data-ai]').forEach(a => a.addEventListener('click', () => {
+  const tip = a.dataset.ai === 'gemini' ? '복사했어요. 제미나이에서 [캔버스]를 켜고 붙여 넣으세요.' : '복사했어요. 클로드 입력창에 붙여 넣으세요.';
+  navigator.clipboard.writeText(answers.p9 || '').then(() => setState($('#buildState'), tip), () => setState($('#buildState'), '자동 복사가 막혔어요. [복사] 단추를 먼저 눌러 주세요.', true));
+}));
+$('#fixChips').innerHTML = FIXES.map((f, i) => `<button type="button" data-fix="${i}">${esc(f[0])}</button>`).join('');
+$('#fixChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-fix]'); if (!b) return;
+  copyText(FIXES[b.dataset.fix][1], $('#buildState'), `「${FIXES[b.dataset.fix][0]}」 고치기 말을 복사했어요. [대괄호]만 바꿔 쓰세요.`);
+});
+paintPk();
+/* 직접 고쳐 둔 프롬프트를 새로고침 때 덮어쓰지 않습니다 — 고르기를 바꿀 때만 다시 짭니다 */
+if (!answers.p9) buildPk(); else $('#pkLen').textContent = `· ${answers.p9.length.toLocaleString()}자`;
+
+// ── 7쪽 배포 체크 ────────────────────────────────────────────────────────
+function paintDeploy() {
+  const boxes = $$('[data-check]'), n = boxes.filter(b => b.checked).length;
+  setState($('#deployState'), n === boxes.length ? '배포 끝! 8쪽에서 작품 카드를 만들어요.' : `${n} / ${boxes.length} 단계 완료`);
+}
+$$('[data-check]').forEach(b => {
+  b.checked = answers['chk-' + b.dataset.check] === '1';
+  b.addEventListener('change', () => { setValue('chk-' + b.dataset.check, b.checked ? '1' : ''); paintDeploy(); });
+});
+paintDeploy();
+
+// ── 8–9쪽 작품 카드 · 갤러리 ─────────────────────────────────────────────
+let works = store.get(WORKS, []) || [];
+let shot = '', editing = null;
+const safeHttp = u => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch { return ''; } };
+const hueOf = s => 200 + ([...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % 30);
+function saveWorks() { if (!store.set(WORKS, works)) setState($('#workState'), '사진이 커서 저장 공간이 모자라요. 사진을 빼고 올려 보세요.', true); }
+function shrink(file) {
+  return new Promise((ok, no) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const w = Math.min(560, img.naturalWidth), h = Math.round(img.naturalHeight * w / img.naturalWidth);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/jpeg', .72));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); no(); };
+    img.src = url;
+  });
+}
+function paintShot() { $('#shotPreview').hidden = !shot; if (shot) $('#shotImg').src = shot; }
+$('#workShot').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { shot = await shrink(f); paintShot(); setState($('#workState'), ''); }
+  catch { setState($('#workState'), '이 사진은 열 수 없어요. PNG나 JPG로 다시 골라 주세요.', true); }
+  e.target.value = '';
+});
+$('#shotClear').onclick = () => { shot = ''; paintShot(); };
+function clearForm() {
+  ['work-name', 'work-url', 'work-desc'].forEach(f => setValue(f, ''));
+  shot = ''; editing = null; paintShot();
+  $('#workSend').textContent = '갤러리에 올리기'; $('#workCancel').hidden = true;
+}
+$('#workSend').onclick = () => {
+  const name = get('work-name'), url = safeHttp(get('work-url'));
+  if (!name) { setState($('#workState'), '웹앱 이름을 써 주세요.', true); $('#f-wname').focus(); return; }
+  if (!url) { setState($('#workState'), '링크는 https:// 로 시작하는 주소로 써 주세요.', true); $('#f-wurl').focus(); return; }
+  const item = { id: editing || Date.now().toString(36), name, maker: get('work-maker'), url, desc: get('work-desc'), shot, likes: 0, liked: false };
+  const at = works.findIndex(w => w.id === editing);
+  if (at >= 0) { item.likes = works[at].likes; item.liked = works[at].liked; works[at] = item; } else works.unshift(item);
+  saveWorks();
+  const was = !!editing;
+  clearForm(); paintGallery();
+  setState($('#workState'), was ? '고쳤어요. 9쪽에서 확인하세요.' : '올렸어요! 9쪽 갤러리에서 확인하세요.');
+};
+$('#workCancel').onclick = () => { clearForm(); setState($('#workState'), ''); };
+function paintGallery() {
+  const box = $('#gallery');
+  if (!works.length) { box.innerHTML = '<div class="empty">아직 올라온 작품이 없어요.<br>8쪽에서 이름과 배포 주소를 쓰고 [갤러리에 올리기]를 누르면 여기에 카드가 생겨요.</div>'; return; }
+  box.innerHTML = works.map(w => `<div class="work" data-id="${esc(w.id)}">
+    <div class="tile" style="--h:${hueOf(w.name)}"><b>${esc([...w.name][0] || '?')}</b>${w.shot ? `<img src="${esc(w.shot)}" alt="">` : ''}</div>
+    <div class="info"><span class="name">${esc(w.name)}</span>${w.maker ? `<span class="maker">${esc(w.maker)}</span>` : ''}${w.desc ? `<span class="desc">${esc(w.desc)}</span>` : ''}
+      <div class="acts">
+        <a class="pill" href="${esc(w.url)}" target="_blank" rel="noopener">해 보기 ↗</a>
+        <button type="button" class="pill like${w.liked ? ' on' : ''}" data-like aria-pressed="${w.liked}">♥ ${w.likes}</button>
+        <button type="button" class="pill quiet" data-share>소개 복사</button>
+        <button type="button" class="pill quiet" data-edit>고치기</button>
+        <button type="button" class="pill quiet" data-del>지우기</button>
+      </div></div></div>`).join('');
+}
+$('#gallery').addEventListener('click', e => {
+  const card = e.target.closest('.work'); if (!card) return;
+  const w = works.find(x => x.id === card.dataset.id); if (!w) return;
+  if (e.target.closest('[data-like]')) { w.liked = !w.liked; w.likes += w.liked ? 1 : -1; saveWorks(); paintGallery(); }
+  else if (e.target.closest('[data-share]')) {
+    const b = e.target.closest('[data-share]');
+    copyText(`[${w.name}]${w.maker ? ' — ' + w.maker : ''}\n${w.desc ? w.desc + '\n' : ''}${w.url}`, null).then(ok => { if (ok) b.textContent = '복사했어요'; });
+  }
+  else if (e.target.closest('[data-edit]')) {
+    editing = w.id; setValue('work-name', w.name); setValue('work-maker', w.maker); setValue('work-url', w.url); setValue('work-desc', w.desc);
+    shot = w.shot || ''; paintShot();
+    $('#workSend').textContent = '고친 내용 올리기'; $('#workCancel').hidden = false;
+    setState($('#workState'), `「${w.name}」을 고치는 중이에요.`);
+    goToStep('work');
+  }
+  else if (e.target.closest('[data-del]')) {
+    const b = e.target.closest('[data-del]');
+    if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = '정말 지울까요?'; setTimeout(() => { if (b.isConnected) { b.classList.remove('arm'); b.textContent = '지우기'; } }, 3000); return; }
+    works = works.filter(x => x.id !== w.id); saveWorks(); paintGallery();
+  }
+});
+paintGallery();
+
+// ── 10쪽 퀴즈 ────────────────────────────────────────────────────────────
+const QUESTIONS = [
+  ['바이브코딩을 가장 잘 설명한 것은?', ['코딩 문법을 외워 직접 입력하는 것', '만들고 싶은 것을 말로 설명하고 AI가 코드를 쓰게 하는 것', '이미 있는 앱을 내려받아 쓰는 것', '코드를 한 줄씩 손으로 옮겨 적는 것'], 1,
+    '원하는 결과를 말로 설명하고, AI가 쓴 코드를 실행해 보며 다시 말로 고쳐 나가는 방식이에요.'],
+  ['[기초] 판 웹앱을 만들 때 프롬프트에 꼭 넣으면 좋은 조건은?', ['로그인 기능을 꼭 넣어 줘', '서버 · 로그인 없이 HTML 파일 하나로 바로 열리게', '외부 사진을 최대한 많이 불러와', '코드는 최대한 짧게만'], 1,
+    '파일 하나로 열려야 내려받아 네트리파이 드롭에 그대로 올릴 수 있어요.'],
+  ['AI가 만든 역사 웹앱에서 교사가 반드시 확인할 것은?', ['단추 색깔', '연도 · 인물 · 지명 같은 사실', '글꼴 이름', '코드 줄 수'], 1,
+    'AI는 그럴듯한 연도와 인물을 지어낼 수 있어요. [교사용 사실 확인표]를 넣어 달라고 하면 확인이 쉬워요.'],
+  ['지도 웹앱에서 옛 나라의 국경선은 어떻게 하는 게 안전할까?', ['AI가 마음대로 그리게 둔다', '국경선 대신 위도 · 경도로 지명 점과 이름표를 찍는다', '국경선을 손으로 따라 그린다', '지도를 아예 빼고 글로만 쓴다'], 1,
+    '옛 영역은 학설마다 다르고 AI가 틀리기 쉬워요. 지명 점과 이동 경로처럼 확인할 수 있는 것으로 보여 주세요.'],
+  ['네트리파이 드롭에 올리기 전에 먼저 해야 할 일은?', ['파일 이름을 영어로 바꾸기', '구글 계정으로 로그인하기', '카드 등록하기', '코드를 압축하기'], 1,
+    '로그인하지 않고 올린 사이트는 얼마 뒤 사라져요. 카드 등록은 필요 없어요.'],
+  ['오류를 고쳐 달라고 할 때 가장 좋은 말은?', ['안 돼. 다시 만들어 줘', '[시작] 단추를 눌렀는데 아무 일도 없어. 잘 되는 기능은 그대로 두고 그 부분만 고쳐 줘', '전부 처음부터 새로', '더 좋게 해 줘'], 1,
+    '무엇을 했고 무엇이 안 되는지 구체적으로, 그리고 잘 되는 곳은 건드리지 말라고 하면 고치다 망가지는 일이 줄어요.']
+];
+let quiz = store.get(QUIZ, {}) || {};
+function paintQuiz() {
+  $('#quiz').innerHTML = QUESTIONS.map(([q, opts, ans, why], i) => {
+    const picked = quiz[i];
+    return `<div class="qcard" data-q="${i}"><span class="qn">문제 ${i + 1}</span><span class="q">${esc(q)}</span>
+      <div class="opts">${opts.map((o, j) => {
+        const cls = picked == null ? '' : j === ans ? 'right' : j === picked ? 'wrong' : '';
+        return `<button type="button" data-a="${j}" class="${cls}"${picked != null ? ' disabled' : ''}><b>${'①②③④'[j]}</b><span>${esc(o)}</span></button>`;
+      }).join('')}</div>${picked != null ? `<div class="why">${picked === ans ? '정답!' : '아쉬워요.'} ${esc(why)}</div>` : ''}</div>`;
+  }).join('');
+  const done = Object.keys(quiz).length, right = QUESTIONS.filter((x, i) => quiz[i] === x[2]).length;
+  $('#scoreNum').textContent = `${right} / ${QUESTIONS.length}`;
+  $('#scoreWord').textContent = done < QUESTIONS.length ? `${done}문제 풀었어요. 남은 문제도 풀어 보세요.`
+    : right === QUESTIONS.length ? '모두 맞혔어요. 오늘의 바이브코딩 장인!' : right >= 4 ? '잘했어요. 틀린 문제의 해설을 한 번 더 읽어 보세요.' : '해설을 읽고 [다시 풀기]로 한 번 더 도전해 보세요.';
+}
+$('#quiz').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
+  quiz[b.closest('[data-q]').dataset.q] = Number(b.dataset.a);
+  store.set(QUIZ, quiz); paintQuiz();
+});
+$('#quizReset').onclick = () => { quiz = {}; store.set(QUIZ, quiz); paintQuiz(); };
+paintQuiz();
+
+// ── 11쪽 별점 ────────────────────────────────────────────────────────────
+const STAR_WORDS = ['', '조금 아쉬웠어요', '보통이었어요', '도움이 되었어요', '많이 도움이 되었어요', '최고였어요!'];
+function paintStars() {
+  const n = Number(answers.star || 0);
+  $$('#stars [data-star]').forEach(b => { const on = Number(b.dataset.star) <= n; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  $('#starWord').textContent = n ? `${n}점 · ${STAR_WORDS[n]}` : '별을 눌러 골라 주세요.';
+}
+$('#stars').addEventListener('click', e => {
+  const b = e.target.closest('[data-star]'); if (!b) return;
+  setValue('star', String(answers.star) === b.dataset.star ? '' : b.dataset.star); paintStars();
+});
+paintStars();
+
+// ── 한 칸씩 보기 ─────────────────────────────────────────────────────────
+const STEPS = $$('.step[data-step]');
+let stepIndex = Math.max(0, Math.min(STEPS.length - 1, Number(store.get(KEY + '-step', 0)) || 0));
+let oneAtATime = store.get(KEY + '-one', true) !== false;
+let seen = new Set(store.get(KEY + '-seen', [0]));
+$('#dots').innerHTML = STEPS.map((s, i) => `<button type="button" data-dot="${i}" aria-label="${esc(s.dataset.title)}" title="${esc(s.dataset.title)}"></button>`).join('');
+function paintSteps(focus) {
+  document.body.classList.toggle('one', oneAtATime);
+  $('#stepbar').hidden = !oneAtATime;
+  $('#allBtn').textContent = oneAtATime ? '전체 보기' : '한 칸씩 보기';
+  STEPS.forEach((s, i) => s.classList.toggle('now', oneAtATime && i === stepIndex));
+  if (!oneAtATime) return;
+  seen.add(stepIndex);
+  store.set(KEY + '-step', stepIndex); store.set(KEY + '-seen', [...seen]);
+  $('#stepTitle').textContent = STEPS[stepIndex].dataset.title;
+  $('#stepCount').textContent = `${stepIndex + 1} / ${STEPS.length}`;
+  $$('#dots [data-dot]').forEach((d, i) => { d.classList.toggle('on', i === stepIndex); d.classList.toggle('done', seen.has(i)); });
+  $('#stepPrev').disabled = stepIndex === 0;
+  $('#stepNext').disabled = stepIndex === STEPS.length - 1;
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (focus) { const first = STEPS[stepIndex].querySelector('textarea, input.line'); if (first) setTimeout(() => { try { first.focus({ preventScroll: true }); } catch {} }, 0); }
+}
+function goStep(n) { stepIndex = Math.max(0, Math.min(STEPS.length - 1, n)); paintSteps(true); }
+function goToStep(id) {
+  const i = STEPS.findIndex(s => s.dataset.step === id);
+  if (oneAtATime) goStep(i); else STEPS[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+$('#stepPrev').onclick = () => goStep(stepIndex - 1);
+$('#stepNext').onclick = () => goStep(stepIndex + 1);
+$('#dots').addEventListener('click', e => { const d = e.target.closest('[data-dot]'); if (d) goStep(Number(d.dataset.dot)); });
+$('#allBtn').onclick = () => { oneAtATime = !oneAtATime; store.set(KEY + '-one', oneAtATime); closeMenu(); paintSteps(); };
+document.addEventListener('keydown', e => {
+  if (!oneAtATime || e.target.closest('input,textarea,select,dialog')) return;
+  if (e.key === 'ArrowLeft') goStep(stepIndex - 1);
+  if (e.key === 'ArrowRight') goStep(stepIndex + 1);
+});
+paintSteps();
+
+// ── 타이머 ───────────────────────────────────────────────────────────────
+let timerJob = null, timerEnd = 0;
+function tick() {
+  const left = Math.max(0, Math.round((timerEnd - Date.now()) / 1000));
+  $('#timer').textContent = left ? `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}` : '끝!';
+  $('#timer').classList.toggle('done', !left);
+  if (!left) { clearInterval(timerJob); timerJob = null; }
+}
+$$('[data-timer]').forEach(b => b.onclick = () => {
+  if (!oneAtATime) { oneAtATime = true; store.set(KEY + '-one', true); paintSteps(); }
+  clearInterval(timerJob); timerEnd = Date.now() + Number(b.dataset.timer) * 1000;
+  $('#timer').hidden = false; tick(); timerJob = setInterval(tick, 500); closeMenu();
+});
+$('#timer').onclick = () => { clearInterval(timerJob); timerJob = null; $('#timer').hidden = true; $('#timer').classList.remove('done'); };
+
+// ── 메뉴 · 창 ────────────────────────────────────────────────────────────
+function closeMenu() { $('#moreMenu').hidden = true; $('#moreBtn').setAttribute('aria-expanded', 'false'); }
+$('#moreBtn').onclick = e => { e.stopPropagation(); const open = $('#moreMenu').hidden; $('#moreMenu').hidden = !open; $('#moreBtn').setAttribute('aria-expanded', String(open)); };
+document.addEventListener('click', e => { if (!$('#moreMenu').hidden && !e.target.closest('#moreMenu')) closeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+$$('dialog [data-close]').forEach(b => b.onclick = () => b.closest('dialog').close());
+$$('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
+
+function drawQR(url) {
+  const host = $('#qrHost'); host.innerHTML = '';
+  if (!window.QRCode) { host.textContent = 'QR 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; return; }
+  new QRCode(host, { text: url, width: 240, height: 240, colorDark: '#0B2545', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+}
+$('#qrBtn').onclick = () => {
+  closeMenu();
+  const url = store.get(KEY + '-qr', '') || location.href.split('#')[0];
+  $('#qrUrl').value = url; drawQR(url); $('#qrBox').showModal();
+};
+$('#qrForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const url = safeHttp($('#qrUrl').value.trim()); if (!url) { $('#qrUrl').focus(); return; }
+  store.set(KEY + '-qr', url); drawQR(url);
+});
+
+$('#clearBtn').onclick = () => { closeMenu(); $('#clearBox').showModal(); };
+$('#clearYes').onclick = () => {
+  [KEY, WORKS, QUIZ, KEY + '-step', KEY + '-seen', KEY + '-one', KEY + '-qr'].forEach(k => store.del(k));
+  answers = {}; works = []; quiz = {}; shot = ''; editing = null; seen = new Set([0]); stepIndex = 0;
+  $$('[data-save]').forEach(el => { el.value = ''; });
+  $$('[data-check]').forEach(b => { b.checked = false; });
+  paintPicks(); paintPk(); buildPk(); paintDeploy(); paintShot(); paintGallery(); paintQuiz(); paintStars(); paintSteps();
+  $('#clearBox').close();
+  say('이 기기의 답변을 모두 지웠어요.');
+};
+</script>
+</body>
+</html>
