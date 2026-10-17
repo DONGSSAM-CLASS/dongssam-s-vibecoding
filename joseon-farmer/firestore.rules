@@ -1,0 +1,57 @@
+rules_version = '2';
+
+// 조선의 농민 — 최소한만 열어 둔 규칙
+// · 쓸 수 있는 곳: rooms/{네 자리 방 번호} 문서와 그 아래 players · votes · quiz 모음뿐
+// · 지우기: 누구도 못 함
+// · 그 밖의 모든 경로: 읽기·쓰기 모두 막힘 (규칙에 없는 경로는 기본으로 거부)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /rooms/{code} {
+      allow read: if code.matches('^[0-9]{4}$');
+      allow create, update: if code.matches('^[0-9]{4}$')
+        && request.resource.data.keys().hasOnly([
+             'code', 'round', 'phase', 'scene', 'outcomes', 'tallies', 'revealed',
+             'quizStats', 'startedAt', 'endedAt', 'phaseAt', 'createdAt'])
+        && request.resource.data.phase in ['lobby', 'vote', 'result', 'quiz', 'answer', 'end']
+        && request.resource.data.scene is int
+        && request.resource.data.scene >= 0 && request.resource.data.scene <= 3;
+      allow delete: if false;
+
+      function roomExists() {
+        return exists(/databases/$(database)/documents/rooms/$(code));
+      }
+
+      // 학생 한 명의 상태 (별명 · 엽전 · 살림 · 물건 · 마지막 한 문장)
+      match /players/{pid} {
+        allow read: if true;
+        allow create, update: if roomExists() && pid.size() <= 20
+          && request.resource.data.keys().hasOnly(['nick', 'round', 'coins', 'hp', 'items', 'correct', 'answer', 'joinedAt', 'at'])
+          && request.resource.data.nick is string
+          && request.resource.data.nick.size() >= 1 && request.resource.data.nick.size() <= 10
+          && request.resource.data.answer is string && request.resource.data.answer.size() <= 150
+          && request.resource.data.items is list && request.resource.data.items.size() <= 5;
+        allow delete: if false;
+      }
+
+      // 장면 투표: 학생 한 명당 장면마다 문서 하나 (다시 누르면 덮어씀)
+      match /votes/{vid} {
+        allow read: if true;
+        allow create, update: if roomExists() && vid.size() <= 40
+          && request.resource.data.keys().hasOnly(['round', 'scene', 'pid', 'choice', 'at'])
+          && request.resource.data.choice in ['A', 'B', 'C'];
+        allow delete: if false;
+      }
+
+      // 사료 퀴즈 답
+      match /quiz/{qid} {
+        allow read: if true;
+        allow create, update: if roomExists() && qid.size() <= 40
+          && request.resource.data.keys().hasOnly(['round', 'scene', 'pid', 'choice', 'correct', 'at'])
+          && request.resource.data.choice is int
+          && request.resource.data.choice >= 0 && request.resource.data.choice <= 3;
+        allow delete: if false;
+      }
+    }
+  }
+}
