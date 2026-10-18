@@ -5,7 +5,7 @@
 
 ## 1. 한 줄 요약
 
-바이브코딩 역사수업 연수용 **인터랙티브 학습지(연수생 모드)**와 **진행자 화면(관리자 모드)**을 다 만들고 테스트까지 마쳤습니다. 남은 일은 **Firebase 프로젝트 `vibecoding-dongssam`에 배포하기** 하나입니다.
+바이브코딩 역사수업 연수용 **인터랙티브 학습지(연수생 모드)**와 **진행자 화면(관리자 모드)**을 Firebase 프로젝트 `vibecoding-dongssam`에 배포했습니다. 실제 진행자 Google 로그인과 휴대전화 QR 입장 확인이 남아 있습니다.
 
 ## 2. 저장소 상태
 
@@ -15,10 +15,10 @@
 | 작업 폴더 | `history-worksheet/` |
 | PR | [#18](https://github.com/DONGSSAM-CLASS/dongssam-s-vibecoding/pull/18) **병합 완료** (`main`의 `4ece247`) |
 | 작업 브랜치 | `claude/nifty-brown-q0knfv`. `main`보다 커밋이 더 있어요(`.firebaserc` 추가, `DEPLOY.md`에 실제 주소 반영, 이 인수인계 문서들). 아직 `main`에 없으니 배포 후 PR로 합쳐 주세요. |
-| 배포 | **안 됨.** `https://vibecoding-dongssam.web.app`은 아직 "Site Not Found"예요. |
-| Firebase 설정 | `firebase-config.js`의 `window.WS_FIREBASE = null` (아직 비어 있음) |
+| 배포 | **완료(2026-10-18).** 학습지, `/admin.html`, `/firebase-config.js`가 HTTP 200으로 열리고 Firestore 규칙도 반영됐어요. |
+| Firebase 설정 | 새 프로젝트의 웹 앱 설정값 입력 완료. 익명·Google 로그인 사용 설정 완료, Firestore 위치는 `asia-northeast3`예요. |
 
-> 이전 작업 환경(Claude Code 클라우드 세션)은 dongssamplay@gmail.com 구글 계정에 로그인할 수 없어서 배포를 못 했습니다. 배포는 선생님 컴퓨터에서 로그인할 수 있는 환경에서 진행해야 합니다.
+> 선생님 컴퓨터의 dongssamplay@gmail.com 로그인으로 새 프로젝트를 만들고 배포했습니다. 배포 설정을 넣기 전에 보안 규칙 33개와 브라우저 테스트 39개를 모두 다시 통과했습니다. 내장 브라우저의 진행자 Google 로그인 팝업은 완료되지 않아 실제 진행자 로그인과 휴대전화 QR 입장은 추가 확인이 필요합니다.
 
 ## 3. 무엇을 만들었나
 
@@ -125,19 +125,14 @@ npm test                          # Firebase 에뮬레이터(auth, firestore)를
 - **사용자:** 터미널을 처음 쓰는 선생님이에요. 안내는 단계별로 아주 쉽게 해 주세요.
 - **비밀값:** 토큰, 비밀번호, 서비스 계정 키는 저장소에 올리지 말고, 채팅으로도 받지 마세요. Firebase 웹 설정값(apiKey 등)은 공개해도 되는 값이라 `firebase-config.js`에 커밋해도 됩니다.
 
-## 8. 남은 일(순서대로)
+## 8. 배포 결과와 남은 확인
 
-1. **Firebase 콘솔:** 아래는 dongssamplay@gmail.com 계정으로 콘솔에서만 할 수 있어요.
-   - 프로젝트 ID가 정확히 `vibecoding-dongssam`인지 확인(다르면 `.firebaserc`, `DEPLOY.md`의 주소를 고치기)
-   - Authentication에서 **익명**과 **Google** 로그인 켜기(Google의 지원 이메일은 dongssamplay@gmail.com)
-   - Firestore 데이터베이스 만들기(asia-northeast3, 프로덕션 모드). CLI로도 할 수 있어요.
-2. **웹 앱 등록과 설정값 넣기:** 웹 앱을 등록하고, 그 설정값을 `firebase-config.js`의 `window.WS_FIREBASE`에 넣어요.
-3. **테스트:** `npm test`가 통과하는지 다시 확인해요.
-4. **배포:** `firebase deploy`(hosting과 firestore 규칙을 함께 올려요).
-5. **실제 주소에서 확인**
-   - `https://vibecoding-dongssam.web.app/`
-   - `/admin.html`에서 진행자 로그인 → 수업방 만들기 → 휴대전화로 QR 입장 → 진행표에 이름이 뜨는지
-6. **변경 커밋과 PR:** `firebase-config.js` 변경을 커밋해서 `claude/nifty-brown-q0knfv`(또는 새 브랜치)에 푸시하고 `main`으로 PR을 열어요.
+1. **완료:** `dongssamplay@gmail.com` 계정으로 새 프로젝트 `vibecoding-dongssam` 생성, 서울 지역 기본 Firestore 생성, `worksheet` 웹 앱 등록, 공개 설정값 입력, 익명·Google 로그인 활성화.
+2. **테스트:** 배포 설정 입력 전 기존 소스에서 `npm test` 실행, 보안 규칙 33개와 브라우저 39개 통과. 테스트 파일은 변경하지 않았어요.
+3. **배포:** Hosting과 Firestore 규칙 배포 완료. 규칙 파일의 컴파일과 실제 반영도 확인했어요.
+4. **주소 확인:** `https://vibecoding-dongssam.web.app/`, `/admin.html`, `/firebase-config.js` 모두 HTTP 200. 실제 학습지에서 수업방 메뉴도 표시돼요. 운영 Firebase SDK로 익명 로그인과 Firestore 수업방 읽기도 성공했고 검사에 쓴 임시 계정은 삭제했어요.
+5. **남은 수동 확인:** 일반 브라우저에서 `/admin.html` 진행자 로그인 → 수업방 만들기 → 휴대전화 QR 입장 → 진행표에 이름이 뜨는지 확인해 주세요. 내장 브라우저에서는 Google 로그인 팝업이 완료되지 않았어요.
+6. **저장소:** 배포 설정과 이 기록을 작업 브랜치에 커밋하고 `main`으로 PR을 열어요.
 
 ## 9. 참고
 
