@@ -26,11 +26,14 @@ Claude가 품의서 초안을 만들고 → 브라우저를 직접 조작해 **�
 
 ---
 
-## 함께 들어 있는 것 — 역사 웹앱 워크숍 학습지
+## 함께 들어 있는 것: 역사 웹앱 워크숍 학습지
 
-[`history-worksheet/index.html`](history-worksheet/index.html) — 푸른 청사진 테마의 인터랙티브 연수 학습지(1~11쪽).
-서버 없이 파일 하나로 열리며, 한 칸씩 보기·타이머, 고른 대로 짜이는 웹앱 프롬프트, 배포 체크리스트, 작품 카드·좋아요 갤러리, 바로 채점되는 퀴즈, 별점 설문까지 모두 작동합니다.
-쓴 답과 갤러리는 그 브라우저에만 저장됩니다. `history-worksheet` 폴더째(썸네일 `shots/` 포함) Netlify Drop이나 Firebase Hosting에 올려 쓰세요.
+[`history-worksheet/`](history-worksheet/): 푸른 청사진 테마의 인터랙티브 연수 학습지(1~11쪽)와 진행자 화면.
+
+- **학습지(`index.html`)**: 한 칸씩 보기와 타이머, 고른 대로 짜이는 웹앱 프롬프트, Netlify·Firebase 배포 따라 하기, 작품 갤러리, 바로 채점되는 퀴즈, 별점 설문. Firebase 없이도 각자의 기기 안에서 모두 작동해요.
+- **수업방**: Firebase에 올리면 연수생이 QR로 수업방에 들어오고, 어디까지 했는지와 답, 작품, 설문(이름 없이)이 진행자에게 실시간으로 가요. 작품 갤러리와 좋아요는 모두가 함께 봐요.
+- **진행자 화면(`admin.html`)**: 지정한 구글 계정만 들어가요. 수업방 만들기, QR, 사람별 진행표, 답 모아 보기, 모두에게 쪽 열기와 타이머, 진행표 복사.
+- 배포 방법은 [`history-worksheet/DEPLOY.md`](history-worksheet/DEPLOY.md), 테스트는 `history-worksheet/tests`에서 `npm test`.
 
 ---
 

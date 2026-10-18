@@ -1,0 +1,66 @@
+rules_version = '2';
+// 역사 웹앱 워크숍 학습지 보안 규칙
+// - 수업방은 진행자(아래 isAdmin의 구글 계정)만 만들고 고칩니다.
+// - 연수생은 익명 로그인으로 들어와 자기 문서(people/works/likes/survey의 {자기 uid})에만 씁니다.
+// - 연수생 진행 상황과 설문은 진행자만 읽습니다. 작품과 좋아요는 같은 수업방 사람 누구나 봅니다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() && request.auth.token.email_verified == true
+        && request.auth.token.email in ['dongssamplay@gmail.com'];
+    }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function roomOpen(room) {
+      return exists(/databases/$(database)/documents/rooms/$(room))
+        && get(/databases/$(database)/documents/rooms/$(room)).data.get('open', true) == true;
+    }
+    function text(v, n) { return v is string && v.size() <= n; }
+    function data() { return request.resource.data; }
+
+    function validPerson() {
+      return data().keys().hasOnly(['name', 'joinedAt', 'updatedAt', 'stepIndex', 'stepId', 'stepTitle', 'seen',
+                                    'answers', 'deploy', 'quiz', 'surveyDone', 'work'])
+        && text(data().name, 30)
+        && (!('answers' in data()) || data().answers is map);
+    }
+    function validWork() {
+      return data().keys().hasOnly(['name', 'maker', 'url', 'desc', 'shot', 'updatedAt'])
+        && text(data().name, 80) && text(data().get('maker', ''), 40) && text(data().get('desc', ''), 200)
+        && text(data().url, 500) && data().url.matches('^https?://.+')
+        && text(data().get('shot', ''), 400000);
+    }
+    function validSurvey() {
+      return data().keys().hasOnly(['star', 's2', 's3', 'updatedAt'])
+        && data().star is int && data().star >= 0 && data().star <= 5
+        && text(data().s2, 3000) && text(data().s3, 3000);
+    }
+
+    match /rooms/{room} {
+      allow read: if signedIn();
+      allow create: if isAdmin() && room.matches('^[0-9]{4}$') && data().ownerUid == request.auth.uid;
+      allow update, delete: if isAdmin();
+
+      match /people/{uid} {
+        allow read: if isAdmin() || isMe(uid);
+        allow create: if isMe(uid) && roomOpen(room) && validPerson();
+        allow update: if isMe(uid) && validPerson();
+        allow delete: if isAdmin();
+      }
+      match /works/{uid} {
+        allow read: if signedIn();
+        allow create: if isMe(uid) && roomOpen(room) && validWork();
+        allow update: if isMe(uid) && validWork();
+        allow delete: if isMe(uid) || isAdmin();
+      }
+      match /likes/{uid} {
+        allow read: if signedIn();
+        allow create, update: if isMe(uid) && data().keys().hasOnly(['ids']) && data().ids is list && data().ids.size() <= 300;
+      }
+      match /survey/{uid} {
+        allow read: if isAdmin();
+        allow create, update: if isMe(uid) && validSurvey();
+      }
+    }
+  }
+}
