@@ -291,6 +291,12 @@ if (LIVE) {
     await amy.waitForSelector('#roomChip:not([hidden])');
     await until(amy, () => document.querySelectorAll('#gallery .work').length === 1);
   });
+  await t('새로고침 뒤에도 진행표에 내 작품이 남아요', async () => {
+    await until(admin, () => {
+      const work = window.WSAdmin.people.find(x => x.name === '김민지')?.work;
+      return work?.name === '독립운동 방탈출' && work?.url === 'https://indep-escape.web.app/';
+    });
+  });
   await t('연수생은 진행자 화면에 못 들어가요', async () => {
     await cara.goto(BASE + 'admin.html?emu');
     await cara.waitForSelector('#signIn:not([hidden])');

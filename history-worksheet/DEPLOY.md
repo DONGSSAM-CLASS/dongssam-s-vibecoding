@@ -1,6 +1,6 @@
 # 학습지 배포하기 (Firebase)
 
-2026-10-18 배포 완료. `dongssamplay@gmail.com` 계정에 `vibecoding-dongssam` 프로젝트와 웹 앱을 만들고 서울(`asia-northeast3`) Firestore를 준비했습니다. 익명·Google 로그인을 켜고 Hosting과 Firestore 규칙을 배포했습니다. 아래 두 화면과 `/firebase-config.js`의 HTTP 200 응답을 확인했습니다. 실제 진행자 로그인과 휴대전화 QR 입장은 추가 확인이 필요합니다.
+2026-10-18 배포 완료. `dongssamplay@gmail.com` 계정에 `vibecoding-dongssam` 프로젝트와 웹 앱을 만들고 서울(`asia-northeast3`) Firestore를 준비했습니다. 익명·Google 로그인을 켜고 Hosting과 Firestore 규칙을 배포했습니다. 아래 두 화면과 `/firebase-config.js`의 HTTP 200 응답을 확인했습니다. 실제 진행자 로그인 후 수업방 1299를 만들고 초대 주소 입장, 실시간 진행표·답·쪽 이동·타이머, 작품·좋아요, 퀴즈·설문, 입장 잠금을 확인했습니다. 새로고침 때 작품 진행표가 비는 문제도 수정해 재배포했습니다. 휴대전화 카메라의 QR 스캔 과정은 직접 확인하지 않았습니다.
 
 학습지는 Firebase 설정이 없어도 각자의 기기 안에서 작동해요. 진행자 화면과 수업방을 쓰려면 Firebase에 올려야 해요.
 
