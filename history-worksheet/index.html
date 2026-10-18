@@ -127,9 +127,11 @@ select.line{cursor:pointer;font-weight:700}
 .arch a{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);border:2px solid var(--ink);border-radius:8px;overflow:hidden;
   background:var(--card);box-shadow:3px 3px 0 var(--shadow);transition:transform .15s,box-shadow .15s}
 .arch a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
-.tile{aspect-ratio:16/9;max-width:100%;display:grid;place-items:center;border-bottom:2px solid var(--ink);
+.tile{aspect-ratio:16/10;max-width:100%;display:grid;place-items:center;border-bottom:2px solid var(--ink);
   background:hsl(var(--h,214) 70% 90%);background-image:linear-gradient(hsl(var(--h,214) 60% 82%) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--h,214) 60% 82%) 1px,transparent 1px);background-size:14px 14px}
 .tile b{font-family:var(--display);font-weight:400;font-size:34px;color:hsl(var(--h,214) 65% 28%)}
+.tile{position:relative;overflow:hidden}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;background:var(--card)}
 .arch span{padding:8px 10px 10px;font-size:14px;font-weight:700;line-height:1.35}
 .arch i{display:block;font-style:normal;font-size:11.5px;color:var(--blue-ink)}
 .credit{font-size:12.5px;color:var(--muted);margin:0}
@@ -139,9 +141,9 @@ select.line{cursor:pointer;font-weight:700}
 
 /* 3쪽 체험 카드 */
 .plays{display:grid;gap:12px}
-.play{display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:start;padding:14px;border:2px solid var(--ink);border-radius:8px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
+.play{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start;padding:14px;border:2px solid var(--ink);border-radius:8px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
 .play.main{background:var(--soft);box-shadow:5px 5px 0 var(--shadow)}
-.play .tile{aspect-ratio:1;border:2px solid var(--ink);border-radius:6px}
+.play .tile{aspect-ratio:16/10;border:2px solid var(--ink);border-radius:6px}
 .play .tile b{font-size:30px}
 .pbody{display:grid;gap:4px;justify-items:start;min-width:0}
 .play .meta{font-size:12px;letter-spacing:.04em;color:var(--blue-ink);font-weight:700}
@@ -166,9 +168,27 @@ select.line{cursor:pointer;font-weight:700}
 .fixes .chips button{font-size:13.5px}
 
 /* 배포 따라 하기 */
+.dtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dtabs button{padding:12px;border:2px solid var(--line);border-radius:8px;background:var(--card);text-align:left;font-size:15.5px;font-weight:700;line-height:1.35}
+.dtabs button small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+.dtabs button[aria-selected="true"]{border-color:var(--ink);background:var(--sky);box-shadow:3px 3px 0 var(--ink)}
+.dpanel{display:grid;gap:12px}
+.dpanel [data-dgroup]{display:grid;gap:10px}
+.dhead{font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--blue-ink);padding-top:4px}
+.dbody{display:grid;gap:8px;min-width:0}
+.dtip{font-size:13px;color:var(--muted)}
+.cmd{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border:2px solid var(--ink);border-radius:6px;background:var(--deep);min-width:0}
+.cmd code{flex:1;min-width:0;color:var(--on-deep);font:14px/1.5 ui-monospace,"SF Mono",Consolas,"D2Coding",monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.note .cmd{margin-top:8px}
+.note .cmd code{font-family:var(--body)}
+code{font-family:ui-monospace,"SF Mono",Consolas,"D2Coding",monospace;font-size:.92em}
+.answers{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+.answers li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px;padding:6px 10px;background:var(--soft);border-radius:6px}
+.answers li::before{content:none}
+.answers span{color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
 .dsteps{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:d}
-.dsteps li{counter-increment:d;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:15px;line-height:1.6}
-.dsteps li::before{content:counter(d);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--sky);
+.dsteps>li{counter-increment:d;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:15px;line-height:1.6}
+.dsteps>li::before{content:counter(d);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--sky);
   border:2px solid var(--ink);font-weight:700;font-size:13px;margin-top:1px}
 .dsteps label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
 .dsteps input{margin-top:6px;width:18px;height:18px;accent-color:var(--blue);flex:0 0 auto}
@@ -237,8 +257,9 @@ dialog p{font-size:14px;margin:0 0 12px}
 @media (max-width:620px){
   .grid2,.level{grid-template-columns:1fr}
   .arch{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .play{grid-template-columns:56px minmax(0,1fr);gap:12px}
-  .play .tile b{font-size:22px}
+  .play{grid-template-columns:1fr;gap:12px}
+  .dtabs{grid-template-columns:1fr}
+  .answers li{grid-template-columns:1fr;gap:0}
   .brand{font-size:15px}
   .stepbar{gap:8px}
   .stepbar .arrow{padding:6px 11px}
@@ -305,22 +326,22 @@ dialog p{font-size:14px;margin:0 0 12px}
   <section class="step" data-step="archive" data-title="2쪽 · 동쌤 작품 아카이브">
     <p class="hint">동쌤이 바이브코딩으로 만들어 수업에 쓰고 있는 웹앱 16편입니다. 눌러서 바로 체험해 보세요. 새 탭에서 열려요.</p>
     <div class="arch">
-      <a href="https://worldhistorysources-dongssam.netlify.app/" target="_blank" rel="noopener"><div class="tile" style="--h:205"><b>史</b></div><span><i>사료 탐구</i>세계사 사료 탐구 교실</span></a>
-      <a href="https://agora-dilemma-class-20260907.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:222"><b>議</b></div><span><i>의사결정</i>아고라의 딜레마</span></a>
-      <a href="https://dokdo-necut.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:198"><b>獨</b></div><span><i>체험부스</i>독도네컷 · 독도의 날 인생네컷</span></a>
-      <a href="https://history-globe-psroy.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:212"><b>球</b></div><span><i>수업 도구</i>History Globe · 히스토리 글로브</span></a>
-      <a href="https://suneung-textbook.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:226"><b>問</b></div><span><i>학습 지원</i>역사 수능 기출 탐색</span></a>
-      <a href="https://gwangbok-game-20260911.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:202"><b>光</b></div><span><i>역사 게임</i>아직 오지 않은 광복 · 한국광복군 추리 게임</span></a>
-      <a href="https://lets-korea-time-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:216"><b>麗</b></div><span><i>역사 게임</i>Let’s KOREA TIME · 고려로의 시간여행</span></a>
-      <a href="https://dongssam-history-racing.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:196"><b>走</b></div><span><i>역사 게임</i>동쌤의 역사 레이싱 게임</span></a>
-      <a href="https://dongssam-tycoon-20260917.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:220"><b>國</b></div><span><i>학급 운영</i>동쌤의 교실 국가 타이쿤</span></a>
-      <a href="https://history-detective-20260915.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:208"><b>探</b></div><span><i>사료 탐구</i>역사탐정 프로젝트</span></a>
-      <a href="https://dasan-time-learning-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:200"><b>茶</b></div><span><i>학습 지원</i>다산의 시간</span></a>
-      <a href="https://imjeong-classroom-20260923.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:224"><b>夢</b></div><span><i>역사 게임</i>임시정부 : 광복을 위한 꿈</span></a>
-      <a href="https://imjeong-rpg2-20260924.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:210"><b>新</b></div><span><i>역사 게임 · 3D</i>임시정부 : 새로운 나라를 향해</span></a>
-      <a href="https://cold-war-witness.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:228"><b>冷</b></div><span><i>의사결정</i>냉전의 목격자</span></a>
-      <a href="https://bongodong-1920-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:204"><b>1920</b></div><span><i>역사 게임</i>1920 봉오동, 그날의 현장으로</span></a>
-      <a href="https://vibe-coding-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:214"><b>&lt;/&gt;</b></div><span><i>교원 연수 · 기초편</i>바로 써먹는 바이브코딩 첫 걸음</span></a>
+      <a href="https://worldhistorysources-dongssam.netlify.app/" target="_blank" rel="noopener"><div class="tile" style="--h:205"><b>史</b><img src="shots/sources.jpg" alt="" loading="lazy"></div><span><i>사료 탐구</i>세계사 사료 탐구 교실</span></a>
+      <a href="https://agora-dilemma-class-20260907.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:222"><b>議</b><img src="shots/agora.jpg" alt="" loading="lazy"></div><span><i>의사결정</i>아고라의 딜레마</span></a>
+      <a href="https://dokdo-necut.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:198"><b>獨</b><img src="shots/dokdo.jpg" alt="" loading="lazy"></div><span><i>체험부스</i>독도네컷 · 독도의 날 인생네컷</span></a>
+      <a href="https://history-globe-psroy.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:212"><b>球</b><img src="shots/globe.jpg" alt="" loading="lazy"></div><span><i>수업 도구</i>History Globe · 히스토리 글로브</span></a>
+      <a href="https://suneung-textbook.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:226"><b>問</b><img src="shots/suneung.jpg" alt="" loading="lazy"></div><span><i>학습 지원</i>역사 수능 기출 탐색</span></a>
+      <a href="https://gwangbok-game-20260911.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:202"><b>光</b><img src="shots/gwangbok.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>아직 오지 않은 광복 · 한국광복군 추리 게임</span></a>
+      <a href="https://lets-korea-time-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:216"><b>麗</b><img src="shots/koreatime.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>Let’s KOREA TIME · 고려로의 시간여행</span></a>
+      <a href="https://dongssam-history-racing.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:196"><b>走</b><img src="shots/racing.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>동쌤의 역사 레이싱 게임</span></a>
+      <a href="https://dongssam-tycoon-20260917.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:220"><b>國</b><img src="shots/tycoon.jpg" alt="" loading="lazy"></div><span><i>학급 운영</i>동쌤의 교실 국가 타이쿤</span></a>
+      <a href="https://history-detective-20260915.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:208"><b>探</b><img src="shots/detective.jpg" alt="" loading="lazy"></div><span><i>사료 탐구</i>역사탐정 프로젝트</span></a>
+      <a href="https://dasan-time-learning-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:200"><b>茶</b><img src="shots/dasan.jpg" alt="" loading="lazy"></div><span><i>학습 지원</i>다산의 시간</span></a>
+      <a href="https://imjeong-classroom-20260923.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:224"><b>夢</b><img src="shots/imjeong1.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>임시정부 : 광복을 위한 꿈</span></a>
+      <a href="https://imjeong-rpg2-20260924.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:210"><b>新</b><img src="shots/imjeong2.jpg" alt="" loading="lazy"></div><span><i>역사 게임 · 3D</i>임시정부 : 새로운 나라를 향해</span></a>
+      <a href="https://cold-war-witness.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:228"><b>冷</b><img src="shots/coldwar.jpg" alt="" loading="lazy"></div><span><i>의사결정</i>냉전의 목격자</span></a>
+      <a href="https://bongodong-1920-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:204"><b>1920</b><img src="shots/bongo.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>1920 봉오동, 그날의 현장으로</span></a>
+      <a href="https://vibe-coding-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:214"><b>&lt;/&gt;</b><img src="shots/vibe.jpg" alt="" loading="lazy"></div><span><i>교원 연수 · 기초편</i>바로 써먹는 바이브코딩 첫 걸음</span></a>
     </div>
     <p class="credit">더 많은 기록과 소식은 <a href="https://dongssam-home-20260914.web.app/" target="_blank" rel="noopener">동쌤 홈페이지</a>에서 볼 수 있어요.</p>
   </section>
@@ -330,7 +351,7 @@ dialog p{font-size:14px;margin:0 0 12px}
     <p class="hint">지금부터는 학생이 되어 봅니다. 먼저 <b>임시정부 체험판(약 12분)</b>을 하고, 시간이 남으면 나머지 두 개도 열어 보세요. 3D 게임이라 노트북·태블릿이 편해요.</p>
     <div class="plays">
       <div class="play main">
-        <div class="tile" style="--h:224"><b>夢</b></div>
+        <div class="tile" style="--h:224"><b>夢</b><img src="shots/imjeong12.jpg" alt="" loading="lazy"></div>
         <div class="pbody">
           <span class="meta">먼저 해 보기 · 3D RPG · 약 12분</span>
           <h3>임시정부 : 광복을 위한 꿈 <small>체험판</small></h3>
@@ -339,7 +360,7 @@ dialog p{font-size:14px;margin:0 0 12px}
         </div>
       </div>
       <div class="play">
-        <div class="tile" style="--h:212"><b>球</b></div>
+        <div class="tile" style="--h:212"><b>球</b><img src="shots/globe.jpg" alt="" loading="lazy"></div>
         <div class="pbody">
           <span class="meta">수업 도구 · 3D 지구본</span>
           <h3>History Globe · 히스토리 글로브</h3>
@@ -348,7 +369,7 @@ dialog p{font-size:14px;margin:0 0 12px}
         </div>
       </div>
       <div class="play">
-        <div class="tile" style="--h:196"><b>走</b></div>
+        <div class="tile" style="--h:196"><b>走</b><img src="shots/racing.jpg" alt="" loading="lazy"></div>
         <div class="pbody">
           <span class="meta">역사 게임 · 레이싱</span>
           <h3>동쌤의 역사 레이싱 게임</h3>
@@ -417,25 +438,71 @@ dialog p{font-size:14px;margin:0 0 12px}
 
   <h2>7–9쪽 · 배포 · 작품 올리기</h2>
   <section class="step" data-step="deploy" data-title="7쪽 · 배포 따라 하기">
-    <p class="hint">처음이어도 괜찮아요. 화면을 보며 한 단계씩 같이 합니다. 끝낸 단계는 눌러서 표시하세요. 노트북이 편해요.</p>
-    <ol class="dsteps" id="dsteps">
-      <li><label><input type="checkbox" id="d1" data-check="d1"><span><b>HTML 파일 내려받기</b> — 제미나이 캔버스 오른쪽 위 공유·내보내기 메뉴에서 다운로드. 「다운로드」 폴더에 .html 파일이 생겨요.</span></label></li>
-      <li><label><input type="checkbox" id="d2" data-check="d2"><span><b>네트리파이 드롭 열기</b> — 아래 단추를 누르거나 주소창에 app.netlify.com/drop</span></label></li>
-      <li><label><input type="checkbox" id="d3" data-check="d3"><span><b>먼저 구글 계정으로 로그인</b> — 로그인하고 올려야 사이트가 사라지지 않아요. 카드 등록은 없어요.</span></label></li>
-      <li><label><input type="checkbox" id="d4" data-check="d4"><span><b>점선 상자에 파일 끌어다 놓기</b> — 끌기가 어려우면 상자 안의 file 글자를 눌러 고르기</span></label></li>
-      <li><label><input type="checkbox" id="d5" data-check="d5"><span><b>주소 복사</b> — 몇 초 뒤 …netlify.app 주소가 나오면 Copy</span></label></li>
-      <li><label><input type="checkbox" id="d6" data-check="d6"><span><b>8쪽 링크 칸에 붙여 넣기</b></span></label></li>
-    </ol>
-    <span class="state" id="deployState"></span>
-    <a class="big" href="https://app.netlify.com/drop" target="_blank" rel="noopener">네트리파이 드롭 열기 ↗</a>
-    <div class="note"><b>휴대전화로 만들었다면</b> 배포는 건너뛰고, 캔버스 [공유] → 링크 복사 → 8쪽 링크 칸에 붙여 넣으세요.<br>
-      <b>에이전트</b>(클로드 코드·코덱스)를 쓴다면 “이 폴더의 웹앱을 Vercel(또는 Firebase Hosting)에 배포해 줘” 한마디면 됩니다.</div>
+    <p class="hint">배포는 내 웹앱에 인터넷 주소를 붙이는 일이에요. 두 방법 중 하나를 골라 한 단계씩 따라 하세요. 끝낸 단계는 눌러서 표시합니다. 노트북이 편해요.</p>
+    <div class="dtabs no-print" role="tablist" aria-label="배포 방법">
+      <button type="button" role="tab" id="tab-netlify" data-dtab="netlify" aria-controls="panel-netlify">A · Netlify Drop<small>설치 없음 · 약 5분 · 파일을 끌어다 놓기</small></button>
+      <button type="button" role="tab" id="tab-firebase" data-dtab="firebase" aria-controls="panel-firebase">B · Firebase Hosting<small>처음 한 번 설치 · 약 15분 · 주소가 이름.web.app</small></button>
+    </div>
+
+    <div class="dpanel" id="panel-netlify" role="tabpanel" aria-labelledby="tab-netlify" data-dpanel="netlify">
+      <ol class="dsteps" data-dgroup>
+        <li><label><input type="checkbox" id="d1" data-check="d1"><span><b>HTML 파일 내려받기</b> — 제미나이 캔버스 오른쪽 위 공유·내보내기 메뉴에서 다운로드. 「다운로드」 폴더에 .html 파일이 생겨요.</span></label></li>
+        <li><label><input type="checkbox" id="d2" data-check="d2"><span><b>네트리파이 드롭 열기</b> — 아래 단추를 누르거나 주소창에 app.netlify.com/drop</span></label></li>
+        <li><label><input type="checkbox" id="d3" data-check="d3"><span><b>먼저 구글 계정으로 로그인</b> — 로그인하고 올려야 사이트가 사라지지 않아요. 카드 등록은 없어요.</span></label></li>
+        <li><label><input type="checkbox" id="d4" data-check="d4"><span><b>점선 상자에 파일 끌어다 놓기</b> — 끌기가 어려우면 상자 안의 file 글자를 눌러 고르기</span></label></li>
+        <li><label><input type="checkbox" id="d5" data-check="d5"><span><b>주소 복사</b> — 몇 초 뒤 …netlify.app 주소가 나오면 Copy</span></label></li>
+        <li><label><input type="checkbox" id="d6" data-check="d6"><span><b>8쪽 링크 칸에 붙여 넣기</b></span></label></li>
+      </ol>
+      <span class="state" data-dstate></span>
+      <a class="big" href="https://app.netlify.com/drop" target="_blank" rel="noopener">네트리파이 드롭 열기 ↗</a>
+    </div>
+
+    <div class="dpanel" id="panel-firebase" role="tabpanel" aria-labelledby="tab-firebase" data-dpanel="firebase">
+      <p class="hint">동쌤의 웹앱들이 쓰는 방법이에요. 주소가 <b>내가-정한-이름.web.app</b>으로 깔끔하고, 나중에 학생 답을 실시간으로 모으는 데이터베이스(Firestore)도 같은 곳에 붙일 수 있어요. 구글 계정만 있으면 무료입니다.</p>
+      <div data-dgroup>
+        <span class="dhead">처음 한 번만 — 컴퓨터 준비</span>
+        <ol class="dsteps">
+          <li><label><input type="checkbox" id="f1" data-check="f1"><span><b>Node.js 설치</b> — <a href="https://nodejs.org/ko" target="_blank" rel="noopener">nodejs.org</a>에서 왼쪽 <b>LTS</b>를 내려받아 [다음]만 눌러 설치해요.</span></label></li>
+          <li><label><input type="checkbox" id="f2" data-check="f2"><span><b>명령 창 열기</b> — 윈도: 시작 단추 → <b>cmd</b> 입력 → 「명령 프롬프트」. PowerShell은 오류가 잦으니 피하세요. 맥: 「터미널」.</span></label></li>
+          <li><div class="dbody"><label><input type="checkbox" id="f3" data-check="f3"><span><b>Firebase 도구 설치</b> — 아래 줄을 복사해 명령 창에 붙여 넣고 Enter. 1~2분 걸려요.</span></label>
+            <div class="cmd"><code>npm install -g firebase-tools</code><button type="button" class="pill" data-cmd>복사</button></div>
+            <span class="dtip">맥에서 권한 오류가 나면 앞에 <code>sudo </code>를 붙이고 컴퓨터 암호를 넣어요.</span></div></li>
+          <li><div class="dbody"><label><input type="checkbox" id="f4" data-check="f4"><span><b>구글 계정으로 로그인</b> — 브라우저가 열리면 내 구글 계정을 고르고 [허용]. 명령 창에 질문이 나오면 Enter.</span></label>
+            <div class="cmd"><code>firebase login</code><button type="button" class="pill" data-cmd>복사</button></div></div></li>
+        </ol>
+        <span class="dhead">웹앱마다 — 올리기</span>
+        <ol class="dsteps" style="counter-reset:d 4">
+          <li><label><input type="checkbox" id="f5" data-check="f5"><span><b>Firebase 프로젝트 만들기</b> — <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase 콘솔</a> → [프로젝트 만들기] → 이름은 영어 소문자·숫자·하이픈(예: <b>imjin-escape-2026</b>). Gemini·애널리틱스는 꺼도 돼요. 이 이름이 곧 주소가 됩니다.</span></label></li>
+          <li><div class="dbody"><label><input type="checkbox" id="f6" data-check="f6"><span><b>웹앱 폴더 만들고 열기</b> — 바탕화면에 새 폴더(예: <b>myapp</b>)를 만들고, 그 폴더를 연 채 탐색기 주소창에 <b>cmd</b>를 쓰고 Enter. 그 폴더에서 명령 창이 열려요.</span></label>
+            <span class="dtip">맥은 폴더를 터미널 아이콘 위로 끌어다 놓으면 돼요.</span></div></li>
+          <li><div class="dbody"><label><input type="checkbox" id="f7" data-check="f7"><span><b>호스팅 준비</b> — 아래 줄을 넣고, 질문에는 이렇게 답해요.</span></label>
+            <div class="cmd"><code>firebase init hosting</code><button type="button" class="pill" data-cmd>복사</button></div>
+            <ul class="answers">
+              <li><span>Please select an option</span><b>Use an existing project</b> → 방금 만든 프로젝트</li>
+              <li><span>public directory?</span><b>그냥 Enter</b> (public)</li>
+              <li><span>single-page app?</span><b>N</b></li>
+              <li><span>GitHub automatic builds?</span><b>N</b></li>
+            </ul></div></li>
+          <li><label><input type="checkbox" id="f8" data-check="f8"><span><b>내 파일 넣기</b> — 내려받은 HTML 파일 이름을 <b>index.html</b>로 바꿔 myapp 안의 <b>public</b> 폴더에 넣어요. 같은 이름 파일이 있다고 하면 [바꾸기].</span></label></li>
+          <li><div class="dbody"><label><input type="checkbox" id="f9" data-check="f9"><span><b>배포!</b> — 끝에 나오는 <b>Hosting URL</b>(https://이름.web.app)을 복사해 8쪽 링크 칸에 붙여 넣어요.</span></label>
+            <div class="cmd"><code>firebase deploy</code><button type="button" class="pill" data-cmd>복사</button></div>
+            <span class="dtip">고칠 때는 public 폴더의 index.html만 바꾸고 <code>firebase deploy</code>를 다시 하면 같은 주소에 바로 반영돼요.</span></div></li>
+        </ol>
+        <span class="state" data-dstate></span>
+      </div>
+      <a class="big" href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase 콘솔 열기 ↗</a>
+      <div class="note"><b>더 쉬운 길 — 에이전트에게 맡기기.</b> 클로드 코드나 코덱스를 쓴다면 웹앱 폴더에서 아래 말을 그대로 붙여 넣으세요. 설치부터 배포까지 대신 하고, 필요한 순간에만 물어봐요.
+        <div class="cmd"><code>이 폴더의 index.html을 Firebase Hosting에 배포해 줘. 나는 처음이야. 필요한 설치와 로그인을 하나씩 안내하고, 할 수 있는 건 네가 직접 해 줘. 끝나면 web.app 주소를 알려 줘.</code><button type="button" class="pill" data-cmd>복사</button></div></div>
+    </div>
+
+    <div class="note"><b>휴대전화로 만들었다면</b> 배포는 건너뛰고, 제미나이 캔버스 [공유] → 링크 복사 → 8쪽 링크 칸에 붙여 넣으세요.</div>
+    <span class="state" id="cmdState" aria-live="polite"></span>
   </section>
 
   <section class="step" data-step="work" data-title="8쪽 · 내 작품 카드 만들기">
     <label class="qwrap"><span class="q">웹앱 이름</span><input class="line" id="f-wname" data-save="work-name" placeholder="예: 임진왜란 방탈출"></label>
     <label class="qwrap"><span class="q">만든 사람</span><input class="line" id="f-wmaker" data-save="work-maker" placeholder="이름 또는 별명"></label>
-    <label class="qwrap"><span class="q">링크 (배포 주소)</span><input class="line" id="f-wurl" data-save="work-url" type="url" inputmode="url" placeholder="https://…netlify.app"></label>
+    <label class="qwrap"><span class="q">링크 (배포 주소)</span><input class="line" id="f-wurl" data-save="work-url" type="url" inputmode="url" placeholder="https://…netlify.app 또는 …web.app"></label>
     <label class="qwrap"><span class="q">소개글 — 어떤 수업에서, 무엇을 하는 웹앱인가요?</span><input class="line" id="f-wdesc" data-save="work-desc" maxlength="120" placeholder="예: 중2 임진왜란 차시, 모둠이 의병장이 되어 방 5개를 탈출"></label>
     <div class="pickfile no-print">
       <label class="q" for="workShot">화면 캡처 (선택) — 올리면 카드 썸네일이 됩니다</label>
@@ -875,16 +942,37 @@ paintPk();
 /* 직접 고쳐 둔 프롬프트를 새로고침 때 덮어쓰지 않습니다 — 고르기를 바꿀 때만 다시 짭니다 */
 if (!answers.p9) buildPk(); else $('#pkLen').textContent = `· ${answers.p9.length.toLocaleString()}자`;
 
-// ── 7쪽 배포 체크 ────────────────────────────────────────────────────────
+// ── 7쪽 배포 — 방법 고르기 · 체크 · 명령어 복사 ──────────────────────────
 function paintDeploy() {
-  const boxes = $$('[data-check]'), n = boxes.filter(b => b.checked).length;
-  setState($('#deployState'), n === boxes.length ? '배포 끝! 8쪽에서 작품 카드를 만들어요.' : `${n} / ${boxes.length} 단계 완료`);
+  const tab = answers.dtab === 'firebase' ? 'firebase' : 'netlify';
+  $$('[data-dtab]').forEach(b => { const on = b.dataset.dtab === tab; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+  $$('[data-dpanel]').forEach(p => { p.hidden = p.dataset.dpanel !== tab; });
+  $$('[data-dgroup]').forEach(g => {
+    const boxes = $$('[data-check]', g), n = boxes.filter(b => b.checked).length;
+    setState($('[data-dstate]', g.closest('.dpanel')), n === boxes.length ? '배포 끝! 8쪽에서 작품 카드를 만들어요.' : `${n} / ${boxes.length} 단계 완료`);
+  });
 }
+$$('[data-dtab]').forEach(b => b.addEventListener('click', () => { setValue('dtab', b.dataset.dtab); paintDeploy(); }));
+$('.dtabs').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.stopPropagation();
+  const next = answers.dtab === 'firebase' ? 'netlify' : 'firebase';
+  setValue('dtab', next); paintDeploy(); $(`[data-dtab="${next}"]`).focus();
+});
 $$('[data-check]').forEach(b => {
   b.checked = answers['chk-' + b.dataset.check] === '1';
   b.addEventListener('change', () => { setValue('chk-' + b.dataset.check, b.checked ? '1' : ''); paintDeploy(); });
 });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-cmd]'); if (!b) return;
+  copyText(b.previousElementSibling.textContent, $('#cmdState'), '복사했어요. 명령 창(또는 에이전트)에 붙여 넣으세요.').then(ok => {
+    if (!ok) return;
+    b.textContent = '복사됨'; setTimeout(() => { b.textContent = '복사'; }, 1500);
+  });
+});
 paintDeploy();
+/* 썸네일을 못 불러오면 그 자리의 글자 타일이 그대로 보이게 합니다 */
+$$('.tile img').forEach(i => { const drop = () => i.remove(); if (i.complete && !i.naturalWidth) drop(); else i.addEventListener('error', drop); });
 
 // ── 8–9쪽 작품 카드 · 갤러리 ─────────────────────────────────────────────
 let works = store.get(WORKS, []) || [];
@@ -1052,7 +1140,7 @@ $('#stepNext').onclick = () => goStep(stepIndex + 1);
 $('#dots').addEventListener('click', e => { const d = e.target.closest('[data-dot]'); if (d) goStep(Number(d.dataset.dot)); });
 $('#allBtn').onclick = () => { oneAtATime = !oneAtATime; store.set(KEY + '-one', oneAtATime); closeMenu(); paintSteps(); };
 document.addEventListener('keydown', e => {
-  if (!oneAtATime || e.target.closest('input,textarea,select,dialog')) return;
+  if (!oneAtATime || e.target.closest('input,textarea,select,dialog,[role=tablist]')) return;
   if (e.key === 'ArrowLeft') goStep(stepIndex - 1);
   if (e.key === 'ArrowRight') goStep(stepIndex + 1);
 });
