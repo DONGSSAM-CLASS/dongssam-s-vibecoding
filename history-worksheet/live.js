@@ -13,7 +13,7 @@
   $('#roomBtn').hidden = false;
 
   let fb = null, room = store.get(ROOM_KEY, null), unsubs = [], liveWorks = [], likeDocs = {}, myLikes = [];
-  let lastStepAt = store.get(ROOM_KEY + '-stepAt', 0), lastTimer = null, syncJob = null, surveyJob = null, broken = false;
+  let lastStepAt = store.get(ROOM_KEY + '-stepAt', 0), lastTimer = null, syncJob = null, surveyJob = null, broken = false, worksReady = false;
 
   const load = src => new Promise((ok, no) => {
     const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error('Firebase를 불러오지 못했어요.'));
@@ -93,7 +93,8 @@
   // ── 실시간으로 받기 ───────────────────────────────────────────────────
   function stop() { unsubs.forEach(f => f()); unsubs = []; clearTimeout(syncJob); clearTimeout(surveyJob); }
   function start() {
-    stop(); paintRoom(); W.useGallery(liveGallery);
+    stop(); liveWorks = []; likeDocs = {}; myLikes = []; worksReady = false;
+    paintRoom(); W.useGallery(liveGallery);
     unsubs.push(roomRef().onSnapshot(d => {
       const r = d.data() || {};
       if (r.step && r.step.id && r.step.at > lastStepAt) { lastStepAt = r.step.at; store.set(ROOM_KEY + '-stepAt', lastStepAt); W.offerStep(r.step.id); }
@@ -103,7 +104,8 @@
     unsubs.push(sub('works').onSnapshot(s => {
       liveWorks = s.docs.map(d => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.updatedAt?.toMillis?.() || Date.now()) - (a.updatedAt?.toMillis?.() || Date.now()));
-      countLikes(); W.paintGallery();
+      worksReady = true;
+      countLikes(); W.paintGallery(); schedule(0);
     }, fail));
     unsubs.push(sub('likes').onSnapshot(s => {
       likeDocs = {}; s.docs.forEach(d => { likeDocs[d.id] = d.data().ids || []; });
@@ -154,7 +156,7 @@
         stepIndex: i, stepId: step.dataset.step, stepTitle: step.dataset.title, seen: W.seen,
         answers: ans, deploy: { tab: a.dtab === 'firebase' ? 'firebase' : 'netlify', ...W.deployCounts() },
         quiz: W.quizScore(), surveyDone: !!(a.star || String(a.s2 || '').trim() || String(a.s3 || '').trim()),
-        work: mine ? { name: mine.name, url: mine.url } : null
+        ...(worksReady ? { work: mine ? { name: mine.name, url: mine.url } : null } : {})
       }, { merge: true });
       ok();
     } catch (err) { fail(err); }

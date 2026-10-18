@@ -1,15 +1,17 @@
 # 학습지 배포하기 (Firebase)
 
+2026-10-18 배포 완료. `dongssamplay@gmail.com` 계정에 `vibecoding-dongssam` 프로젝트와 웹 앱을 만들고 서울(`asia-northeast3`) Firestore를 준비했습니다. 익명·Google 로그인을 켜고 Hosting과 Firestore 규칙을 배포했습니다. 아래 두 화면과 `/firebase-config.js`의 HTTP 200 응답을 확인했습니다. 실제 진행자 로그인 후 수업방 1299를 만들고 초대 주소 입장, 실시간 진행표·답·쪽 이동·타이머, 작품·좋아요, 퀴즈·설문, 입장 잠금을 확인했습니다. 새로고침 때 작품 진행표가 비는 문제도 수정해 재배포했습니다. 휴대전화 카메라의 QR 스캔 과정은 직접 확인하지 않았습니다.
+
 학습지는 Firebase 설정이 없어도 각자의 기기 안에서 작동해요. 진행자 화면과 수업방을 쓰려면 Firebase에 올려야 해요.
 
 | 화면 | 주소 | 누가 쓰나요 |
 |---|---|---|
-| 학습지 | `https://프로젝트이름.web.app/` | 연수생. 진행자 화면의 QR로 들어오면 수업방에 바로 들어가요. |
-| 진행자 화면 | `https://프로젝트이름.web.app/admin.html` | `dongssamplay@gmail.com` 구글 계정만 들어갈 수 있어요. |
+| 학습지 | `https://vibecoding-dongssam.web.app/` | 연수생. 진행자 화면의 QR로 들어오면 수업방에 바로 들어가요. |
+| 진행자 화면 | `https://vibecoding-dongssam.web.app/admin.html` | `dongssamplay@gmail.com` 구글 계정만 들어갈 수 있어요. |
 
 ## 1. Firebase 콘솔에서 준비하기 (dongssamplay@gmail.com 계정으로, 처음 한 번)
 
-1. [Firebase 콘솔](https://console.firebase.google.com/)에서 **프로젝트 만들기**. 이름은 예를 들어 `dongssam-history-worksheet`처럼 영어 소문자와 하이픈으로 정해요. Gemini와 애널리틱스는 꺼도 돼요.
+1. [Firebase 콘솔](https://console.firebase.google.com/)에서 **프로젝트 만들기**. 프로젝트 이름은 `vibecoding-dongssam`이에요(`.firebaserc`에 이미 적혀 있어요). Gemini와 애널리틱스는 꺼도 돼요.
 2. 왼쪽 메뉴 **빌드 → Authentication → 시작하기**를 누르고, **로그인 방법** 탭에서 두 가지를 켜요.
    - **익명**: 사용 설정 (연수생은 로그인 없이 들어와요)
    - **Google**: 사용 설정, 지원 이메일은 dongssamplay@gmail.com (진행자 로그인)
@@ -28,7 +30,7 @@
    ```
    npm install -g firebase-tools
    firebase login
-   firebase deploy --project 프로젝트이름
+   firebase deploy
    ```
    학습지와 보안 규칙(`firestore.rules`)이 한 번에 올라가요.
 
