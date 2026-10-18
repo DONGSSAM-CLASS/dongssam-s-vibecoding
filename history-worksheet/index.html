@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>역사 웹앱 워크숍 학습지</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#F3F7FC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="worksheet.css">
+</head>
+<body>
+
+<header class="top no-print">
+  <div class="nav">
+    <span class="brand">역사 웹앱 학습지</span>
+    <span class="status" id="saveStatus">답은 이 브라우저에만 저장돼요.</span>
+    <button class="roomchip" id="roomChip" type="button" hidden></button>
+    <button class="iconbtn" id="moreBtn" type="button" aria-expanded="false" aria-controls="moreMenu" title="메뉴">⋯</button>
+  </div>
+  <div class="stepbar" id="stepbar">
+    <button class="arrow" id="stepPrev" type="button" aria-label="이전 쪽">←</button>
+    <div class="stepmid">
+      <div id="stepTitle"></div>
+      <div class="row" style="gap:8px"><div class="dots" id="dots"></div><span id="stepCount"></span></div>
+      <button class="follow" id="stepFollow" type="button" hidden></button>
+    </div>
+    <button class="timer" id="timer" type="button" title="누르면 타이머가 멈춰요" hidden>00:00</button>
+    <button class="arrow" id="stepNext" type="button" aria-label="다음 쪽">→</button>
+  </div>
+  <div class="menu" id="moreMenu" hidden>
+    <button type="button" id="roomBtn" hidden>수업방 들어가기</button>
+    <button type="button" id="allBtn">전체 보기</button>
+    <button type="button" id="copyAll">내 답 모두 복사</button>
+    <button type="button" id="qrBtn">이 학습지 QR</button>
+    <div class="sep">타이머</div>
+    <div class="row"><button type="button" data-timer="180">3분</button><button type="button" data-timer="300">5분</button><button type="button" data-timer="600">10분</button></div>
+    <div class="sep">이 기기</div>
+    <button type="button" id="clearBtn">이 기기에 저장된 답 지우기</button>
+  </div>
+</header>
+
+<main class="wrap">
+<article class="sheet" id="sheet">
+  <div class="head">
+    <span class="eyebrow">역사 교사 연수 · 인터랙티브 학습지</span>
+    <h1>바이브코딩으로 만드는 역사수업 웹앱</h1>
+    <small>진행: 동쌤(김동은 선생님). 말로 설명하면 AI가 웹앱을 만들어 줘요. 오늘은 웹앱을 하나 직접 만들어서 인터넷에 올리는 데까지 해 봐요.</small>
+  </div>
+
+  <h2>1쪽 · 어떤 역사 웹앱을 만들까요?</h2>
+  <section class="step" data-step="c1" data-title="1쪽 · 웹앱 경험과 만들고 싶은 것">
+    <div class="qwrap pick" data-pick="n0" data-options="아직 없어요|1–2번|3–5번|6번 이상">
+      <span class="q">AI로 웹앱을 몇 번 만들어 보셨어요?</span>
+    </div>
+    <label class="qwrap"><span class="q">만들면서 어려웠던 점이 있었나요? 아직 안 해 보셨다면 무엇이 망설여졌나요?</span>
+      <textarea id="f-pain" data-save="pain" placeholder="짧게 써도 괜찮아요. 예: 오류가 나면 못 고치겠어요, 배포를 몰라요"></textarea></label>
+    <label class="qwrap"><span class="q">어떤 역사 웹앱을 만들어 보고 싶으세요? 이미 만들어 보셨다면 무엇을 만드셨나요?</span>
+      <textarea id="f-c1" data-save="c1" placeholder="낱말만 써도 괜찮아요. 예: 독립운동 방탈출, 조선 신분 체험"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="n0,pain,c1">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>2쪽 · 동쌤 작품 둘러보기</h2>
+  <section class="step" data-step="archive" data-title="2쪽 · 동쌤 작품 둘러보기">
+    <p class="hint">동쌤이 바이브코딩으로 만들어 수업에 쓰고 있는 웹앱 16편이에요. 누르면 새 탭에서 바로 열려요.</p>
+    <div class="arch">
+      <a href="https://worldhistorysources-dongssam.netlify.app/" target="_blank" rel="noopener"><div class="tile" style="--h:205"><b>史</b><img src="shots/sources.jpg" alt="" loading="lazy"></div><span><i>사료 탐구</i>세계사 사료 탐구 교실</span></a>
+      <a href="https://agora-dilemma-class-20260907.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:222"><b>議</b><img src="shots/agora.jpg" alt="" loading="lazy"></div><span><i>의사결정</i>아고라의 딜레마</span></a>
+      <a href="https://dokdo-necut.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:198"><b>獨</b><img src="shots/dokdo.jpg" alt="" loading="lazy"></div><span><i>체험부스</i>독도네컷 · 독도의 날 인생네컷</span></a>
+      <a href="https://history-globe-psroy.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:212"><b>球</b><img src="shots/globe.jpg" alt="" loading="lazy"></div><span><i>수업 도구</i>History Globe · 히스토리 글로브</span></a>
+      <a href="https://suneung-textbook.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:226"><b>問</b><img src="shots/suneung.jpg" alt="" loading="lazy"></div><span><i>학습 지원</i>역사 수능 기출 탐색</span></a>
+      <a href="https://gwangbok-game-20260911.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:202"><b>光</b><img src="shots/gwangbok.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>아직 오지 않은 광복 · 한국광복군 추리 게임</span></a>
+      <a href="https://lets-korea-time-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:216"><b>麗</b><img src="shots/koreatime.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>Let’s KOREA TIME · 고려로의 시간여행</span></a>
+      <a href="https://dongssam-history-racing.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:196"><b>走</b><img src="shots/racing.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>동쌤의 역사 레이싱 게임</span></a>
+      <a href="https://dongssam-tycoon-20260917.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:220"><b>國</b><img src="shots/tycoon.jpg" alt="" loading="lazy"></div><span><i>학급 운영</i>동쌤의 교실 국가 타이쿤</span></a>
+      <a href="https://history-detective-20260915.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:208"><b>探</b><img src="shots/detective.jpg" alt="" loading="lazy"></div><span><i>사료 탐구</i>역사탐정 프로젝트</span></a>
+      <a href="https://dasan-time-learning-2026.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:200"><b>茶</b><img src="shots/dasan.jpg" alt="" loading="lazy"></div><span><i>학습 지원</i>다산의 시간</span></a>
+      <a href="https://imjeong-classroom-20260923.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:224"><b>夢</b><img src="shots/imjeong1.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>임시정부 : 광복을 위한 꿈</span></a>
+      <a href="https://imjeong-rpg2-20260924.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:210"><b>新</b><img src="shots/imjeong2.jpg" alt="" loading="lazy"></div><span><i>역사 게임 · 3D</i>임시정부 : 새로운 나라를 향해</span></a>
+      <a href="https://cold-war-witness.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:228"><b>冷</b><img src="shots/coldwar.jpg" alt="" loading="lazy"></div><span><i>의사결정</i>냉전의 목격자</span></a>
+      <a href="https://bongodong-1920-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:204"><b>1920</b><img src="shots/bongo.jpg" alt="" loading="lazy"></div><span><i>역사 게임</i>1920 봉오동, 그날의 현장으로</span></a>
+      <a href="https://vibe-coding-dongssam.web.app/" target="_blank" rel="noopener"><div class="tile" style="--h:214"><b>&lt;/&gt;</b><img src="shots/vibe.jpg" alt="" loading="lazy"></div><span><i>교원 연수 · 기초편</i>바로 써먹는 바이브코딩 첫 걸음</span></a>
+    </div>
+    <p class="credit">더 많은 기록과 소식은 <a href="https://dongssam-home-20260914.web.app/" target="_blank" rel="noopener">동쌤 홈페이지</a>에서 볼 수 있어요.</p>
+  </section>
+
+  <h2>3쪽 · 학생이 되어 해 보기</h2>
+  <section class="step" data-step="play" data-title="3쪽 · 체험 게임 세 가지">
+    <p class="hint">이제 학생이 되어 볼게요. 먼저 <b>임시정부 체험판(약 12분)</b>을 해 보고, 시간이 남으면 나머지 두 개도 열어 보세요. 3D 게임이라 노트북이나 태블릿이 편해요.</p>
+    <div class="plays">
+      <div class="play main">
+        <div class="tile" style="--h:224"><b>夢</b><img src="shots/imjeong12.jpg" alt="" loading="lazy"></div>
+        <div class="pbody">
+          <span class="meta">먼저 해 보기 · 3D RPG · 약 12분</span>
+          <h3>임시정부 : 광복을 위한 꿈 <small>체험판</small></h3>
+          <p>대한민국 임시정부가 한 일을 직접 걸어 다니며 알아보는 3D 역사 RPG예요. 선생님들이 12분 안에 해 볼 수 있게 줄였어요.</p>
+          <a class="btn big-in" href="https://dongssam-history-12m-20261018.web.app/" target="_blank" rel="noopener">임시정부 체험판 시작 ↗</a>
+        </div>
+      </div>
+      <div class="play">
+        <div class="tile" style="--h:212"><b>球</b><img src="shots/globe.jpg" alt="" loading="lazy"></div>
+        <div class="pbody">
+          <span class="meta">수업 도구 · 3D 지구본</span>
+          <h3>History Globe · 히스토리 글로브</h3>
+          <p>지구본을 돌려 보며 같은 시기에 세계 곳곳에서 무슨 일이 있었는지 찾아봐요.</p>
+          <a class="btn ghost" href="https://history-globe-psroy.web.app/" target="_blank" rel="noopener">히스토리 글로브 열기 ↗</a>
+        </div>
+      </div>
+      <div class="play">
+        <div class="tile" style="--h:196"><b>走</b><img src="shots/racing.jpg" alt="" loading="lazy"></div>
+        <div class="pbody">
+          <span class="meta">역사 게임 · 레이싱</span>
+          <h3>동쌤의 역사 레이싱 게임</h3>
+          <p>마음에 드는 차를 고르고 역사 인물 10명과 함께 달려요. 혼자 해도 되고, 반 전체가 같이 경주할 수도 있어요.</p>
+          <a class="btn ghost" href="https://dongssam-history-racing.web.app/" target="_blank" rel="noopener">레이싱 게임 시작 ↗</a>
+        </div>
+      </div>
+    </div>
+    <p class="hint">해 보면서 ‘내 수업에서는 어디에 쓸까?’를 생각해 두세요. 4쪽에서 이야기 나눠요.</p>
+  </section>
+
+  <h2>4쪽 · 해 보니 어땠나요?</h2>
+  <section class="step" data-step="c2" data-title="4쪽 · 해 보니 어땠나요?">
+    <div class="qwrap pick" data-pick="best" data-options="임시정부 체험판|히스토리 글로브|역사 레이싱">
+      <span class="q">가장 기억에 남는 체험은?</span>
+    </div>
+    <div class="qwrap pick" data-pick="fun" data-options="푹 빠졌어요|재밌었어요|그저 그랬어요|어려웠어요">
+      <span class="q">한마디로 하면?</span>
+    </div>
+    <label class="qwrap"><span class="q">해 보니 어떠셨어요? 수업에 쓴다면 언제 쓰고 싶으세요?</span>
+      <textarea id="f-c2" data-save="c2" placeholder="예: 수업 시작 10분에 쓰면 아이들이 저절로 질문할 것 같아요"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="best,fun,c2">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>5쪽 · 만들 때 조심할 점</h2>
+  <section class="step" data-step="c4" data-title="5쪽 · 만들 때 조심할 점">
+    <div class="qwrap pick" data-pick="worry" data-multi="1" data-options="사실이 정확한지|재미와 배움의 균형|학생 기기 사정|수업 시간 안에 끝나는지|개인정보|저작권">
+      <span class="q">가장 신경 쓰이는 것을 모두 골라 주세요.</span>
+    </div>
+    <label class="qwrap"><span class="q">역사 수업용 웹앱을 만들 때 무엇을 조심해야 할까요?</span>
+      <textarea id="f-c4" data-save="c4" placeholder="예: 게임에만 빠져서 사료를 안 읽고 넘어갈까 봐 걱정돼요"></textarea></label>
+    <div class="row no-print"><button class="btn ghost" type="button" data-copy="worry,c4">이 쪽 답 복사</button><span class="state" data-state></span></div>
+  </section>
+
+  <h2>6쪽 · 역사 교사 미니 해커톤</h2>
+  <section class="step" data-step="make" data-title="6쪽 · 프롬프트 만들기">
+    <p class="hint">고르고 쓰는 대로 아래 프롬프트가 바로 바뀌어요. 이 쪽에서는 AI를 쓰지 않으니 인터넷이 없어도 돼요.</p>
+    <label class="qwrap"><span class="q">웹앱 종류</span><select class="line" id="pkKind"></select><span class="kdesc" id="pkDesc"></span></label>
+    <div class="grid2">
+      <div id="pkGrade"></div>
+      <div id="pkMins"></div>
+    </div>
+    <label class="qwrap"><span class="q">단원 또는 주제</span><input class="line" id="f-p1" data-save="p1" placeholder="예: 임진왜란"></label>
+    <div id="pkExtra" style="display:grid;gap:14px"></div>
+    <label class="qwrap"><span class="q">학생에게 던질 질문 (선택)</span><input class="line" id="f-p5" data-save="p5" placeholder="예: 전쟁은 백성의 삶을 어떻게 바꾸었을까?"></label>
+    <div id="pkLook"></div>
+    <label class="qwrap"><span class="q">더 넣고 싶은 것 (선택)</span><textarea id="f-p6" data-save="p6" placeholder="예: 정답을 맞히면 조선 시대 관직이 하나씩 올라가게"></textarea></label>
+    <div class="qwrap"><span class="q">만드는 방식</span>
+      <div class="level no-print" id="pkLevel">
+        <button type="button" data-pl="basic">기초<small>기기 한 대로 · 파일 하나 · 제미나이 캔버스면 충분해요</small></button>
+        <button type="button" data-pl="adv">심화<small>학생 여럿이 동시에 · Firebase 실시간 · 에이전트를 추천해요</small></button>
+      </div>
+    </div>
+    <label class="qwrap"><span class="q">완성된 프롬프트 <span class="kdesc" id="pkLen"></span></span><textarea class="tall" id="f-p9" data-save="p9"></textarea></label>
+    <div class="builder row no-print">
+      <button class="btn deep" type="button" id="copyPrompt">복사</button>
+      <a class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener" data-ai="gemini">복사하고 제미나이 열기 ↗</a>
+      <a class="btn ghost" href="https://claude.ai/new" target="_blank" rel="noopener" data-ai="claude">복사하고 클로드 열기 ↗</a>
+      <span class="state" id="buildState"></span>
+    </div>
+    <div class="fixes no-print">
+      <span class="q">다 만든 뒤 고칠 때 쓰는 말 (누르면 복사돼요)</span>
+      <div class="chips" id="fixChips"></div>
+    </div>
+  </section>
+
+  <h2>7–9쪽 · 인터넷에 올리고 함께 보기</h2>
+  <section class="step" data-step="deploy" data-title="7쪽 · 배포 따라 하기">
+    <p class="hint">배포는 내가 만든 웹앱에 인터넷 주소를 붙이는 일이에요. 두 방법 중 하나를 골라 차례대로 따라 해 보세요. 끝낸 단계는 눌러서 표시해 두면 돼요. 노트북으로 하면 편해요.</p>
+    <div class="dtabs no-print" role="tablist" aria-label="배포 방법">
+      <button type="button" role="tab" id="tab-netlify" data-dtab="netlify" aria-controls="panel-netlify">A · Netlify Drop<small>설치 없음 · 약 5분 · 파일을 끌어다 놓기만 해요</small></button>
+      <button type="button" role="tab" id="tab-firebase" data-dtab="firebase" aria-controls="panel-firebase">B · Firebase Hosting<small>처음 한 번 설치 · 약 15분 · 주소가 ‘이름.web.app’</small></button>
+    </div>
+
+    <div class="dpanel" id="panel-netlify" role="tabpanel" aria-labelledby="tab-netlify" data-dpanel="netlify">
+      <ol class="dsteps">
+        <li><label><input type="checkbox" id="d1" data-check="d1"><span><b>HTML 파일 내려받기</b>제미나이 캔버스 오른쪽 위의 공유·내보내기 메뉴에서 [다운로드]를 눌러요. 「다운로드」 폴더에 .html 파일이 생겨요.</span></label></li>
+        <li><label><input type="checkbox" id="d2" data-check="d2"><span><b>Netlify Drop 열기</b>아래 단추를 누르거나 주소창에 app.netlify.com/drop 을 써요.</span></label></li>
+        <li><label><input type="checkbox" id="d3" data-check="d3"><span><b>구글 계정으로 먼저 로그인하기</b>로그인하고 올려야 사이트가 사라지지 않아요. 카드 등록은 하지 않아도 돼요.</span></label></li>
+        <li><label><input type="checkbox" id="d4" data-check="d4"><span><b>점선 상자에 파일 끌어다 놓기</b>끌어다 놓기가 어려우면 상자 안의 file 글자를 눌러서 파일을 골라요.</span></label></li>
+        <li><label><input type="checkbox" id="d5" data-check="d5"><span><b>주소 복사하기</b>몇 초 뒤에 …netlify.app 주소가 나오면 [Copy]를 눌러요.</span></label></li>
+        <li><label><input type="checkbox" id="d6" data-check="d6"><span><b>8쪽 링크 칸에 붙여 넣기</b>다음 쪽에서 작품 카드를 만들어요.</span></label></li>
+      </ol>
+      <span class="state" data-dstate></span>
+      <a class="big" href="https://app.netlify.com/drop" target="_blank" rel="noopener">Netlify Drop 열기 ↗</a>
+    </div>
+
+    <div class="dpanel" id="panel-firebase" role="tabpanel" aria-labelledby="tab-firebase" data-dpanel="firebase">
+      <p class="hint">동쌤의 웹앱들도 이 방법으로 올렸어요. 주소가 <b>내가 정한 이름.web.app</b>으로 깔끔하고, 나중에 학생 답을 실시간으로 모으는 데이터베이스(Firestore)도 같은 곳에 붙일 수 있어요. 구글 계정만 있으면 무료예요.</p>
+      <span class="dhead">처음 한 번만: 컴퓨터 준비하기</span>
+      <ol class="dsteps">
+        <li><label><input type="checkbox" id="f1" data-check="f1"><span><b>Node.js 설치하기</b><a href="https://nodejs.org/ko" target="_blank" rel="noopener">nodejs.org</a>에서 <b>LTS</b>라고 적힌 쪽을 내려받아, [다음]만 눌러서 설치해요.</span></label></li>
+        <li><label><input type="checkbox" id="f2" data-check="f2"><span><b>명령 창 열기</b>윈도는 시작 단추를 누르고 <b>cmd</b>를 쳐서 「명령 프롬프트」를 열어요. PowerShell은 오류가 자주 나니 쓰지 마세요. 맥은 「터미널」을 열어요.</span></label></li>
+        <li><div class="dbody"><label><input type="checkbox" id="f3" data-check="f3"><span><b>Firebase 도구 설치하기</b>아래 줄을 복사해서 명령 창에 붙여 넣고 Enter를 눌러요. 1~2분쯤 걸려요.</span></label>
+          <div class="cmd"><code>npm install -g firebase-tools</code><button type="button" class="pill" data-cmd>복사</button></div>
+          <span class="dtip">맥에서 권한 오류가 나면 맨 앞에 <code>sudo </code>를 붙이고, 컴퓨터 암호를 넣어요.</span></div></li>
+        <li><div class="dbody"><label><input type="checkbox" id="f4" data-check="f4"><span><b>구글 계정으로 로그인하기</b>브라우저가 열리면 내 구글 계정을 고르고 [허용]을 눌러요. 명령 창에 질문이 나오면 Enter만 누르면 돼요.</span></label>
+          <div class="cmd"><code>firebase login</code><button type="button" class="pill" data-cmd>복사</button></div></div></li>
+      </ol>
+      <span class="dhead">웹앱을 올릴 때마다</span>
+      <ol class="dsteps" style="counter-reset:d 4">
+        <li><label><input type="checkbox" id="f5" data-check="f5"><span><b>Firebase 프로젝트 만들기</b><a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase 콘솔</a>에서 [프로젝트 만들기]를 누르고 이름을 정해요. 이름은 영어 소문자, 숫자, 하이픈(-)으로 써요(예: <b>imjin-escape-2026</b>). 이 이름이 그대로 주소가 돼요. Gemini와 애널리틱스는 꺼도 괜찮아요.</span></label></li>
+        <li><div class="dbody"><label><input type="checkbox" id="f6" data-check="f6"><span><b>웹앱 폴더 만들고 명령 창 열기</b>바탕화면에 새 폴더(예: <b>myapp</b>)를 만들어요. 그 폴더를 열어 둔 채로 위쪽 주소창에 <b>cmd</b>라고 쓰고 Enter를 누르면, 그 폴더에서 명령 창이 열려요.</span></label>
+          <span class="dtip">맥은 폴더를 Dock의 터미널 아이콘 위로 끌어다 놓으면 돼요.</span></div></li>
+        <li><div class="dbody"><label><input type="checkbox" id="f7" data-check="f7"><span><b>호스팅 준비하기</b>아래 줄을 넣으면 영어 질문이 몇 개 나와요. 이렇게 답해요.</span></label>
+          <div class="cmd"><code>firebase init hosting</code><button type="button" class="pill" data-cmd>복사</button></div>
+          <ul class="answers">
+            <li><span>Please select an option</span><b>Use an existing project</b>를 고르고 방금 만든 프로젝트 선택</li>
+            <li><span>public directory?</span><b>그냥 Enter</b></li>
+            <li><span>single-page app?</span><b>N</b></li>
+            <li><span>GitHub automatic builds?</span><b>N</b></li>
+          </ul></div></li>
+        <li><label><input type="checkbox" id="f8" data-check="f8"><span><b>내 파일 넣기</b>내려받은 HTML 파일의 이름을 <b>index.html</b>로 바꿔서 myapp 안에 생긴 <b>public</b> 폴더에 넣어요. 같은 이름의 파일이 있다고 나오면 [바꾸기]를 눌러요.</span></label></li>
+        <li><div class="dbody"><label><input type="checkbox" id="f9" data-check="f9"><span><b>배포하기</b>끝에 나오는 <b>Hosting URL</b>(https://이름.web.app)을 복사해서 8쪽 링크 칸에 붙여 넣어요.</span></label>
+          <div class="cmd"><code>firebase deploy</code><button type="button" class="pill" data-cmd>복사</button></div>
+          <span class="dtip">나중에 고칠 때는 public 폴더의 index.html만 바꾸고 <code>firebase deploy</code>를 다시 하면 같은 주소에 바로 반영돼요.</span></div></li>
+      </ol>
+      <span class="state" data-dstate></span>
+      <a class="big" href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase 콘솔 열기 ↗</a>
+      <div class="note"><b>더 쉬운 방법: 에이전트에게 맡기기.</b> 클로드 코드나 코덱스를 쓰신다면, 웹앱 폴더에서 아래 문장을 그대로 붙여 넣으세요. 설치부터 배포까지 대신 해 주고, 꼭 필요할 때만 물어봐요.
+        <div class="cmd"><code>이 폴더의 index.html을 Firebase Hosting에 배포해 줘. 나는 처음이야. 필요한 설치와 로그인을 하나씩 안내해 주고, 네가 할 수 있는 건 직접 해 줘. 다 끝나면 web.app 주소를 알려 줘.</code><button type="button" class="pill" data-cmd>복사</button></div></div>
+    </div>
+
+    <div class="note"><b>휴대전화로 만드셨다면</b> 배포는 건너뛰어도 돼요. 제미나이 캔버스에서 [공유]를 눌러 링크를 복사한 다음, 8쪽 링크 칸에 붙여 넣으세요.</div>
+    <span class="state" id="cmdState" aria-live="polite"></span>
+  </section>
+
+  <section class="step" data-step="work" data-title="8쪽 · 내 작품 카드 만들기">
+    <label class="qwrap"><span class="q">웹앱 이름</span><input class="line" id="f-wname" data-save="work-name" placeholder="예: 임진왜란 방탈출"></label>
+    <label class="qwrap"><span class="q">만든 사람</span><input class="line" id="f-wmaker" data-save="work-maker" placeholder="이름이나 별명"></label>
+    <label class="qwrap"><span class="q">링크(배포한 주소)</span><input class="line" id="f-wurl" data-save="work-url" type="url" inputmode="url" placeholder="https://…netlify.app 또는 …web.app"></label>
+    <label class="qwrap"><span class="q">소개 한 줄: 어떤 수업에서 무엇을 하는 웹앱인가요?</span><input class="line" id="f-wdesc" data-save="work-desc" maxlength="120" placeholder="예: 중2 임진왜란 시간, 모둠이 의병장이 되어 방 5개를 탈출해요"></label>
+    <div class="pickfile no-print">
+      <label class="q" for="workShot">화면 캡처(선택): 올리면 카드 썸네일이 돼요</label>
+      <input type="file" id="workShot" accept="image/*">
+      <div class="shotprev" id="shotPreview" hidden><img id="shotImg" alt="고른 화면 캡처 미리 보기"><button class="pill quiet" type="button" id="shotClear">사진 빼기</button></div>
+    </div>
+    <div class="row no-print"><button class="btn" type="button" id="workSend">갤러리에 올리기</button><button class="btn ghost" type="button" id="workCancel" hidden>고치기 그만두기</button><span class="state" id="workState"></span></div>
+    <p class="hint" id="workHint">지금은 갤러리가 이 기기에만 저장돼요. 수업방에 들어오면 모든 선생님의 갤러리에 함께 올라가요.</p>
+  </section>
+
+  <section class="step" data-step="gallery" data-title="9쪽 · 작품 갤러리와 좋아요">
+    <p class="hint">눌러서 해 보고, 마음에 들면 <b>♥ 좋아요</b>를 눌러 주세요.</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <h2>10쪽 · 마무리 퀴즈</h2>
+  <section class="step" data-step="quiz" data-title="10쪽 · 마무리 퀴즈">
+    <p class="hint">오늘 배운 내용을 가볍게 확인해 봐요. 보기를 누르면 바로 정답과 풀이가 나와요.</p>
+    <div class="quiz" id="quiz"></div>
+    <div class="score" id="score"><b id="scoreNum">0 / 6</b><span id="scoreWord">문제를 풀면 점수가 쌓여요.</span><button class="btn ghost" type="button" id="quizReset">다시 풀기</button></div>
+  </section>
+
+  <h2>11쪽 · 연수 만족도</h2>
+  <section class="step" data-step="survey" data-title="11쪽 · 연수 만족도">
+    <span class="q">오늘 연수가 얼마나 도움이 되었나요?</span>
+    <div class="stars no-print" id="stars"><button type="button" data-star="1" aria-label="별 1개">★</button><button type="button" data-star="2" aria-label="별 2개">★</button><button type="button" data-star="3" aria-label="별 3개">★</button><button type="button" data-star="4" aria-label="별 4개">★</button><button type="button" data-star="5" aria-label="별 5개">★</button></div>
+    <span class="starword" id="starWord"></span>
+    <label class="qwrap"><span class="q">좋았던 점</span><textarea id="f-s2" data-save="s2"></textarea></label>
+    <label class="qwrap"><span class="q">아쉬웠던 점이나 더 배우고 싶은 것</span><textarea id="f-s3" data-save="s3"></textarea></label>
+    <div class="row no-print"><button class="btn" type="button" data-copy="star,s2,s3">설문 답 복사</button><span class="state" data-state></span></div>
+    <p class="hint" id="surveyHint">이름은 들어가지 않아요. 복사해서 진행자가 알려 준 설문 칸에 붙여 넣어 주세요.</p>
+  </section>
+</article>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<dialog id="roomBox">
+  <h3>수업방 들어가기</h3>
+  <form class="roomform" id="roomForm">
+    <p id="roomMsg">진행자 화면에 보이는 수업방 번호 네 자리와 이름을 넣어 주세요. 들어오면 내가 어디까지 했는지 진행자에게 보여요.</p>
+    <label class="qwrap"><span class="q">수업방 번호</span><input class="line" id="roomCode" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="예: 4821"></label>
+    <label class="qwrap"><span class="q">이름</span><input class="line" id="roomName" maxlength="20" autocomplete="name" placeholder="예: 김동은 (별명도 괜찮아요)"></label>
+    <div class="row"><button class="btn" type="submit" id="roomGo">들어가기</button><button class="btn ghost" type="button" data-close>나중에</button></div>
+    <span class="state" id="roomState" aria-live="polite"></span>
+  </form>
+  <div id="roomIn" hidden>
+    <p>수업방 <b id="roomInCode"></b>에 <b id="roomInName"></b> 이름으로 들어와 있어요. 진행 상황과 작품, 설문이 진행자에게 전달돼요.</p>
+    <div class="row"><button class="btn ghost" type="button" id="roomLeave">수업방에서 나가기</button><button class="btn" type="button" data-close>닫기</button></div>
+  </div>
+</dialog>
+
+<dialog id="qrBox">
+  <h3>이 학습지 QR</h3>
+  <p>휴대전화로 찍으면 이 학습지가 열려요. 배포한 주소가 따로 있다면 아래 칸을 고쳐 주세요.</p>
+  <div class="qrhost" id="qrHost"></div>
+  <form class="row" id="qrForm">
+    <input class="line" id="qrUrl" type="url" style="flex:1 1 220px" aria-label="QR에 담을 주소">
+    <button class="btn" type="submit">QR 다시 만들기</button>
+  </form>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" data-close>닫기</button></div>
+</dialog>
+
+<dialog id="clearBox">
+  <h3>이 기기에 저장된 답 지우기</h3>
+  <p>이 브라우저에 저장된 답, 갤러리, 퀴즈 기록을 모두 지워요. 지우면 되돌릴 수 없어요. 공용 기기를 다음 사람에게 넘길 때 쓰세요.</p>
+  <div class="row"><button class="btn deep" type="button" id="clearYes">모두 지우기</button><button class="btn ghost" type="button" data-close>그만두기</button></div>
+</dialog>
+
+<dialog id="copyBox">
+  <h3>직접 복사해 주세요</h3>
+  <p>이 브라우저에서는 자동 복사가 안 돼요. 아래 글이 선택되어 있으니 Ctrl+C(휴대전화는 길게 눌러 복사)로 복사해 주세요.</p>
+  <textarea id="copyText" class="tall" readonly aria-label="복사할 글"></textarea>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" data-close>닫기</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="firebase-config.js"></script>
+<script src="promptkit.js"></script>
+<script src="worksheet.js"></script>
+<script src="live.js"></script>
+</body>
+</html>

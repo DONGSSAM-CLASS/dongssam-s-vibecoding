@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>워크숍 진행자 화면</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F3F7FC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="worksheet.css">
+<style>
+/* 진행자 화면: 같은 청사진 종이 위에, 위는 수업방과 조작, 아래는 사람별 진행표. */
+.awrap{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+.panel{background:var(--card);border:2px solid var(--ink);border-radius:10px;box-shadow:5px 5px 0 var(--shadow);padding:18px clamp(14px,3vw,24px);display:grid;gap:14px;min-width:0}
+.panel h2{margin:0}
+.awrap>*,.panel>*,[data-pane]{min-width:0}
+.who{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.signin{max-width:520px;margin:6vh auto 0}
+.rooms{display:flex;flex-wrap:wrap;gap:8px}
+.rooms button{display:grid;gap:2px;text-align:left;padding:10px 14px;border:2px solid var(--line);border-radius:8px;background:var(--card);min-width:150px}
+.rooms button b{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.rooms button span{font-size:12.5px;color:var(--muted)}
+.rooms button.on{border-color:var(--ink);background:var(--sky);box-shadow:3px 3px 0 var(--ink)}
+.newroom{display:flex;gap:8px;flex-wrap:wrap}
+.newroom input{flex:1 1 220px}
+
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px;align-items:center}
+.code{display:grid;gap:2px}
+.code small{font-size:12px;letter-spacing:.08em;color:var(--blue-ink);font-weight:700}
+.code b{font-family:var(--display);font-weight:400;font-size:clamp(48px,8vw,72px);line-height:1;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.hero .meta{display:grid;gap:8px;min-width:0}
+.hero .link{display:flex;gap:8px;align-items:center;min-width:0}
+.hero .link code{flex:1;min-width:0;padding:8px 10px;border:2px solid var(--line);border-radius:6px;background:var(--soft);overflow-wrap:anywhere;font-size:13px}
+.hero .qr{background:#FFFFFF;border:2px solid var(--ink);border-radius:8px;padding:8px;width:156px}
+.hero .qr img,.hero .qr canvas{width:100%;height:auto;display:block}
+.closed{font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--deep);color:var(--on-deep);justify-self:start}
+
+.controls{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px}
+.ctl{display:grid;gap:8px;padding:12px;border:2px dashed var(--line);border-radius:8px;min-width:0}
+.ctl .q{font-size:14px}
+.ctl .row select{flex:1 1 200px}
+.ctl .now{font-size:13px;color:var(--blue-ink);font-weight:700}
+
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.tile2{border:2px solid var(--ink);border-radius:8px;padding:10px 12px;background:var(--soft);display:grid;gap:2px}
+.tile2 span{font-size:12.5px;color:var(--muted)}
+.tile2 b{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile2 small{font-size:12px;color:var(--muted)}
+
+.flow{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:6px;align-items:end}
+.flow div{display:grid;gap:4px;justify-items:center;min-width:0}
+.flow .bar{width:100%;max-width:46px;height:90px;display:flex;align-items:flex-end;border-bottom:2px solid var(--ink)}
+.flow .bar i{display:block;width:100%;background:var(--blue);border:2px solid var(--ink);border-bottom:0;border-radius:4px 4px 0 0;min-height:0}
+.flow .n{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.flow .l{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.25}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.tabs button{padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--card);font-weight:700;font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.tablebox{overflow-x:auto;border:2px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:860px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;letter-spacing:.04em;color:var(--muted);background:var(--soft);font-weight:700;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--soft)}
+.pname{font-weight:700;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:0 0 auto}
+.dot.on{background:var(--blue);box-shadow:0 0 0 3px var(--sky)}
+.seen{display:flex;gap:3px}
+.seen i{width:12px;height:12px;border-radius:3px;background:var(--line)}
+.seen i.y{background:var(--ice)}
+.seen i.c{background:var(--blue);outline:2px solid var(--ink)}
+.meter{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.meter span{display:inline-block;width:54px;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.meter span i{display:block;height:100%;background:var(--blue)}
+.muted{color:var(--muted)}
+
+.qpick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.qpick select{flex:1 1 280px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.acard{border:2px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:4px;background:var(--card)}
+.acard b{font-size:13px;color:var(--blue-ink)}
+.acard p{margin:0;font-size:14.5px;white-space:pre-wrap}
+.bars{display:grid;gap:8px}
+.bars div{display:grid;grid-template-columns:minmax(90px,200px) minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:14px}
+.bars span.track{height:14px;border-radius:7px;background:var(--soft);border:1px solid var(--line);overflow:hidden}
+.bars span.track i{display:block;height:100%;background:var(--blue)}
+.bars em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+
+.pdl dl{display:grid;grid-template-columns:minmax(110px,200px) minmax(0,1fr);gap:8px 14px;margin:0;font-size:14px}
+.pdl dt{color:var(--muted)}
+.pdl dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+dialog.wide{width:min(720px,calc(100vw - 32px));max-height:86vh;overflow:auto}
+
+@media (max-width:900px){
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .controls{grid-template-columns:1fr}
+  .hero{grid-template-columns:1fr}
+  .hero .qr{width:140px}
+  .flow{grid-template-columns:repeat(6,minmax(0,1fr));row-gap:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav">
+    <span class="brand">진행자 화면</span>
+    <span class="status" id="saveStatus">역사 웹앱 워크숍 학습지</span>
+    <span class="who" id="who"></span>
+    <button class="btn ghost" type="button" id="signOut" hidden>로그아웃</button>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="awrap">
+
+  <section class="panel signin" id="noConfig" hidden>
+    <h2>Firebase 설정이 비어 있어요</h2>
+    <p class="hint">진행자 화면은 Firebase가 있어야 작동해요. firebase-config.js에 Firebase 웹 앱 설정값을 넣은 뒤 다시 배포해 주세요. 그 전까지 학습지는 각자의 기기 안에서만 작동해요.</p>
+    <a class="btn ghost" href="index.html">학습지로 가기</a>
+  </section>
+
+  <section class="panel signin" id="signIn" hidden>
+    <h2>진행자 로그인</h2>
+    <p class="hint">진행자로 등록된 구글 계정으로 로그인하면, 연수생들이 어디까지 했는지 실시간으로 볼 수 있어요.</p>
+    <div class="row">
+      <button class="btn" type="button" id="googleIn">구글 계정으로 로그인</button>
+      <button class="btn ghost" type="button" id="emuIn" hidden>테스트 진행자로 로그인</button>
+    </div>
+    <span class="state" id="signState" aria-live="polite"></span>
+  </section>
+
+  <section class="panel signin" id="denied" hidden>
+    <h2>진행자 계정이 아니에요</h2>
+    <p class="hint"><b id="deniedEmail"></b> 계정은 진행자로 등록되어 있지 않아요. 등록된 계정으로 다시 로그인해 주세요.</p>
+    <div class="row"><button class="btn" type="button" id="deniedOut">다른 계정으로 로그인</button></div>
+  </section>
+
+  <section class="panel" id="roomsPanel" hidden>
+    <h2>수업방</h2>
+    <div class="rooms" id="rooms"></div>
+    <form class="newroom" id="newRoom">
+      <input class="line" id="newTitle" maxlength="40" placeholder="수업방 이름 (예: 10월 18일 역사연구팀 연수)" aria-label="새 수업방 이름">
+      <button class="btn" type="submit" id="newBtn">새 수업방 만들기</button>
+    </form>
+    <span class="state" id="roomsState" aria-live="polite"></span>
+  </section>
+
+  <div id="dash" class="awrap" hidden>
+    <section class="panel">
+      <div class="hero">
+        <div class="code"><small>수업방 번호</small><b id="code">0000</b></div>
+        <div class="meta">
+          <strong id="roomTitle"></strong>
+          <span class="closed" id="closedTag" hidden>새로 들어오기 막힘</span>
+          <div class="link"><code id="joinUrl"></code><button class="btn ghost" type="button" id="copyJoin">주소 복사</button></div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="toggleOpen">새로 들어오기 막기</button>
+            <button class="btn ghost" type="button" id="copyTable">진행표 복사(스프레드시트용)</button>
+            <span class="state" id="dashState" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="qr" id="qr" aria-label="연수생용 QR"></div>
+      </div>
+      <div class="controls">
+        <div class="ctl">
+          <span class="q">모두에게 이 쪽 열기</span>
+          <div class="row"><select class="line" id="stepSel" aria-label="열어 줄 쪽"></select><button class="btn" type="button" id="stepGo">열기</button></div>
+          <span class="now" id="stepNow">아직 연 쪽이 없어요. 연수생은 각자 자유롭게 넘겨요.</span>
+        </div>
+        <div class="ctl">
+          <span class="q">모두에게 타이머</span>
+          <div class="row"><button class="btn ghost" type="button" data-t="180">3분</button><button class="btn ghost" type="button" data-t="300">5분</button><button class="btn ghost" type="button" data-t="600">10분</button><button class="btn ghost" type="button" data-t="0">끄기</button></div>
+          <span class="now" id="timerNow">타이머가 꺼져 있어요.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="tiles" id="tiles"></div>
+      <div>
+        <span class="q" style="margin-bottom:8px">지금 보고 있는 쪽</span>
+        <div class="flow" id="flow"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="tabs" role="tablist" aria-label="보기">
+        <button type="button" role="tab" data-tab="people" aria-selected="true">진행 상황</button>
+        <button type="button" role="tab" data-tab="answers" aria-selected="false">답 모아 보기</button>
+        <button type="button" role="tab" data-tab="works" aria-selected="false">작품</button>
+        <button type="button" role="tab" data-tab="survey" aria-selected="false">설문</button>
+      </div>
+      <div data-pane="people">
+        <div class="tablebox"><table>
+          <thead><tr><th>이름</th><th>지금 보는 쪽</th><th>본 쪽</th><th>배포</th><th>작품</th><th>퀴즈</th><th>설문</th><th>마지막 활동</th></tr></thead>
+          <tbody id="peopleRows"></tbody>
+        </table></div>
+      </div>
+      <div data-pane="answers" hidden>
+        <div class="qpick"><select class="line" id="qSel" aria-label="볼 질문"></select><button class="btn ghost" type="button" id="copyAnswers">이 질문의 답 복사</button></div>
+        <div id="answerView"></div>
+      </div>
+      <div data-pane="works" hidden><div class="gallery" id="worksView"></div></div>
+      <div data-pane="survey" hidden><div id="surveyView"></div></div>
+    </section>
+  </div>
+</div>
+</main>
+
+<dialog id="personBox" class="wide">
+  <h3 id="pName"></h3>
+  <div class="pdl" id="pBody"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" type="button" id="pDelete">이 참가자 지우기</button><button class="btn" type="button" data-close>닫기</button></div>
+</dialog>
+
+<dialog id="copyBox">
+  <h3>직접 복사해 주세요</h3>
+  <p>이 브라우저에서는 자동 복사가 안 돼요. 아래 글이 선택되어 있으니 Ctrl+C로 복사해 주세요.</p>
+  <textarea id="copyText" class="tall" readonly aria-label="복사할 글"></textarea>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" type="button" data-close>닫기</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="firebase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
