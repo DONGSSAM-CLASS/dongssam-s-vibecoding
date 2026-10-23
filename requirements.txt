@@ -3,6 +3,6 @@ anthropic==1.11.0
 playwright==1.63.0
 fastapi==0.142.2
 uvicorn==0.50.2
-pillow==12.3.0
+pillow==13.0.0
 python-dotenv==1.2.2
 pydantic==2.13.4
