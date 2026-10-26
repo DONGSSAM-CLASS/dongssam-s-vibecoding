@@ -13,6 +13,7 @@ description: 유튜브 영상(URL)의 제목·채널·설명란·챕터·자막�
 | 상황 | 방법 |
 |---|---|
 | 사용자 PC(가정·학교 인터넷)에서 실행 | 아래 2번 yt-dlp (자막 원문까지 받음) |
+| 클라우드 세션 + Higgsfield 커넥터 연결됨 | **Higgsfield `video_analysis_create`(youtube_url)** → `video_analysis_status`를 1분 간격으로 확인. 키 없이 장면별(화면+음성) 분석. 가끔 "Something went wrong"으로 실패하면 `https://www.youtube.com/watch?v=ID` 형태로 한 번 더 시도 |
 | 클라우드 세션(유튜브가 서버 IP를 "not a bot"으로 막음) | **Gemini 직접 시청** — 구글 서버가 영상을 가져가므로 막히지 않음 |
 | 둘 다 안 됨 | 사용자에게 [더보기 → 스크립트 표시] 내용을 받아 `--transcript-file` |
 

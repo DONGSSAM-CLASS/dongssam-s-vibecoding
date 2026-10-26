@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-콘텐츠 스튜디오</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e2e5eb; --field: #fff; --soft: #f0f2f6;
+    --brand: #e5484d; --brand-ink: #fff; --navy: #151b2e; --ok: #2e8b57; --warn: #b7791f; --bad: #c0392b;
+    --okbg: #e8f6ee; --warnbg: #fff7e6; --badbg: #fdecea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #10131c; --card: #191d29; --ink: #e6e9f2; --muted: #9aa3b8; --line: #2a3042; --field: #11151f; --soft: #232838;
+      --okbg: #15301f; --warnbg: #33290f; --badbg: #3a1a18; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+  header { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 18px; }
+  header h1 b { color: var(--brand); }
+  header .meta { margin-left: auto; font-size: 12px; color: #b9c0d4; }
+  nav { display: flex; gap: 6px; padding: 12px 24px 0; flex-wrap: wrap; }
+  nav button { border-radius: 18px; }
+  nav button.on { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 700; }
+  main { padding: 14px 24px 40px; max-width: 1200px; }
+  section { display: none; } section.on { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 10px; font-size: 15px; }
+  textarea, input, select { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); color: var(--ink); }
+  textarea { resize: vertical; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 3px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } main, nav, header { padding-left: 16px; padding-right: 16px; } }
+  button { font: inherit; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: var(--card); padding: 8px 14px; color: var(--ink); }
+  button.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); font-weight: 700; }
+  button:disabled { opacity: .5; cursor: default; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 14px; background: var(--soft); border: 1px solid var(--line); cursor: pointer; user-select: none; }
+  .chip.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .check { display: inline-flex; gap: 6px; align-items: center; margin: 0; color: var(--ink); font-size: 13px; }
+  .check input { width: auto; }
+  .note { font-size: 12.5px; color: var(--muted); }
+  .box { border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-top: 10px; }
+  .box.ok { background: var(--okbg); } .box.warn { background: var(--warnbg); } .box.bad { background: var(--badbg); }
+  .results { display: grid; gap: 10px; }
+  .res { display: grid; grid-template-columns: 200px 1fr auto; gap: 12px; align-items: start; }
+  @media (max-width: 860px) { .res { grid-template-columns: 1fr; } }
+  .res img { width: 100%; border-radius: 6px; aspect-ratio: 16/9; object-fit: cover; background: var(--soft); }
+  .res h3 { margin: 0 0 4px; font-size: 14px; } .res h3 a { color: inherit; }
+  .score { font-size: 22px; font-weight: 800; text-align: center; min-width: 80px; }
+  .score small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-right: 4px; }
+  .tag.cc_by, .tag.own { background: var(--okbg); color: var(--ok); } .tag.permission_needed { background: var(--warnbg); color: var(--warn); }
+  ul.notes { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--muted); }
+  .seg { border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px; }
+  .seg .head { font-size: 12px; color: var(--muted); }
+  .meter { height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .meter div { height: 100%; background: var(--ok); }
+  #thumbPreview { width: 100%; max-width: 640px; border-radius: 8px; border: 1px solid var(--line); display: block; margin-top: 10px; }
+  pre { white-space: pre-wrap; background: var(--soft); border-radius: 6px; padding: 10px; font-size: 12.5px; max-height: 320px; overflow: auto; }
+  .busy::after { content: " ⏳"; }
+</style>
+</head>
+<body>
+<header>
+  <h1><b>K</b>-콘텐츠 스튜디오</h1>
+  <span class="note" style="color:#b9c0d4">외국인의 한국 여행 영상 → 한국어 영상 기획 · 자막 · 썸네일</span>
+  <span class="meta" id="meta"></span>
+</header>
+<nav id="tabs">
+  <button data-tab="find" class="on">① 소재 찾기</button>
+  <button data-tab="plan">② 대본·제목</button>
+  <button data-tab="thumb">③ 썸네일</button>
+  <button data-tab="export">④ 내보내기</button>
+</nav>
+<main>
+  <div id="keyWarn"></div>
+
+  <!-- ① 소재 찾기 -->
+  <section id="find" class="on">
+    <div class="card">
+      <h2>다국어 키워드로 찾기 (3-3-3 규칙: 인물 · 장소 · 8분 이상)</h2>
+      <label>언어 고르기 — 고른 언어의 기본 키워드가 아래 칸에 들어갑니다</label>
+      <div class="chips" id="langs"></div>
+      <label>검색 키워드 (한 줄에 하나)</label>
+      <textarea id="keywords" rows="4"></textarea>
+      <div class="grid3">
+        <div><label>최소 길이(분)</label><input id="minMin" type="number" value="8" min="0"></div>
+        <div><label>키워드당 결과 수</label><input id="perKw" type="number" value="20" min="5" max="50"></div>
+        <div><label>이 날짜 이후 영상만</label><input id="after" type="date"></div>
+      </div>
+      <div class="actions">
+        <label class="check"><input type="checkbox" id="ccOnly" checked> CC BY(출처 표기 후 재사용 가능) 영상만</label>
+        <button class="primary" id="btnSearch">소재 찾기</button>
+        <span class="note" id="searchInfo"></span>
+      </div>
+      <div class="box warn">표준 라이선스 영상을 허락 없이 다시 올리면 저작권 침해이고, 유튜브의 '재사용 콘텐츠' 정책으로 수익 창출이 막힐 수 있습니다.
+        CC BY 영상은 출처를 표기하면 쓸 수 있고, 그 밖의 영상은 ②단계에서 만드는 허락 요청 메일로 원작자 허락을 먼저 받으세요.</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>영상 주소로 바로 가져오기</h2>
+        <input id="oneUrl" placeholder="https://youtu.be/...">
+        <div class="actions"><button id="btnOne">가져오기</button></div>
+      </div>
+      <div class="card">
+        <h2>직접 촬영한 영상으로 만들기 (YouTube 키 없어도 됨)</h2>
+        <div class="grid2">
+          <div><label>영상 내용(제목)</label><input id="mTitle" placeholder="예: 부산 해운대 외국인 친구와 하루"></div>
+          <div><label>길이(분)</label><input id="mMin" type="number" value="10" min="1"></div>
+        </div>
+        <label>장면 설명</label><textarea id="mDesc" rows="2" placeholder="어디서 무엇을 찍었는지"></textarea>
+        <div class="actions"><button id="btnManual">이 영상으로 진행</button></div>
+      </div>
+    </div>
+    <div class="results" id="results"></div>
+  </section>
+
+  <!-- ② 대본 -->
+  <section id="plan">
+    <div class="card" id="selBox"><span class="note">①에서 소재를 먼저 고르세요.</span></div>
+    <div class="card">
+      <h2>대본 재료 (있을수록 정확해요)</h2>
+      <label>원본 자막/대본 — 유튜브 [더보기 → 스크립트 표시] 내용을 붙여 넣으세요. 없으면 Claude가 원작자 말을 지어내지 않고 장면 설명 위주로 씁니다.</label>
+      <textarea id="transcript" rows="5"></textarea>
+      <div class="grid2">
+        <div><label>장면 메모 (예: 03:10 편의점에서 삼각김밥에 놀람)</label><textarea id="notes" rows="3"></textarea></div>
+        <div><label>우리 채널 말투</label><textarea id="style" rows="3" placeholder="예: 친근한 반말, 짧은 문장, 감탄사 적게"></textarea></div>
+      </div>
+      <div class="actions"><button class="primary" id="btnPlan" disabled>대본·제목 만들기</button><span class="note">1~3분 걸립니다. 한 편에 대략 200~500원(Claude API 사용료, Opus 기준).</span></div>
+    </div>
+    <div id="planOut"></div>
+  </section>
+
+  <!-- ③ 썸네일 -->
+  <section id="thumb">
+    <div class="card">
+      <h2>썸네일 만들기 (1280×720)</h2>
+      <div class="chips" id="thumbChoices"></div>
+      <div class="grid3">
+        <div><label>문구 (두 줄은 엔터)</label><textarea id="tText" rows="2">외국인이 처음 본
+한국의 이것</textarea></div>
+        <div><label>배지 (왼쪽 위)</label><input id="tBadge" placeholder="예: 외국인 반응"></div>
+        <div><label>강조색</label><select id="tTheme"><option value="yellow">노랑</option><option value="red">빨강</option><option value="sky">하늘</option></select></div>
+      </div>
+      <label>배경 사진 — 비우면 소재 영상의 썸네일, 그것도 없으면 단색</label>
+      <input id="tFile" type="file" accept="image/*">
+      <div class="actions"><button class="primary" id="btnThumb">썸네일 만들기</button><span class="note" id="thumbWarn"></span></div>
+      <img id="thumbPreview" alt="" hidden>
+    </div>
+  </section>
+
+  <!-- ④ 내보내기 -->
+  <section id="export">
+    <div class="card">
+      <h2>업로드 전 체크리스트</h2>
+      <div id="checklist"></div>
+    </div>
+    <div class="card">
+      <h2>프로젝트 파일</h2>
+      <p class="note">script.md(전체 대본) · narration_tts.txt(TTS에 붙여 넣기) · subtitles_ko.srt(편집 프로그램에 불러오기) · description.txt(설명란, 출처 포함) · tags.txt · thumbnail.png · permission_email.txt(허락 요청 메일)</p>
+      <div class="actions">
+        <button class="primary" id="btnSave" disabled>프로젝트 폴더에 저장</button>
+        <button id="btnZip" disabled>ZIP 내려받기</button>
+        <span class="note" id="saveInfo"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const TOKEN = (() => {
+  const q = new URLSearchParams(location.search).get('t');
+  try { if (q) sessionStorage.setItem('kc_t', q); } catch (e) {}
+  if (q) history.replaceState(null, '', '/');
+  try { return q || sessionStorage.getItem('kc_t') || ''; } catch (e) { return q || ''; }
+})();
+async function api(path, body, raw = false) {
+  const r = await fetch(path, { method: body === undefined ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json', 'X-KC-Token': TOKEN }, body: body === undefined ? undefined : JSON.stringify(body) });
+  if (r.status === 403) { document.body.innerHTML = '<div style="padding:40px">연결이 만료되었습니다. 프로그램을 다시 실행해 주세요.</div>'; throw new Error('token'); }
+  if (raw && r.ok) return r;
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof j.detail === 'string' ? j.detail : (r.statusText || '오류'));
+  return j;
+}
+async function busy(btn, fn) {
+  btn.disabled = true; btn.classList.add('busy');
+  try { await fn(); } catch (e) { if (e.message !== 'token') alert(e.message); }
+  finally { btn.disabled = false; btn.classList.remove('busy'); }
+}
+
+const S = { cfg: null, cand: null, plan: null, thumb: '' , langs: new Set(['en', 'de', 'el']) };
+
+function tab(name) {
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
+  document.querySelectorAll('main section').forEach((s) => s.classList.toggle('on', s.id === name));
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('#tabs button').forEach((b) => b.onclick = () => tab(b.dataset.tab));
+
+function fillKeywords() {
+  $('keywords').value = [...S.langs].flatMap((l) => S.cfg.keywords[l] || []).join('\n');
+}
+function renderLangs() {
+  $('langs').innerHTML = Object.entries(S.cfg.lang_names).map(([k, v]) =>
+    `<span class="chip ${S.langs.has(k) ? 'on' : ''}" data-l="${k}">${esc(v)}</span>`).join('');
+  $('langs').querySelectorAll('.chip').forEach((c) => c.onclick = () => {
+    S.langs.has(c.dataset.l) ? S.langs.delete(c.dataset.l) : S.langs.add(c.dataset.l);
+    renderLangs(); fillKeywords();
+  });
+}
+
+// ── ① 소재 ──
+function resultCard(c, i) {
+  const mins = Math.round(c.duration_sec / 60);
+  return `<div class="card res">
+    <img src="${esc(c.thumbnail)}" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <div>
+      <h3><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a></h3>
+      <div class="note">${esc(c.channel)} · ${mins}분 · 조회 ${Number(c.views).toLocaleString()} · 구독자 ${Number(c.subscribers).toLocaleString()} · ${esc(c.published_at)}</div>
+      <div style="margin-top:4px"><span class="tag ${c.rights}">${c.rights === 'cc_by' ? 'CC BY 재사용 가능' : c.rights === 'own' ? '직접 촬영' : '허락 필요'}</span>
+        ${(c.places || []).slice(0, 6).map((p) => `<span class="tag" style="background:var(--soft)">${esc(p)}</span>`).join('')}</div>
+      <ul class="notes">${(c.score_notes || []).map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
+    </div>
+    <div><div class="score">${c.score}<small>/ 100점</small></div><button class="primary" data-pick="${i}">이 소재로</button></div>
+  </div>`;
+}
+let found = [];
+function showResults(list) {
+  found = list;
+  $('results').innerHTML = list.length ? list.map(resultCard).join('') : '<div class="card note">조건에 맞는 영상이 없습니다. 키워드를 늘리거나 CC BY 조건을 끄고 다시 찾아보세요.</div>';
+  $('results').querySelectorAll('[data-pick]').forEach((b) => b.onclick = () => pick(found[+b.dataset.pick]));
+}
+$('btnSearch').onclick = () => busy($('btnSearch'), async () => {
+  const keywords = $('keywords').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  if (!keywords.length) throw new Error('키워드를 하나 이상 넣어 주세요.');
+  const after = $('after').value ? new Date($('after').value).toISOString() : '';
+  $('searchInfo').textContent = `${keywords.length}개 키워드 검색 중... (API 할당량 약 ${keywords.length * 200}단위 사용)`;
+  const list = await api('/api/search', { keywords, cc_only: $('ccOnly').checked, min_minutes: +$('minMin').value || 0, per_keyword: +$('perKw').value || 20, published_after: after });
+  $('searchInfo').textContent = `${list.length}개 찾음 (점수순)`;
+  showResults(list);
+});
+$('btnOne').onclick = () => busy($('btnOne'), async () => showResults([await api('/api/video', { url: $('oneUrl').value })]));
+$('btnManual').onclick = () => busy($('btnManual'), async () => {
+  if (!$('mTitle').value.trim()) throw new Error('영상 내용을 적어 주세요.');
+  pick(await api('/api/manual', { title: $('mTitle').value, duration_min: +$('mMin').value || 10, description: $('mDesc').value, own: true }));
+});
+
+function pick(c) {
+  S.cand = c; S.plan = null; S.thumb = '';
+  const cls = c.rights === 'permission_needed' ? 'warn' : 'ok';
+  $('selBox').innerHTML = `<h2>선택한 소재</h2><b>${esc(c.title)}</b> <span class="note">— ${esc(c.channel)} · ${Math.round(c.duration_sec / 60)}분 · ${c.score}점</span>
+    <div class="box ${cls}">${esc(c.verdict)}</div>`;
+  $('btnPlan').disabled = false; $('planOut').innerHTML = ''; updateExport();
+  tab('plan');
+}
+
+// ── ② 대본 ──
+function planChars(p) { return (p.hook.length + p.closing.length + p.segments.reduce((a, s) => a + s.narration.length, 0)); }
+function renderPlan(res) {
+  const p = S.plan;
+  const chars = planChars(p), mins = (chars / 330).toFixed(1), pct = Math.min(100, chars / 2700 * 100);
+  $('planOut').innerHTML = `
+    <div class="card"><h2>길이</h2>내레이션 <b id="pChars">${chars.toLocaleString()}</b>자 · 예상 <b id="pMins">${mins}</b>분 <span class="note">(8분 = 약 2,640자, 중간 광고 가능)</span>
+      <div class="meter"><div id="pMeter" style="width:${pct}%"></div></div></div>
+    <div class="card"><h2>제목 후보</h2>${p.titles.map((t, i) => `<label class="check" style="display:flex;margin:4px 0"><input type="radio" name="title" value="${i}" ${i ? '' : 'checked'}> ${esc(t)}</label>`).join('')}</div>
+    <div class="card"><h2>오프닝 (첫 15초)</h2><textarea data-k="hook" rows="3">${esc(p.hook)}</textarea>
+      ${p.segments.map((s, i) => `<div class="seg"><div class="head">${i + 1}. ${s.source_start ? `원본 ${esc(s.source_start)}~${esc(s.source_end)}` : '직접 촬영/스톡'} · 화면: ${esc(s.scene)}</div>
+        <label>강조 자막</label><input data-seg="${i}" data-f="caption" value="${esc(s.caption)}">
+        <label>내레이션</label><textarea data-seg="${i}" data-f="narration" rows="4">${esc(s.narration)}</textarea></div>`).join('')}
+      <div class="seg"><div class="head">마무리 (구독·좋아요 요청 없이)</div><textarea data-k="closing" rows="2">${esc(p.closing)}</textarea></div></div>
+    ${p.comparison_points.length ? `<div class="card"><h2>한국 vs 해외 비교 포인트</h2><ul>${p.comparison_points.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+    ${p.fact_checks.length ? `<div class="card"><h2>올리기 전 사실 확인</h2><ul>${p.fact_checks.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+    <div class="card"><h2>설명란 (출처 포함)</h2><pre>${esc(res.description)}</pre><div class="actions"><button data-copy="desc">복사</button></div></div>
+    ${res.permission_email ? `<div class="card"><h2>원작자 허락 요청 메일 (영어)</h2><div class="box warn">허락 답장을 받기 전에는 이 소재를 올리지 마세요. 답장은 캡처해 보관하세요.</div><pre>${esc(res.permission_email)}</pre><div class="actions"><button data-copy="mail">복사</button></div></div>` : ''}`;
+  const copies = { desc: res.description, mail: res.permission_email };
+  $('planOut').querySelectorAll('[data-copy]').forEach((b) => b.onclick = () => navigator.clipboard.writeText(copies[b.dataset.copy]).then(() => { b.textContent = '복사됨'; }));
+  $('planOut').querySelectorAll('textarea, input[data-seg]').forEach((el) => el.oninput = () => {
+    if (el.dataset.k) p[el.dataset.k] = el.value; else p.segments[+el.dataset.seg][el.dataset.f] = el.value;
+    const c = planChars(p); $('pChars').textContent = c.toLocaleString(); $('pMins').textContent = (c / 330).toFixed(1);
+    $('pMeter').style.width = Math.min(100, c / 2700 * 100) + '%';
+  });
+  const titles0 = [...p.titles];
+  $('planOut').querySelectorAll('input[name=title]').forEach((r) => r.onchange = () => {
+    const i = +r.value; p.titles = [titles0[i], ...titles0.filter((_, j) => j !== i)];
+  });
+  $('thumbChoices').innerHTML = p.thumbnail_texts.map((t, i) => `<span class="chip" data-t="${i}">${esc(t.replace(/\n/g, ' / '))}</span>`).join('');
+  $('thumbChoices').querySelectorAll('.chip').forEach((c) => c.onclick = () => { $('tText').value = p.thumbnail_texts[+c.dataset.t].replace(/\\n/g, '\n'); });
+  $('tText').value = (p.thumbnail_texts[0] || '').replace(/\\n/g, '\n');
+}
+$('btnPlan').onclick = () => busy($('btnPlan'), async () => {
+  const res = await api('/api/plan', { candidate: S.cand, transcript: $('transcript').value, notes: $('notes').value, channel_style: $('style').value });
+  S.plan = res.plan; renderPlan(res); updateExport();
+});
+
+// ── ③ 썸네일 ──
+const fileB64 = (f) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(f); });
+$('btnThumb').onclick = () => busy($('btnThumb'), async () => {
+  const f = $('tFile').files[0];
+  const body = { text: $('tText').value, badge: $('tBadge').value, theme: $('tTheme').value };
+  if (f) body.background_b64 = await fileB64(f); else if (S.cand && S.cand.thumbnail) body.background_url = S.cand.thumbnail;
+  const res = await api('/api/thumbnail', body);
+  S.thumb = res.png; $('thumbPreview').src = 'data:image/png;base64,' + res.png; $('thumbPreview').hidden = false;
+  $('thumbWarn').textContent = res.warning || '';
+});
+
+// ── ④ 내보내기 ──
+function updateExport() {
+  const ok = !!(S.cand && S.plan);
+  $('btnSave').disabled = !ok; $('btnZip').disabled = !ok;
+  $('saveInfo').textContent = ok ? '' : '②에서 대본을 먼저 만드세요.';
+}
+const exportBody = () => ({ candidate: S.cand, plan: S.plan, thumbnail_b64: S.thumb });
+$('btnSave').onclick = () => busy($('btnSave'), async () => {
+  const r = await api('/api/export', exportBody());
+  $('saveInfo').textContent = `저장됨: ${r.folder} (${r.files.length}개 파일)`;
+});
+$('btnZip').onclick = () => busy($('btnZip'), async () => {
+  const r = await api('/api/export.zip', exportBody(), true);
+  const url = URL.createObjectURL(await r.blob());
+  const a = Object.assign(document.createElement('a'), { href: url, download: 'kcontent_project.zip' });
+  a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+});
+
+(async () => {
+  S.cfg = await api('/api/config');
+  $('meta').textContent = `v${S.cfg.version} · ${S.cfg.models[S.cfg.model] || S.cfg.model}`;
+  const warns = [];
+  if (!S.cfg.has_youtube_key) warns.push('YOUTUBE_API_KEY가 없어 ①소재 찾기가 동작하지 않습니다(직접 촬영 영상은 사용 가능).');
+  if (!S.cfg.has_anthropic_key) warns.push('ANTHROPIC_API_KEY가 없어 ②대본 만들기가 동작하지 않습니다.');
+  if (S.cfg.font_warning) warns.push(S.cfg.font_warning);
+  $('keyWarn').innerHTML = warns.map((w) => `<div class="box bad">${esc(w)}</div>`).join('') + (warns.length ? '<br>' : '');
+  $('checklist').innerHTML = S.cfg.checklist.map((c) => `<label class="check" style="display:flex;margin:6px 0"><input type="checkbox"> ${esc(c)}</label>`).join('');
+  renderLangs(); fillKeywords(); updateExport();
+})();
+</script>
+</body>
+</html>
