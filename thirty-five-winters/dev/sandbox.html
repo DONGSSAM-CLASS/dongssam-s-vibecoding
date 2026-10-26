@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><title>sandbox</title>
+<script type="importmap">{"imports":{"three":"../vendor/three.module.min.js"}}</script>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{width:100%;height:100%;display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { Renderer } from '../src/engine/renderer.js';
+import { Level } from '../src/world/level.js';
+import { Character } from '../src/world/characters.js';
+const q = new URLSearchParams(location.search);
+const R = new Renderer(document.getElementById('c'));
+const env = {
+  biome: q.get('biome') || 'manchuria_autumn', season: q.get('season') || 'autumn', time: q.get('time') || 'day', weather: q.get('weather') || 'clear',
+  terrain: { size: 200, seed: 4, noiseAmp: 5, features: [
+    { type: 'valley', path: [[-90, 0], [0, 10], [90, -10]], width: 40, depth: 8 },
+    { type: 'road', path: [[-90, 2], [0, 12], [90, -8]], width: 3 },
+    { type: 'flat', x: 10, z: -20, r: 18, h: null, fall: 8 },
+    { type: 'field', x: -30, z: -25, w: 24, d: 16 },
+  ] },
+  build(kit) {
+    kit.house('choga', 5, -22, 0.2); kit.house('giwa', 22, -26, -0.2); kit.house('manchu', -8, -32, 0.1);
+    kit.house('brick', 30, 20, 2.9); kit.house('shophouse', 42, 0, -1.5); kit.house('storehouse', -18, 22, 0.4); kit.house('hut', 52, 26, 0.6);
+    kit.house('barracks', -40, 18, 0.1); kit.house('tent', -10, 30, 0.2);
+    kit.forest({ x: 0, z: 60, w: 180, d: 50 }, 90, ['larch', 'pine', 'birch', 'oak']);
+    kit.forest({ x: 0, z: -70, w: 180, d: 40 }, 60, ['larch', 'pine', 'oak']);
+    kit.crops({ x: -30, z: -25, w: 24, d: 16 });
+    for (let i = 0; i < 20; i++) kit.bush(-60 + i * 6, 34, 1);
+    kit.rock(8, 4, 1.2); kit.log(-4, 6, 0.3, 4); kit.wall(-2, -8, 14, -8, 1.1, 'stone'); kit.crates(15, 6, 0.3, 3); kit.cart(-12, 5, 0.6);
+    kit.flag(2, 0, '1919', 5); kit.flag(6, 0, '1940', 5); kit.flag(-2, 0, '1910', 5); kit.campfire(-6, -2); kit.target(18, -4, 0); kit.well(10, -12); kit.pots(14, -14);
+    kit.telegraph([[-90, -6], [90, -16]]);
+  },
+};
+const L = new Level(env, { quality: 'high' }); L.build({});
+R.setGrade(q.get('grade') || 'autumn', true);
+const outfits = (q.get('outfits') || 'army1920,medic1920,hanbok_w,scholar,jp_army1920,kla1940,liaison_w,refugee_m,child,jp_army1940,kvc1938,chinese_vol').split(',');
+const chars = outfits.map((o, i) => { const c = new Character(o, { weapon: ['army1920','jp_army1920','kla1940','jp_army1940','chinese_vol'].includes(o) ? 'rifle' : 'none', seed: i }); const x = -6 + i * 1.3, z = 2; c.root.position.set(x, L.terrain.heightAt(x, z), z); c.root.rotation.y = 0.3; L.scene.add(c.root); return c; });
+const cam = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 3000);
+const view = q.get('view') || 'chars';
+if (view === 'chars') { cam.position.set(1.5, L.terrain.heightAt(1.5, 9) + 2.2, 9); cam.lookAt(1, L.terrain.heightAt(1, 2) + 0.9, 2); }
+else { cam.position.set(-20, 30, 60); cam.lookAt(10, 0, -10); }
+R.onResize = (w, h) => { cam.aspect = w / h; cam.updateProjectionMatrix(); };
+let t = 0; const poses = ['idle','walk','aim','crouch','down','treat','carry','run','wave','kneel','reload','sit'];
+function loop() { const dt = 1 / 60; t += dt;
+  chars.forEach((c, i) => { const p = poses[i % poses.length]; if (['army1920','jp_army1920','kla1940','jp_army1940','chinese_vol'].includes(c.outfitKey)) {}
+    if (c.weapon) c.setWeaponMode(p === 'aim' || p === 'crouch' || p === 'reload' ? 'ready' : 'slung');
+    c.update(dt, { speed: p === 'walk' ? 1.4 : p === 'run' ? 5 : 0, aim: p === 'aim', crouch: p === 'crouch', down: p === 'down', treat: p === 'treat', carry: p === 'carry', wave: p === 'wave', kneel: p === 'kneel', reload: p === 'reload', sit: p === 'sit' }); });
+  L.update(dt, t, cam.position); L.effects.update(dt, cam.position); R.render(L.scene, cam, dt); requestAnimationFrame(loop); }
+loop(); window.__ready = true;
+</script></body></html>

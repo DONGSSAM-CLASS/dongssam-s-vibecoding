@@ -6,3 +6,6 @@ runs/
 .pytest_cache/
 build/
 dist/
+
+# Thirty-Five Winters (local symlink for Playwright tests)
+thirty-five-winters/node_modules
