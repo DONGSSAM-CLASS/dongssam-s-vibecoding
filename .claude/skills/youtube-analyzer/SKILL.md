@@ -8,6 +8,29 @@ description: 유튜브 영상(URL)의 제목·채널·설명란·챕터·자막�
 오픈소스 [yt-dlp](https://github.com/yt-dlp/yt-dlp)로 영상 정보와 자막을 받아, 분석에 바로 쓸 수 있는
 `analysis.md`(메타데이터 + 타임스탬프 자막)를 만든다. 영상 파일 자체는 내려받지 않는다.
 
+## 0. 어느 방법을 쓸까
+
+| 상황 | 방법 |
+|---|---|
+| 사용자 PC(가정·학교 인터넷)에서 실행 | 아래 2번 yt-dlp (자막 원문까지 받음) |
+| 클라우드 세션(유튜브가 서버 IP를 "not a bot"으로 막음) | **Gemini 직접 시청** — 구글 서버가 영상을 가져가므로 막히지 않음 |
+| 둘 다 안 됨 | 사용자에게 [더보기 → 스크립트 표시] 내용을 받아 `--transcript-file` |
+
+### Gemini 직접 시청 (클라우드에서 권장)
+
+환경변수 `GEMINI_API_KEY`가 있어야 한다(https://aistudio.google.com/apikey, 무료 등급 있음).
+키는 채팅에 붙여 넣게 하지 말고 환경 설정의 환경변수/시크릿으로 넣게 한다. 표준 라이브러리만 쓰므로 venv가 필요 없다.
+
+```bash
+python3 -I .claude/skills/youtube-analyzer/scripts/gemini_video.py "https://youtu.be/<영상ID>" --out "$SCRATCH/yt"
+# → $SCRATCH/yt/<영상ID>/gemini_analysis.md  (화면 구성·버튼·작업 흐름·수익 구조·기능 명세)
+```
+
+`--model`로 모델을 고정할 수 있고, 비우면 사용 가능한 최신 안정판 flash 모델을 고른다.
+`--prompt-file`로 분석 지시문을 바꿀 수 있다.
+
+같은 저장소의 `youtube-content` 스킬(fairchild/dotclaude에서 가져옴)도 yt-dlp 기반이라 클라우드에서는 같은 이유로 막힌다.
+
 ## 1. 준비 (한 번만)
 
 ```bash
