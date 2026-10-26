@@ -1,11 +1,16 @@
-"""소재 영상 정보 → 8분 이상 한국어 영상 기획안 (Claude 구조화 출력)."""
+"""소재 영상 정보 → 8분 이상 한국어 영상 기획안.
+
+기본은 무료 방식(llm.py: 채팅 복사·붙여넣기, Gemini 무료 등급, Ollama). Claude API는 고를 때만 씁니다.
+"""
 
 from __future__ import annotations
 
+import asyncio
 import os
 
 import anthropic
 
+from . import llm
 from .config import Settings
 from .models import Candidate, VideoPlan
 
@@ -64,8 +69,31 @@ def build_prompt(c: Candidate, notes: str = "", transcript: str = "", channel_st
     return "\n\n".join(parts)
 
 
+def manual_prompt(c: Candidate, notes: str = "", transcript: str = "", channel_style: str = "") -> str:
+    """무료 AI 채팅창에 붙여 넣을 프롬프트."""
+    return llm.full_prompt(SYSTEM, build_prompt(c, notes, transcript, channel_style))
+
+
 async def make_plan(c: Candidate, settings: Settings, *, notes: str = "", transcript: str = "",
-                    channel_style: str = "", client: anthropic.AsyncAnthropic | None = None) -> VideoPlan:
+                    channel_style: str = "", provider: str = "",
+                    client: anthropic.AsyncAnthropic | None = None) -> VideoPlan:
+    provider = provider or settings.provider
+    if provider == "manual":
+        raise ValueError("복사·붙여넣기 방식은 [프롬프트 복사] → AI 채팅 → [답 붙여넣기] 순서로 진행합니다.")
+    if provider == "gemini":
+        prompt = manual_prompt(c, notes, transcript, channel_style)
+        return await asyncio.to_thread(llm.gemini_plan, prompt, settings.gemini_api_key, settings.gemini_model)
+    if provider == "ollama":
+        prompt = manual_prompt(c, notes, transcript, channel_style)
+        return await asyncio.to_thread(llm.ollama_plan, prompt, settings.ollama_host, settings.ollama_model)
+    if provider != "claude":
+        raise ValueError(f"알 수 없는 방식: {provider}")
+    return await _claude_plan(c, settings, notes, transcript, channel_style, client)
+
+
+async def _claude_plan(c: Candidate, settings: Settings, notes: str, transcript: str, channel_style: str,
+                       client: anthropic.AsyncAnthropic | None) -> VideoPlan:
+    """유료: Claude API 구조화 출력."""
     client = client or make_client(settings)
     extra = {}
     if settings.use_fallbacks:

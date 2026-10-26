@@ -2,7 +2,9 @@
 
 python -m kcontent                       웹 화면 실행
 python -m kcontent search [키워드...] --cc  소재 찾기 (키워드 없으면 기본 다국어 키워드)
-python -m kcontent plan <영상주소> [--transcript 자막.txt]   기획안·자막·설명란 만들기 → 프로젝트 폴더
+python -m kcontent plan <영상주소> [--transcript 자막.txt]   프롬프트 파일 만들기(무료 채팅에 붙여 넣기)
+python -m kcontent plan <영상주소> --answer 답.txt             AI 답 → 프로젝트 폴더
+python -m kcontent plan <영상주소> --provider gemini|ollama    무료 API로 바로 만들기
 python -m kcontent thumb "외국인이 놀란\\n한국 편의점" [--bg 사진.jpg] [--badge 반응] [-o thumb.png]
 """
 
@@ -38,7 +40,8 @@ def cmd_search(args: argparse.Namespace) -> int:
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
-    from .planner import make_plan
+    from .llm import PlanParseError, parse_plan_text
+    from .planner import make_plan, manual_prompt
 
     s = Settings()
     m = re.search(r"(?:v=|youtu\.be/|shorts/|embed/)([\w-]{11})", args.url)
@@ -52,8 +55,24 @@ def cmd_plan(args: argparse.Namespace) -> int:
         return 1
     c = score_candidate(to_candidate(items[0], yt.subscribers([items[0]["snippet"]["channelId"]])))
     transcript = Path(args.transcript).read_text(encoding="utf-8") if args.transcript else ""
-    print(f"대본 작성 중: {c.title} ({s.model}) ...", file=sys.stderr)
-    plan = asyncio.run(make_plan(c, s, transcript=transcript, notes=args.notes))
+    provider = args.provider or s.provider
+    if args.answer:
+        try:
+            plan = parse_plan_text(Path(args.answer).read_text(encoding="utf-8"))
+        except PlanParseError as exc:
+            print(exc, file=sys.stderr)
+            return 1
+    elif provider == "manual":
+        out = Path(args.prompt_out)
+        out.write_text(manual_prompt(c, args.notes, transcript), encoding="utf-8")
+        print(f"프롬프트를 {out}에 저장했습니다 (요금 0원).")
+        print("1) 파일 내용을 claude.ai / gemini.google.com / chatgpt.com 채팅에 붙여 넣기")
+        print("2) 돌아온 답 전체를 답.txt로 저장")
+        print(f"3) python -m kcontent plan {args.url} --answer 답.txt")
+        return 0
+    else:
+        print(f"대본 작성 중: {c.title} ({provider}) ...", file=sys.stderr)
+        plan = asyncio.run(make_plan(c, s, transcript=transcript, notes=args.notes, provider=provider))
     png = thumbnail.render(plan.thumbnail_texts[0], badge=args.badge, font_path=s.font_path)
     folder = project.save(c, plan, png)
     print(f"내레이션 {plan.narration_chars():,}자 · 약 {plan.estimated_minutes()}분")
@@ -90,6 +109,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--transcript", help="원본 자막/대본 파일 (있으면 더 정확)")
     p.add_argument("--notes", default="", help="장면 메모")
     p.add_argument("--badge", default="", help="썸네일 왼쪽 위 배지 문구")
+    p.add_argument("--provider", choices=["manual", "gemini", "ollama", "claude"],
+                   help="대본 AI (기본 manual: 무료 채팅 복사·붙여넣기)")
+    p.add_argument("--answer", help="무료 AI 채팅에서 받은 답(JSON)을 저장한 파일")
+    p.add_argument("--prompt-out", default="prompt.txt", help="manual 방식에서 프롬프트를 저장할 파일")
 
     p = sub.add_parser("thumb", help="썸네일만 만들기")
     p.add_argument("text", help="두 줄은 \\n 으로 구분")

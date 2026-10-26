@@ -1,13 +1,13 @@
 # K-콘텐츠 스튜디오 사용설명서
 
 외국인이 한국을 여행한 영상을 소재로 **한국어 영상 기획안 · 대본 · 자막(SRT) · 설명란 · 썸네일**을 만들어 주는 무료 프로그램입니다.
-유료 '원클릭 프로그램'과 같은 기능을 본인 API 키로 직접 돌립니다. 어떤 영상을 분석해 만들었는지는 [영상 분석](영상분석_K콘텐츠_수익화.md)에 있습니다.
+유료 '원클릭 프로그램'과 같은 기능을 **요금 0원**으로 직접 돌립니다(결제 수단 등록도 필요 없음). 어떤 영상을 분석해 만들었는지는 [영상 분석](영상분석_K콘텐츠_수익화.md)에 있습니다.
 
 | | 유료 프로그램 | K-콘텐츠 스튜디오 |
 |---|---|---|
-| 비용 | 강의·프로그램 구매 | YouTube API 무료 + 대본 한 편에 대략 200~500원(Claude API) |
+| 비용 | 강의·프로그램 구매 | **0원** — YouTube API 무료 할당량 + 무료 AI(채팅 복사·붙여넣기 / Gemini 무료 등급 / 내 PC의 Ollama) |
 | 소재 찾기 | 키워드 클릭 | 15개 언어 키워드, 3-3-3 자동 채점 |
-| 대본 | AI 대본 | Claude 대본 + 제목·설명란·태그·챕터·SRT 자막·TTS 대본 |
+| 대본 | AI 대본 | 무료 AI 대본 + 제목·설명란·태그·챕터·SRT 자막·TTS 대본 |
 | 썸네일 | 자동 생성 | 자동 생성(문구·배지·배경) |
 | 저작권 | "2차 창작이라 괜찮다"(사실 아님) | CC BY 필터, 허락 요청 메일, 업로드 전 체크리스트 |
 
@@ -17,17 +17,16 @@
 
 1. [Python 3.12](https://www.python.org/downloads/)을 설치합니다. 설치 첫 화면에서 **Add python.exe to PATH**를 꼭 체크하세요.
 2. 이 저장소를 내려받아 압축을 풉니다(초록색 **Code → Download ZIP**).
-3. Windows: `setup.bat` 실행 → 메모장으로 `.env`가 열리면 아래 2장의 키 두 개를 입력하고 저장.
+3. Windows: `setup.bat` 실행 → 메모장으로 `.env`가 열리면 아래 2장의 `YOUTUBE_API_KEY`를 입력하고 저장.
    macOS/Linux: `./run_kcontent.sh` 한 번 실행 → `.env`에 키 입력.
 4. 실행: Windows `run_kcontent.bat`, macOS/Linux `./run_kcontent.sh` → 브라우저에 프로그램 화면이 열립니다.
 
 > `setup.bat`은 같은 저장소의 에듀파인 프로그램용 브라우저도 함께 설치합니다. K-콘텐츠 스튜디오만 쓴다면 그 단계는 실패해도 괜찮습니다.
 
-## 2. API 키 두 개 받기
+## 2. 무료 키 받기
 
-### Claude API 키 (`ANTHROPIC_API_KEY`) — 대본 작성용
-1. https://console.anthropic.com 가입 → **Billing**에서 크레딧 충전(5달러면 대본 수십 편)
-2. **API Keys → Create Key** → `sk-ant-...`로 시작하는 키를 복사해 `.env`에 붙여 넣기
+필수는 YouTube 키 하나입니다. 둘 다 **결제 수단(카드) 등록 없이** 무료로 받습니다.
+직접 찍은 영상만 쓴다면 YouTube 키도 없어도 됩니다.
 
 ### YouTube Data API 키 (`YOUTUBE_API_KEY`) — 소재 찾기용, 무료
 1. https://console.cloud.google.com 접속 → 위쪽 프로젝트 선택 → **새 프로젝트**(이름 아무거나)
@@ -35,6 +34,16 @@
 3. **API 및 서비스 → 사용자 인증 정보 → + 사용자 인증 정보 만들기 → API 키** → 키 복사
 4. (권장) 키 옆 **수정 → API 제한사항 → 키 제한 → YouTube Data API v3**만 체크 → 저장
 5. 하루 무료 할당량은 10,000단위입니다. 키워드 하나를 검색할 때 약 200단위를 씁니다(하루 키워드 약 50개).
+
+### (선택) 대본 AI 고르기 — 모두 0원
+| 방식 | 준비 | 특징 |
+|---|---|---|
+| **복사·붙여넣기** (기본) | 없음 | 프로그램이 만든 프롬프트를 [claude.ai](https://claude.ai), [Gemini](https://gemini.google.com), [ChatGPT](https://chatgpt.com) 무료 채팅에 붙여 넣고 답을 다시 붙여 넣습니다. 품질이 가장 좋고 키가 필요 없습니다. |
+| **Gemini 무료 등급** | https://aistudio.google.com/apikey 에서 키 발급 → `.env`의 `GEMINI_API_KEY` | 버튼 한 번으로 자동 작성. 하루 사용량 한도 안에서 무료(한도를 넘으면 오류만 나고 요금은 나가지 않음). 무료 등급 입력 내용은 구글 서비스 개선에 쓰일 수 있습니다. |
+| **Ollama (내 PC)** | https://ollama.com 설치 → 명령 창에서 `ollama pull exaone3.5:7.8b` | 인터넷·키 없이 PC에서 실행. 메모리 16GB 이상 권장, 느릴 수 있음. 한국어가 좋은 모델: `exaone3.5:7.8b`, `gemma3:12b` |
+| Claude API (유료) | `ANTHROPIC_API_KEY` + 크레딧 충전 | 사용한 만큼 과금(한 편에 대략 200~500원). 고를 때만 씁니다. |
+
+`.env`의 `KCONTENT_PROVIDER`로 기본 방식을 바꿀 수 있고(`manual`/`gemini`/`ollama`/`claude`), 화면에서도 매번 고를 수 있습니다.
 
 키는 남에게 보여 주거나 프로그램에 넣어 나눠 주지 마세요. `.env` 파일은 깃허브에 올라가지 않도록 설정돼 있습니다.
 
@@ -54,7 +63,11 @@
 
 ### ② 대본·제목
 - **원본 자막을 붙여 넣으면** 훨씬 정확합니다. 유튜브 영상 아래 **[더보기] → [스크립트 표시]** 내용을 복사하세요.
-  없으면 Claude가 원작자가 하지 않은 말을 지어내지 않도록 장면 설명 위주로 씁니다.
+  없으면 AI가 원작자가 하지 않은 말을 지어내지 않도록 장면 설명 위주로 씁니다.
+- **대본을 쓸 AI**에서 방식을 고릅니다. 기본인 **복사·붙여넣기**는:
+  1. **① 프롬프트 복사** → claude.ai / Gemini / ChatGPT 링크 중 하나를 열어 채팅창에 붙여 넣고 보내기
+  2. 답이 다 나오면 답 전체를 복사 → **② AI 답 붙여넣기** 칸에 붙여 넣고 **② 답 가져오기**
+  3. 답이 길어 중간에 끊기면 채팅에 "계속"이라고 보내 끝까지 받은 뒤 이어진 부분까지 함께 붙여 넣으세요.
 - 결과: 제목 후보, 오프닝(질문형), 구간별 내레이션(원본 몇 분 몇 초 위에 얹을지 표시), 마무리(구독 요청 없음), 한국 vs 해외 비교 포인트, **올리기 전 사실 확인 목록**, 설명란, 원작자 허락 요청 메일(필요할 때만).
 - 길이 막대가 초록으로 꽉 차면 8분 이상입니다. 내레이션은 화면에서 바로 고칠 수 있고, 고친 내용이 내보내기에 반영됩니다.
 
@@ -66,7 +79,7 @@
 | 파일 | 쓰는 곳 |
 |---|---|
 | `script.md` | 전체 대본·제목 후보·체크리스트 (메모장/VS Code로 열기) |
-| `narration_tts.txt` | TTS에 그대로 붙여 넣기 (클로바더빙, 타입캐스트, 무료 Edge TTS 등) |
+| `narration_tts.txt` | 직접 녹음하거나 무료 TTS에 붙여 넣기 (캡컷 내장 TTS, 클로바더빙·타입캐스트 무료 한도 등) |
 | `subtitles_ko.srt` | 캡컷·브루·프리미어에서 자막 불러오기 → 녹음에 맞춰 싱크만 조정 |
 | `description.txt` | 유튜브 설명란 (맨 위에 원작자·원본 링크 자동 포함) |
 | `tags.txt`, `thumbnail.png` | 업로드 화면 |
@@ -75,7 +88,7 @@
 ## 4. 영상 완성까지
 
 1. **녹음**: `narration_tts.txt`를 TTS로 읽히거나 직접 녹음
-2. **편집**: 원본(허락 받은 것) 또는 직접 찍은 영상 위에 내레이션을 얹고, `subtitles_ko.srt`를 불러와 싱크 조정
+2. **편집**: 무료 편집 프로그램(캡컷, 브루 무료 버전 등)에서 원본(허락 받은 것) 또는 직접 찍은 영상 위에 내레이션을 얹고, `subtitles_ko.srt`를 불러와 싱크 조정
 3. **음악**: 원본 배경음악은 빼고 [YouTube 오디오 보관함](https://studio.youtube.com) 같은 무료 음원 사용
 4. **업로드**: 제목·설명란·태그·썸네일 입력. AI 음성이나 합성 화면을 썼다면 **'변경되거나 합성된 콘텐츠'** 표시를 켜세요.
 
@@ -85,7 +98,9 @@
 python -m kcontent                                   # 웹 화면
 python -m kcontent search --cc --langs en,de,el      # 소재 찾기 (CC BY만)
 python -m kcontent search "Jeju vlog" "Korea Reise"  # 키워드 직접 지정
-python -m kcontent plan https://youtu.be/영상ID --transcript 자막.txt   # 프로젝트 폴더 생성
+python -m kcontent plan https://youtu.be/영상ID --transcript 자막.txt   # prompt.txt 생성 (무료 채팅에 붙여 넣기)
+python -m kcontent plan https://youtu.be/영상ID --answer 답.txt          # AI 답 → 프로젝트 폴더
+python -m kcontent plan https://youtu.be/영상ID --provider gemini        # Gemini 무료 등급으로 바로
 python -m kcontent thumb "외국인이 처음 본\n한국 편의점" --badge "외국인 반응" -o thumb.png
 ```
 

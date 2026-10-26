@@ -26,7 +26,8 @@ from pydantic import BaseModel, Field
 from . import __version__, project, rights, subtitles, thumbnail
 from .config import Settings, projects_dir
 from .models import Candidate, VideoPlan
-from .planner import MissingApiKey, make_plan
+from .llm import FREE, PROVIDERS, PlanParseError, parse_plan_text
+from .planner import MissingApiKey, make_plan, manual_prompt
 from .scoring import score_candidate
 from .youtube import KEYWORDS, LANG_NAMES, YouTubeClient, YouTubeError, to_candidate
 
@@ -88,6 +89,12 @@ class PlanRequest(BaseModel):
     notes: str = ""
     transcript: str = ""
     channel_style: str = ""
+    provider: str = ""
+
+
+class ImportRequest(BaseModel):
+    candidate: Candidate
+    answer: str
 
 
 class ThumbRequest(BaseModel):
@@ -116,6 +123,8 @@ def _cand_json(c: Candidate) -> dict[str, Any]:
 
 
 def _api_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, (PlanParseError, ValueError)):
+        return HTTPException(400, str(exc))
     if isinstance(exc, MissingApiKey):
         return HTTPException(401, str(exc))
     if isinstance(exc, anthropic.AuthenticationError):
@@ -126,6 +135,8 @@ def _api_error(exc: Exception) -> HTTPException:
         return HTTPException(502, f"Claude API 오류: {exc.message}")
     if isinstance(exc, anthropic.APIConnectionError):
         return HTTPException(502, "Claude API에 연결하지 못했습니다. 인터넷 연결을 확인하세요.")
+    if isinstance(exc, RuntimeError):
+        return HTTPException(502, str(exc))
     return HTTPException(500, f"오류: {exc}")
 
 
@@ -182,18 +193,41 @@ async def manual(req: ManualRequest) -> dict[str, Any]:
 
 
 # ── ② 대본 ──────────────────────────────────────────────────
-@app.post("/api/plan")
-async def plan(req: PlanRequest) -> dict[str, Any]:
-    try:
-        p = await make_plan(req.candidate, Settings(), notes=req.notes, transcript=req.transcript,
-                            channel_style=req.channel_style)
-    except Exception as exc:  # noqa: BLE001
-        raise _api_error(exc) from exc
+def _plan_response(c: Candidate, p: VideoPlan) -> dict[str, Any]:
     return {
         "plan": p.model_dump(), "chars": p.narration_chars(), "minutes": p.estimated_minutes(),
-        "srt": subtitles.to_srt(p), "description": project.full_description(req.candidate, p),
-        "permission_email": rights.permission_email(req.candidate) if req.candidate.rights == "permission_needed" else "",
+        "srt": subtitles.to_srt(p), "description": project.full_description(c, p),
+        "permission_email": rights.permission_email(c) if c.rights == "permission_needed" else "",
     }
+
+
+@app.post("/api/prompt")
+async def prompt(req: PlanRequest) -> dict[str, Any]:
+    """무료 방식: AI 채팅창에 붙여 넣을 프롬프트."""
+    return {"prompt": manual_prompt(req.candidate, req.notes, req.transcript, req.channel_style)}
+
+
+@app.post("/api/plan/import")
+async def plan_import(req: ImportRequest) -> dict[str, Any]:
+    """무료 방식: AI 채팅의 답(JSON)을 붙여 넣으면 기획안으로 바꿉니다."""
+    try:
+        p = parse_plan_text(req.answer)
+    except PlanParseError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return _plan_response(req.candidate, p)
+
+
+@app.post("/api/plan")
+async def plan(req: PlanRequest) -> dict[str, Any]:
+    provider = req.provider or Settings().provider
+    if provider not in PROVIDERS:
+        raise HTTPException(400, "대본 방식 값이 올바르지 않습니다.")
+    try:
+        p = await make_plan(req.candidate, Settings(), notes=req.notes, transcript=req.transcript,
+                            channel_style=req.channel_style, provider=provider)
+    except Exception as exc:  # noqa: BLE001
+        raise _api_error(exc) from exc
+    return {**_plan_response(req.candidate, p), "free": provider in FREE}
 
 
 # ── ③ 썸네일 ────────────────────────────────────────────────

@@ -18,12 +18,13 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 os.environ.setdefault("KCONTENT_DATA_DIR", tempfile.mkdtemp(prefix="kcontent-test-"))
-os.environ.pop("YOUTUBE_API_KEY", None)
+for _k in ("YOUTUBE_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "KCONTENT_PROVIDER"):
+    os.environ.pop(_k, None)
 
-from kcontent import project, rights, subtitles, thumbnail  # noqa: E402
+from kcontent import llm, project, rights, subtitles, thumbnail  # noqa: E402
 from kcontent.config import Settings  # noqa: E402
 from kcontent.models import Candidate, Segment, VideoPlan  # noqa: E402
-from kcontent.planner import make_plan  # noqa: E402
+from kcontent.planner import make_plan, manual_prompt  # noqa: E402
 from kcontent.scoring import find_places, score_candidate  # noqa: E402
 from kcontent.youtube import YouTubeClient, YouTubeError, parse_duration  # noqa: E402
 
@@ -182,7 +183,7 @@ def test_planner_request_and_parse():
 
     client = anthropic.AsyncAnthropic(api_key="test", http_client=httpx2.AsyncClient(transport=httpx2.MockTransport(handler)))
     plan = asyncio.run(make_plan(score_candidate(_cand()), Settings(anthropic_api_key="test"),
-                                 transcript="Wow, the subway is so clean!", client=client))
+                                 transcript="Wow, the subway is so clean!", provider="claude", client=client))
     assert plan.titles[0].startswith("외국인이")
     body = captured["body"]
     assert body["model"] == "claude-opus-5-5"
@@ -193,6 +194,69 @@ def test_planner_request_and_parse():
     prompt = body["messages"][0]["content"]
     assert "Wow, the subway is so clean!" in prompt and "서울" in prompt
     assert "구독" in body["system"]                       # 구독 요청 금지 규칙이 들어갔는지
+
+
+# ── 무료 방식 ────────────────────────────────────────────────
+def test_free_is_default_and_manual_prompt():
+    assert Settings().provider == "manual"
+    prompt = manual_prompt(score_candidate(_cand()), transcript="So clean!")
+    assert "JSON 스키마" in prompt and '"segments"' in prompt and "So clean!" in prompt and "구독" in prompt
+    with pytest.raises(ValueError):
+        asyncio.run(make_plan(_cand(), Settings()))
+
+
+def test_parse_plan_text_tolerates_chatter():
+    raw = _plan().model_dump_json()
+    assert llm.parse_plan_text(f"네, 기획안입니다!\n```json\n{raw}\n```\n수정할 점 있으면 말씀하세요.").titles == _plan().titles
+    assert llm.parse_plan_text("앞말 " + raw + " 뒷말").hook == _plan().hook
+    with pytest.raises(llm.PlanParseError, match="JSON을 찾지"):
+        llm.parse_plan_text("죄송합니다")
+    with pytest.raises(llm.PlanParseError, match="끊겼다면"):
+        llm.parse_plan_text(raw[:200])
+    with pytest.raises(llm.PlanParseError, match="형식이 조금 다릅니다"):
+        llm.parse_plan_text('{"titles": ["하나"]}')
+
+
+def test_gemini_free_tier_request_and_retry():
+    calls: list[tuple[str, dict | None]] = []
+    answers = iter(["형식 틀린 답", _plan().model_dump_json()])
+
+    def post(url: str, body: dict | None, timeout: int) -> dict:
+        calls.append((url, body))
+        if "/models?" in url:
+            return {"models": [{"name": "models/gemini-2.5-flash", "supportedGenerationMethods": ["generateContent"]},
+                               {"name": "models/gemini-2.5-pro", "supportedGenerationMethods": ["generateContent"]},
+                               {"name": "models/gemini-3-flash-preview", "supportedGenerationMethods": ["generateContent"]}]}
+        return {"candidates": [{"content": {"parts": [{"text": next(answers)}]}}]}
+
+    plan = llm.gemini_plan("프롬프트", "free-key", post=post)
+    assert plan.titles == _plan().titles
+    gen = [c for c in calls if ":generateContent" in c[0]]
+    assert len(gen) == 2 and "models/gemini-2.5-flash:generateContent?key=free-key" in gen[0][0]
+    assert gen[0][1]["generationConfig"]["responseMimeType"] == "application/json"
+    assert "형식 오류" in gen[1][1]["contents"][0]["parts"][0]["text"]
+    with pytest.raises(RuntimeError, match="aistudio"):
+        llm.gemini_plan("p", "")
+
+
+def test_ollama_local_request():
+    seen = {}
+
+    def post(url: str, body: dict | None, timeout: int) -> dict:
+        seen.update(url=url, body=body)
+        return {"message": {"content": _plan().model_dump_json()}}
+
+    plan = llm.ollama_plan("프롬프트", "http://127.0.0.1:11434/", "exaone3.5:7.8b", post=post)
+    assert plan.closing == _plan().closing
+    assert seen["url"] == "http://127.0.0.1:11434/api/chat"
+    assert seen["body"]["model"] == "exaone3.5:7.8b" and seen["body"]["stream"] is False
+    assert seen["body"]["format"]["title"] == "VideoPlan"
+
+    def down(url: str, body: dict | None, timeout: int) -> dict:
+        raise RuntimeError("AI 서버에 연결하지 못했습니다: refused")
+
+    with pytest.raises(RuntimeError, match="ollama pull"):
+        llm.ollama_plan("p", "http://127.0.0.1:11434", "exaone3.5:7.8b", post=down)
 
 
 # ── 로컬 서버 ────────────────────────────────────────────────
@@ -223,6 +287,16 @@ def test_server_flow(api):
 
     cand = api.post("/api/manual", json={"title": "부산 해운대 외국인 친구와 하루", "duration_min": 12}).json()
     assert cand["rights"] == "own" and "부산" in cand["places"]
+
+    assert cfg["provider"] == "manual"
+    pr = api.post("/api/prompt", json={"candidate": cand, "notes": "03:10 해변 산책"}).json()["prompt"]
+    assert "부산 해운대 외국인 친구와 하루" in pr and "03:10 해변 산책" in pr
+    assert api.post("/api/plan", json={"candidate": cand, "provider": "manual"}).status_code == 400
+    assert api.post("/api/plan", json={"candidate": cand, "provider": "nope"}).status_code == 400
+    imp = api.post("/api/plan/import", json={"candidate": cand, "answer": "```json\n" + _plan().model_dump_json() + "\n```"})
+    assert imp.status_code == 200 and imp.json()["minutes"] >= 8 and imp.json()["srt"].startswith("1\n")
+    bad = api.post("/api/plan/import", json={"candidate": cand, "answer": "모르겠어요"})
+    assert bad.status_code == 400 and "JSON" in bad.json()["detail"]
 
     t = api.post("/api/thumbnail", json={"text": "부산에서\n생긴 일", "badge": "브이로그"}).json()
     assert Image.open(io.BytesIO(base64.b64decode(t["png"]))).size == (1280, 720)

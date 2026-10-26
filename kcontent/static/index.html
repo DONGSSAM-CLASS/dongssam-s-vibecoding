@@ -124,13 +124,30 @@
     <div class="card" id="selBox"><span class="note">①에서 소재를 먼저 고르세요.</span></div>
     <div class="card">
       <h2>대본 재료 (있을수록 정확해요)</h2>
-      <label>원본 자막/대본 — 유튜브 [더보기 → 스크립트 표시] 내용을 붙여 넣으세요. 없으면 Claude가 원작자 말을 지어내지 않고 장면 설명 위주로 씁니다.</label>
+      <label>원본 자막/대본 — 유튜브 [더보기 → 스크립트 표시] 내용을 붙여 넣으세요. 없으면 AI가 원작자 말을 지어내지 않고 장면 설명 위주로 씁니다.</label>
       <textarea id="transcript" rows="5"></textarea>
       <div class="grid2">
         <div><label>장면 메모 (예: 03:10 편의점에서 삼각김밥에 놀람)</label><textarea id="notes" rows="3"></textarea></div>
         <div><label>우리 채널 말투</label><textarea id="style" rows="3" placeholder="예: 친근한 반말, 짧은 문장, 감탄사 적게"></textarea></div>
       </div>
-      <div class="actions"><button class="primary" id="btnPlan" disabled>대본·제목 만들기</button><span class="note">1~3분 걸립니다. 한 편에 대략 200~500원(Claude API 사용료, Opus 기준).</span></div>
+      <label>대본을 쓸 AI</label>
+      <select id="provider"></select>
+      <div id="manualBox">
+        <div class="box ok">요금 0원 — 무료 AI 채팅을 씁니다. ① 프롬프트를 복사해 아래 채팅 중 하나에 붙여 넣고 ② 돌아온 답 전체를 복사해 아래 칸에 붙여 넣으세요.</div>
+        <div class="actions">
+          <button class="primary" id="btnPrompt" disabled>① 프롬프트 복사</button>
+          <a href="https://claude.ai/new" target="_blank" rel="noopener">claude.ai</a>
+          <a href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+          <a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>
+          <span class="note" id="promptInfo"></span>
+        </div>
+        <label>② AI 답 붙여넣기 (JSON — 앞뒤에 설명이 섞여 있어도 괜찮아요)</label>
+        <textarea id="answer" rows="5" placeholder='{"titles": [...], ...}'></textarea>
+        <div class="actions"><button class="primary" id="btnImport" disabled>② 답 가져오기</button></div>
+      </div>
+      <div id="autoBox" hidden>
+        <div class="actions"><button class="primary" id="btnPlan" disabled>대본·제목 만들기</button><span class="note" id="costNote"></span></div>
+      </div>
     </div>
     <div id="planOut"></div>
   </section>
@@ -256,7 +273,8 @@ function pick(c) {
   const cls = c.rights === 'permission_needed' ? 'warn' : 'ok';
   $('selBox').innerHTML = `<h2>선택한 소재</h2><b>${esc(c.title)}</b> <span class="note">— ${esc(c.channel)} · ${Math.round(c.duration_sec / 60)}분 · ${c.score}점</span>
     <div class="box ${cls}">${esc(c.verdict)}</div>`;
-  $('btnPlan').disabled = false; $('planOut').innerHTML = ''; updateExport();
+  ['btnPlan', 'btnPrompt', 'btnImport'].forEach((id) => { $(id).disabled = false; });
+  $('planOut').innerHTML = ''; updateExport();
   tab('plan');
 }
 
@@ -293,8 +311,26 @@ function renderPlan(res) {
   $('thumbChoices').querySelectorAll('.chip').forEach((c) => c.onclick = () => { $('tText').value = p.thumbnail_texts[+c.dataset.t].replace(/\\n/g, '\n'); });
   $('tText').value = (p.thumbnail_texts[0] || '').replace(/\\n/g, '\n');
 }
+const planBody = () => ({ candidate: S.cand, transcript: $('transcript').value, notes: $('notes').value, channel_style: $('style').value, provider: $('provider').value });
+const COST = { gemini: '요금 0원 — Gemini 무료 등급(하루 한도 안에서). 1~3분 걸립니다.', ollama: '요금 0원 — 내 PC에서 실행. PC 성능에 따라 수 분 걸립니다.', claude: '유료 — Claude API 사용료(한 편에 대략 200~500원)가 본인 계정에 청구됩니다.' };
+function showProvider() {
+  const v = $('provider').value;
+  $('manualBox').hidden = v !== 'manual'; $('autoBox').hidden = v === 'manual';
+  $('costNote').textContent = COST[v] || '';
+  try { localStorage.setItem('kc_provider', v); } catch (e) {}
+}
+$('provider').onchange = showProvider;
+$('btnPrompt').onclick = () => busy($('btnPrompt'), async () => {
+  const { prompt } = await api('/api/prompt', planBody());
+  try { await navigator.clipboard.writeText(prompt); $('promptInfo').textContent = `복사됨 (${prompt.length.toLocaleString()}자). 채팅창에 붙여 넣으세요.`; }
+  catch (e) { $('answer').value = prompt; $('promptInfo').textContent = '자동 복사가 막혀 아래 칸에 넣었습니다. 전체 선택해 복사한 뒤 칸을 비우세요.'; }
+});
+$('btnImport').onclick = () => busy($('btnImport'), async () => {
+  const res = await api('/api/plan/import', { candidate: S.cand, answer: $('answer').value });
+  S.plan = res.plan; renderPlan(res); updateExport();
+});
 $('btnPlan').onclick = () => busy($('btnPlan'), async () => {
-  const res = await api('/api/plan', { candidate: S.cand, transcript: $('transcript').value, notes: $('notes').value, channel_style: $('style').value });
+  const res = await api('/api/plan', planBody());
   S.plan = res.plan; renderPlan(res); updateExport();
 });
 
@@ -329,10 +365,12 @@ $('btnZip').onclick = () => busy($('btnZip'), async () => {
 
 (async () => {
   S.cfg = await api('/api/config');
-  $('meta').textContent = `v${S.cfg.version} · ${S.cfg.models[S.cfg.model] || S.cfg.model}`;
+  $('meta').textContent = `v${S.cfg.version} · 기본 요금 0원`;
+  let saved = ''; try { saved = localStorage.getItem('kc_provider') || ''; } catch (e) {}
+  $('provider').innerHTML = Object.entries(S.cfg.providers).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+  $('provider').value = S.cfg.providers[saved] ? saved : S.cfg.provider; showProvider();
   const warns = [];
   if (!S.cfg.has_youtube_key) warns.push('YOUTUBE_API_KEY가 없어 ①소재 찾기가 동작하지 않습니다(직접 촬영 영상은 사용 가능).');
-  if (!S.cfg.has_anthropic_key) warns.push('ANTHROPIC_API_KEY가 없어 ②대본 만들기가 동작하지 않습니다.');
   if (S.cfg.font_warning) warns.push(S.cfg.font_warning);
   $('keyWarn').innerHTML = warns.map((w) => `<div class="box bad">${esc(w)}</div>`).join('') + (warns.length ? '<br>' : '');
   $('checklist').innerHTML = S.cfg.checklist.map((c) => `<label class="check" style="display:flex;margin:6px 0"><input type="checkbox"> ${esc(c)}</label>`).join('');
