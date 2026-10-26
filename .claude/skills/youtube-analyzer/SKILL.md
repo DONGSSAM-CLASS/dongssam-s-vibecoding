@@ -1,0 +1,57 @@
+---
+name: youtube-analyzer
+description: 유튜브 영상(URL)의 제목·채널·설명란·챕터·자막을 받아 분석용 마크다운으로 정리한다. "이 영상 분석해줘", "유튜브 영상 내용 정리", "영상 자막 가져와" 같은 요청에 사용한다. 영상 속 프로그램·기능·가격을 뽑아 따라 만들기 계획을 세울 때 먼저 실행한다.
+---
+
+# 유튜브 영상 분석
+
+오픈소스 [yt-dlp](https://github.com/yt-dlp/yt-dlp)로 영상 정보와 자막을 받아, 분석에 바로 쓸 수 있는
+`analysis.md`(메타데이터 + 타임스탬프 자막)를 만든다. 영상 파일 자체는 내려받지 않는다.
+
+## 1. 준비 (한 번만)
+
+```bash
+python3 -m venv "$SCRATCH/ytenv"
+"$SCRATCH/ytenv/bin/pip" install -q -r .claude/skills/youtube-analyzer/requirements.txt
+```
+
+`$SCRATCH`는 스크래치패드 폴더(없으면 아무 임시 폴더). 저장소 안에 venv를 만들지 않는다.
+
+## 2. 실행
+
+```bash
+"$SCRATCH/ytenv/bin/python" -I .claude/skills/youtube-analyzer/scripts/yt_analyze.py \
+  "https://youtu.be/<영상ID>" --out "$SCRATCH/yt"
+```
+
+- 결과: `$SCRATCH/yt/<영상ID>/analysis.md`, `info.json`, 원본 자막 파일
+- 자막 우선순위: 사람이 단 한국어 자막 → 자동 생성 한국어 → 영어
+- 자막이 없는 영상이면 설명란·챕터만 정리되고, 그 사실이 `analysis.md`에 적힌다.
+
+### 유튜브에 접속할 수 없을 때
+
+`Tunnel connection failed: 403` / `Unable to connect to proxy`가 나오면 **환경의 네트워크 정책이
+`www.youtube.com`을 막고 있는 것**이다. 우회하려 하지 말고 사용자에게 알린다:
+클라우드 환경 설정 → Network access에서 `www.youtube.com`, `youtube.com`, `i.ytimg.com`을
+Allowed domains에 추가하거나 접근 수준을 넓힌다.
+
+그동안 쓸 수 있는 대체 경로:
+
+```bash
+# 사용자가 붙여 넣거나 올린 자막/대본 파일(.vtt/.srt/.txt)로 같은 형식의 analysis.md 만들기
+"$SCRATCH/ytenv/bin/python" -I .claude/skills/youtube-analyzer/scripts/yt_analyze.py \
+  --transcript-file 자막.vtt --title "영상 제목" --out "$SCRATCH/yt"
+```
+
+## 3. 분석
+
+`analysis.md`를 읽고 다음 순서로 정리한다. 지어내지 않는다 — 자막에 없는 내용은 "영상에서 확인 안 됨"으로 적는다.
+
+1. **영상 요지** 3~5줄
+2. **소개된 프로그램/서비스**: 이름, 하는 일, 가격·결제 방식, 입력→출력 흐름
+3. **기능 목록**: 타임스탬프와 함께 (예: `[03:12] 키워드 입력하면 대본 자동 생성`)
+4. **수익화 방식**: 어떤 플랫폼에서 어떻게 돈이 되는지, 영상이 주장하는 수치는 "주장"으로 표시
+5. **직접 만들기 설계**: 각 기능을 무료/저가 도구(Claude API, 오픈소스 TTS, ffmpeg 등)로 대체하는 방법
+6. **주의점**: 저작권(방송·음원·드라마 클립 재사용), 플랫폼 정책(반복·재사용 콘텐츠 수익 제한), 초상권
+
+영상의 자막 전문을 그대로 옮겨 배포하지 않는다. 분석에는 요약과 짧은 인용만 쓴다.
