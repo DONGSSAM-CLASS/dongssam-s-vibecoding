@@ -35,7 +35,17 @@ python3 -m venv "$SCRATCH/ytenv"
 클라우드 환경 설정 → Network access에서 `www.youtube.com`, `youtube.com`, `i.ytimg.com`을
 Allowed domains에 추가하거나 접근 수준을 넓힌다.
 
-그동안 쓸 수 있는 대체 경로:
+`Sign in to confirm you're not a bot`이 나오면 유튜브가 클라우드 서버 IP를 막은 것이다.
+다른 클라이언트 흉내·키 바꾸기 같은 우회를 시도하지 말고, 아래 대체 경로 중 하나를 사용자에게 안내한다.
+가장 쉬운 방법은 사용자 PC(가정·학교 인터넷)에서 같은 명령을 실행해 `analysis.md`를 올려 받는 것이다.
+
+```bash
+# 사용자 PC (Windows는 python, macOS/Linux는 python3)
+pip install -r .claude/skills/youtube-analyzer/requirements.txt
+python .claude/skills/youtube-analyzer/scripts/yt_analyze.py "https://youtu.be/<영상ID>" --out yt
+```
+
+대체 경로:
 
 ```bash
 # 사용자가 붙여 넣거나 올린 자막/대본 파일(.vtt/.srt/.txt)로 같은 형식의 analysis.md 만들기

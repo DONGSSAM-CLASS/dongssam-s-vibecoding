@@ -121,6 +121,12 @@ def from_youtube(url: str, out: Path) -> Path:
                 "환경 설정의 Network access에 www.youtube.com, youtube.com, i.ytimg.com 을 허용하거나,\n"
                 "--transcript-file 로 자막/대본 파일을 넣어 주세요.\n\n원본 오류: " + msg
             )
+        if "not a bot" in msg:
+            sys.exit(
+                "유튜브가 이 컴퓨터(클라우드 서버 IP)를 봇으로 의심해 막았습니다.\n"
+                "선생님 PC에서 이 스크립트를 실행해 나온 analysis.md를 올리거나,\n"
+                "영상의 [더보기 → 스크립트 표시] 내용을 붙여 넣어 --transcript-file 로 넣어 주세요.\n\n원본 오류: " + msg
+            )
         sys.exit(f"영상 정보를 가져오지 못했습니다: {msg}")
 
     vid = info["id"]
