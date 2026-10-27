@@ -1,6 +1,6 @@
 'use strict';
 /* 역사 웹앱 워크숍 학습지. 서버가 없어도 이 파일만으로 돌아갑니다.
-   ① 쓴 답은 이 브라우저에 저장 ② 한 칸씩 보기와 타이머 ③ 고른 대로 프롬프트를 짜 줌(AI를 부르지 않음)
+   ① 쓴 답은 이 브라우저에 저장 ② 한 쪽씩 보기와 타이머 ③ 고른 대로 프롬프트를 짜 줌(AI를 부르지 않음)
    ④ 작품 카드와 좋아요 갤러리 ⑤ 바로 채점되는 퀴즈 ⑥ 별점 설문
    수업방에 들어오면 live.js가 WS의 갈고리를 써서 진행 상황을 진행자에게 보냅니다. */
 const $ = (s, r = document) => r.querySelector(s);
@@ -24,6 +24,8 @@ function toast(t) {
 }
 
 let answers = store.get(KEY, {}) || {};
+if (!answers || typeof answers !== 'object' || Array.isArray(answers)) answers = {};
+if (!['canva','gemini','codex','claude'].includes(answers.tool)) answers.tool = answers.pl === 'adv' ? 'codex' : 'gemini';
 function save() {
   if (store.set(KEY, answers)) say('이 브라우저에 저장했어요. 공용 기기라면 끝나고 답을 지워 주세요.');
   else say('이 브라우저는 저장이 꺼져 있어요. [내 답 모두 복사]로 옮겨 두세요.', true);
@@ -79,7 +81,8 @@ async function copyText(text, stateEl, okMsg = '복사했어요.') {
   try { await navigator.clipboard.writeText(text); setState(stateEl, okMsg); return true; }
   catch { setState(stateEl, '직접 복사하는 창을 열었어요.', true); openCopyBox(text); return false; }
 }
-const LABELS = { star: '연수 만족도(별점)' };
+const LABELS = { star: '연수 만족도(별점)', tool: '선택한 실습 도구' };
+const TOOL_NAMES = { canva:'Canva AI', gemini:'Gemini', codex:'Codex', claude:'Claude Code' };
 function labelOf(f) {
   if (LABELS[f]) return LABELS[f];
   const el = $(`[data-save="${f}"]`) || $(`[data-pick="${f}"]`);
@@ -88,7 +91,7 @@ function labelOf(f) {
 }
 function answerText(fields) {
   return fields.map(f => {
-    const v = f === 'star' ? (answers.star ? '★'.repeat(answers.star) + ` (${answers.star}/5)` : '') : String(answers[f] || '').trim();
+    const v = f === 'tool' ? TOOL_NAMES[answers.tool] : f === 'star' ? (answers.star ? '★'.repeat(answers.star) + ` (${answers.star}/5)` : '') : String(answers[f] || '').trim();
     return v ? `■ ${labelOf(f)}\n${f === 'worry' ? v.split(',').join(', ') : v}` : '';
   }).filter(Boolean).join('\n\n');
 }
@@ -98,7 +101,7 @@ document.addEventListener('click', e => {
 });
 $('#copyAll').onclick = () => {
   closeMenu();
-  const fields = ['n0', 'pain', 'c1', 'best', 'fun', 'c2', 'worry', 'c4', 'p1', 'p5', 'p6', 'work-name', 'work-url', 'work-desc', 'star', 's2', 's3'];
+  const fields = ['tool', 'n0', 'pain', 'c1', 'best', 'fun', 'c2', 'worry', 'c4', 'p1', 'p5', 'p6', 'work-name', 'work-url', 'work-desc', 'star', 's2', 's3'];
   const text = answerText(fields);
   if (!text) { say('아직 쓴 답이 없어요.', true); return; }
   copyText('[역사 웹앱 워크숍 학습지: 내 답]\n\n' + text, null).then(ok => { if (ok) say('내 답을 모두 복사했어요.'); });
@@ -109,8 +112,8 @@ const PK = window.PromptKit;
 const GRADES = ['초등 5–6학년', '중학교 1학년', '중학교 2학년', '중학교 3학년', '고등학교'];
 const MINS = ['10분', '15분', '20분', '한 차시(45분)'];
 const OWN = '직접 쓰기';
-const pkKind = () => PK.KINDS.find(k => k.id === answers.pk) || PK.KINDS[0];
-const pkLevel = () => answers.pl === 'adv' ? 'adv' : 'basic';
+const pkKind = () => PK.KINDS.find(k => k.id === answers.pk) || PK.KINDS.find(k => k.id === 'quiz') || PK.KINDS[0];
+const pkLevel = () => ['codex','claude'].includes(answers.tool) && answers.pl === 'adv' ? 'adv' : 'basic';
 const pkVal = (key, def) => { const c = answers[key] || def; return c === OWN ? (String(answers[key + '-own'] || '').trim() || def) : c; };
 const pkMulti = (id, def) => String(answers['x-' + id] ?? def).split(',').map(x => x.trim()).filter(Boolean);
 function sel(key, label, opts, def) {
@@ -148,7 +151,7 @@ function buildPk() {
     v[id] = multi ? [...pkMulti(id, def), ...String(answers['x-' + id + '-own'] || '').split(',').map(x => x.trim()).filter(Boolean)].join(',')
       : opts ? pkVal('x-' + id, def) : String(answers['x-' + id] || '').trim();
   });
-  setValue('p9', PK.build(kind, v, pkLevel()));
+  setValue('p9', PK.build(kind, { ...v, tool: answers.tool }, pkLevel()));
   paintPkLen();
   setState($('#buildState'), get('p1') ? '' : '주제를 쓰면 [주제] 자리가 바뀌어요.', !get('p1'));
 }
@@ -178,10 +181,10 @@ document.addEventListener('change', e => {
   if (s.value === OWN) { const o = $(`[data-pko="${s.dataset.pks}"]`); if (o) o.focus(); }
 });
 $('#copyPrompt').onclick = () => copyText(answers.p9 || '', $('#buildState'), '복사했어요. AI 입력창에 붙여 넣으세요.');
-/* AI 단추는 진짜 링크입니다. 누르는 순간 복사하고, 링크는 그대로 새 탭에서 열립니다. */
+/* AI 버튼은 진짜 링크입니다. 누르는 순간 복사하고, 링크는 그대로 새 탭에서 열립니다. */
 $$('[data-ai]').forEach(a => a.addEventListener('click', () => {
   const tip = a.dataset.ai === 'gemini' ? '복사했어요. 제미나이에서 [캔버스]를 켜고 붙여 넣으세요.' : '복사했어요. 클로드 입력창에 붙여 넣으세요.';
-  navigator.clipboard.writeText(answers.p9 || '').then(() => setState($('#buildState'), tip), () => setState($('#buildState'), '자동 복사가 막혔어요. [복사] 단추를 먼저 눌러 주세요.', true));
+  navigator.clipboard.writeText(answers.p9 || '').then(() => setState($('#buildState'), tip), () => setState($('#buildState'), '자동 복사가 막혔어요. [복사] 버튼을 먼저 눌러 주세요.', true));
 }));
 $('#fixChips').innerHTML = PK.FIXES.map((f, i) => `<button type="button" data-fix="${i}">${esc(f[0])}</button>`).join('');
 $('#fixChips').addEventListener('click', e => {
@@ -202,7 +205,7 @@ function deployCounts() {
   return out;
 }
 function paintDeploy() {
-  const tab = answers.dtab === 'firebase' ? 'firebase' : 'netlify';
+  const tab = ['canva','gemini','firebase','netlify'].includes(answers.dtab) ? answers.dtab : (answers.tool === 'canva' ? 'canva' : answers.tool === 'gemini' ? 'gemini' : 'firebase');
   $$('[data-dtab]').forEach(b => { const on = b.dataset.dtab === tab; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
   $$('[data-dpanel]').forEach(p => { p.hidden = p.dataset.dpanel !== tab; });
   const c = deployCounts();
@@ -215,7 +218,9 @@ $$('[data-dtab]').forEach(b => b.addEventListener('click', () => { setValue('dta
 $('.dtabs').addEventListener('keydown', e => {
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   e.stopPropagation();
-  const next = answers.dtab === 'firebase' ? 'netlify' : 'firebase';
+  const visible = $$('[data-dtab]').filter(b => !b.hidden).map(b => b.dataset.dtab);
+  const current = Math.max(0, visible.indexOf(answers.dtab));
+  const next = visible[(current + (e.key === 'ArrowRight' ? 1 : visible.length - 1)) % visible.length];
   setValue('dtab', next); paintDeploy(); $(`[data-dtab="${next}"]`).focus();
 });
 $$('[data-check]').forEach(b => {
@@ -224,7 +229,7 @@ $$('[data-check]').forEach(b => {
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-cmd]'); if (!b) return;
-  copyText(b.previousElementSibling.textContent, $('#cmdState'), '복사했어요. 명령 창이나 에이전트에 붙여 넣으세요.').then(ok => {
+  copyText(b.previousElementSibling.textContent, $('#cmdState'), '복사했어요. 해당 도구의 입력창이나 안내된 명령 창에 붙여 넣으세요.').then(ok => {
     if (!ok) return;
     b.textContent = '복사됨'; setTimeout(() => { b.textContent = '복사'; }, 1500);
   });
@@ -348,8 +353,8 @@ const QUESTIONS = [
     '배포하면 …netlify.app이나 …web.app 같은 주소가 생겨요. QR로 만들어 나눠 주면 돼요.'],
   ['Netlify Drop에 웹앱을 올리기 전에 먼저 할 일은?', ['구글 계정으로 로그인하기', '카드 등록하기', '프로그램 설치하기', '컴퓨터 다시 켜기'], 0,
     '로그인하고 올려야 사이트가 사라지지 않아요. 카드 등록은 필요 없어요.'],
-  ['만든 웹앱에서 단추가 안 눌릴 때 가장 좋은 방법은?', ['처음부터 포기하기', 'AI에게 무엇이 안 되는지 말하고 고쳐 달라고 하기', '컴퓨터 끄기', '그냥 두기'], 1,
-    '"[시작] 단추를 눌렀는데 반응이 없어. 고쳐 줘"처럼 말하면 돼요. 6쪽 아래의 고칠 때 쓰는 말을 써도 좋아요.']
+  ['만든 웹앱에서 버튼이 안 눌릴 때 가장 좋은 방법은?', ['처음부터 포기하기', 'AI에게 무엇이 안 되는지 말하고 고쳐 달라고 하기', '컴퓨터 끄기', '그냥 두기'], 1,
+    '"[시작] 버튼을 눌렀는데 반응이 없어. 고쳐 줘"처럼 말하면 돼요. 6쪽 아래의 고칠 때 쓰는 말을 써도 좋아요.']
 ];
 let quiz = store.get(QUIZ, {}) || {};
 function quizScore() {
@@ -390,7 +395,7 @@ $('#stars').addEventListener('click', e => {
 });
 paintStars();
 
-// ── 한 칸씩 보기 ─────────────────────────────────────────────────────────
+// ── 한 쪽씩 보기 ─────────────────────────────────────────────────────────
 const STEPS = $$('.step[data-step]');
 let stepIndex = Math.max(0, Math.min(STEPS.length - 1, Number(store.get(KEY + '-step', 0)) || 0));
 let oneAtATime = store.get(KEY + '-one', true) !== false;
@@ -405,7 +410,7 @@ function paintFollow() {
 function paintSteps(focus) {
   document.body.classList.toggle('one', oneAtATime);
   $('#stepbar').hidden = !oneAtATime;
-  $('#allBtn').textContent = oneAtATime ? '전체 보기' : '한 칸씩 보기';
+  $('#allBtn').textContent = oneAtATime ? '전체 보기' : '한 쪽씩 보기';
   STEPS.forEach((s, i) => s.classList.toggle('now', oneAtATime && i === stepIndex));
   seen.add(stepIndex);
   store.set(KEY + '-step', stepIndex); store.set(KEY + '-seen', [...seen]);
@@ -425,7 +430,7 @@ function goToStep(id) {
   const i = STEPS.findIndex(s => s.dataset.step === id); if (i < 0) return;
   if (oneAtATime) goStep(i); else STEPS[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-/* 쓰는 중에는 진행자를 따라 화면을 옮기지 않습니다. 쓰던 자리를 잃으면 안 되니까 단추만 띄웁니다. */
+/* 쓰는 중에는 진행자를 따라 화면을 옮기지 않습니다. 쓰던 자리를 잃으면 안 되니까 버튼만 띄웁니다. */
 let lastTyped = 0;
 document.addEventListener('input', e => { if (e.target.closest('#sheet')) lastTyped = Date.now(); }, true);   // 수업방 창에 이름을 쓰는 건 세지 않아요
 const isWriting = () => Date.now() - lastTyped < 20000;
@@ -433,7 +438,7 @@ function offerStep(id) {
   const i = STEPS.findIndex(s => s.dataset.step === id); if (i < 0) return;
   if (!oneAtATime) { oneAtATime = true; store.set(KEY + '-one', true); }
   if (i === stepIndex) { pendingStep = -1; paintSteps(); return; }
-  if (isWriting()) { pendingStep = i; paintFollow(); toast('진행자가 다음 쪽을 열었어요. 다 쓰고 위의 단추를 눌러 주세요.'); }
+  if (isWriting()) { pendingStep = i; paintFollow(); toast('진행자가 다음 쪽을 열었어요. 다 쓰고 위의 버튼을 눌러 주세요.'); }
   else { pendingStep = -1; goStep(i, false); toast(`진행자가 「${STEPS[i].dataset.title}」을(를) 열었어요.`); }
 }
 $('#stepPrev').onclick = () => goStep(stepIndex - 1);
@@ -503,7 +508,8 @@ $('#clearYes').onclick = () => {
 
 /* live.js가 쓰는 갈고리 */
 window.WS = {
-  $, $$, esc, say, toast, setState, store, setValue,
+  $, $$, esc, say, toast, setState, store, setValue, copyText,
+  buildPrompt: buildPk, paintPromptBuilder: paintPk, paintPromptLength: paintPkLen, paintDeploy, goToStep,
   get answers() { return answers; },
   get stepIndex() { return stepIndex; },
   get seen() { return [...seen]; },

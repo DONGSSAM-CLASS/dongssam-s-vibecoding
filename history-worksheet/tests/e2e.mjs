@@ -42,9 +42,9 @@ console.log('학습지(이 기기 모드)');
 {
   const p = await page();
   await p.goto(BASE + 'index.html');
-  await t('첫 화면이 1쪽이고 수업방 메뉴는 숨어 있어요', async () => {
+  await t('첫 화면이 1쪽이고 수업방 메뉴가 준비돼 있어요', async () => {
     ok((await p.textContent('#stepTitle')).startsWith('1쪽'));
-    ok(await p.isHidden('#roomBtn'), '수업방 메뉴가 보여요');
+    ok(!(await p.isHidden('#roomBtn')), '수업방 메뉴가 없어요');
   });
   await t('화면 글에 줄표(—)가 없어요', async () => {
     const txt = await p.evaluate(() => document.body.innerText + [...document.querySelectorAll('[placeholder],[data-title],[title],[aria-label]')].map(e => e.getAttribute('placeholder') || e.dataset.title || e.title || e.getAttribute('aria-label')).join(' '));
@@ -68,6 +68,8 @@ console.log('학습지(이 기기 모드)');
   });
   await t('6쪽 프롬프트가 고른 대로 바뀌어요', async () => {
     await dot(p, 'make');
+    await p.click('[data-step="make"] [data-practice-mode="paid"]');
+    await p.click('#customBuilder > summary');
     await p.fill('#f-p1', '임진왜란');
     await p.selectOption('#pkKind', 'slides');
     await p.click('[data-pkm="parts"][data-opt="지도"]');
@@ -94,12 +96,14 @@ console.log('학습지(이 기기 모드)');
   });
   await t('7쪽 배포: 탭을 바꾸고 단계를 체크하고 명령어를 복사해요', async () => {
     await dot(p, 'deploy');
-    ok(await p.isVisible('#panel-netlify') && await p.isHidden('#panel-firebase'));
+    ok(await p.isVisible('#panel-firebase') && await p.isHidden('#panel-netlify'));
+    await p.click('[data-dtab="netlify"]');
+    ok(await p.isVisible('#panel-netlify'));
     await p.click('[data-dtab="firebase"]');
     ok(await p.isHidden('#panel-netlify') && await p.isVisible('#panel-firebase'));
     await p.click('label:has(#f1)'); await p.click('label:has(#f3)');
     ok((await p.textContent('#panel-firebase [data-dstate]')).includes('9단계 중 2단계'));
-    await p.click('#panel-firebase .cmd [data-cmd] >> nth=0');
+    await p.locator('#panel-firebase .cmd').filter({hasText:'npm install -g firebase-tools'}).locator('[data-cmd]').click();
     ok((await p.evaluate(() => window.__copied)) === 'npm install -g firebase-tools');
   });
   await t('8–9쪽: 작품을 올리고 좋아요·고치기·지우기', async () => {
@@ -258,10 +262,10 @@ if (LIVE) {
   await t('퀴즈 점수와 배포 단계가 진행표에 보여요', async () => {
     await dot(amy, 'quiz');
     await amy.click('[data-q="0"] [data-a="1"]'); await amy.click('[data-q="1"] [data-a="2"]');
-    await dot(amy, 'deploy'); await amy.click('label:has(#d1)'); await amy.click('label:has(#d2)');
+    await dot(amy, 'deploy'); await amy.click('[data-dtab="netlify"]'); await amy.click('label:has(#d1)'); await amy.click('label:has(#d2)');
     await until(admin, () => { const p = window.WSAdmin.people.find(x => x.name === '김민지'); return p && p.quiz && p.quiz.done === 2 && p.quiz.right === 1 && p.deploy.netlify.done === 2; });
     const r = await row('김민지').textContent();
-    ok(r.includes('1/6') && r.includes('Netlify 2/6'), r);
+    ok(r.includes('1/6') && r.includes('HTML 배포 2/6'), r);
   });
   await t('설문은 이름 없이 진행자에게 모여요', async () => {
     await dot(ben, 'survey');

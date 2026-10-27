@@ -12,12 +12,13 @@ const ONLINE_MS = 150000;   // 연수생 화면은 1분마다 신호를 보냅�
 /* 학습지의 쪽 순서. index.html의 data-step과 같아야 합니다. */
 const STEPS = [
   ['c1', '1쪽', '웹앱 경험과 만들고 싶은 것'], ['archive', '2쪽', '동쌤 작품 둘러보기'], ['play', '3쪽', '체험 게임 세 가지'],
-  ['c2', '4쪽', '해 보니 어땠나요?'], ['c4', '5쪽', '만들 때 조심할 점'], ['make', '6쪽', '프롬프트 만들기'],
+  ['c2', '4쪽', '해 보니 어땠나요?'], ['c4', '5쪽', '만들 때 조심할 점'], ['make', '6쪽', '도구별 만들기와 수정'],
   ['deploy', '7쪽', '배포 따라 하기'], ['work', '8쪽', '내 작품 카드 만들기'], ['gallery', '9쪽', '작품 갤러리와 좋아요'],
   ['quiz', '10쪽', '마무리 퀴즈'], ['survey', '11쪽', '연수 만족도']
 ];
 /* 답 모아 보기에 쓰는 질문. pick은 고르기 문항(막대그래프로 셉니다). */
 const QS = [
+  ['tool', '선택한 실습 도구', 'pick'],
   ['n0', 'AI로 웹앱을 몇 번 만들어 보셨어요?', 'pick'],
   ['pain', '만들면서 어려웠던 점, 망설여진 까닭'],
   ['c1', '만들어 보고 싶은 역사 웹앱'],
@@ -165,7 +166,7 @@ function paintTimer() {
   draw(); timerTick = setInterval(draw, 1000);
 }
 $('#stepGo').onclick = async () => {
-  try { await fb.db.doc(`rooms/${room.code}`).update({ step: { id: $('#stepSel').value, at: Date.now() } }); setState($('#dashState'), '모두에게 열었어요. 글을 쓰는 중인 사람에게는 단추로 알려요.'); }
+  try { await fb.db.doc(`rooms/${room.code}`).update({ step: { id: $('#stepSel').value, at: Date.now() } }); setState($('#dashState'), '모두에게 열었어요. 글을 쓰는 중인 사람에게는 버튼으로 알려요.'); }
   catch { setState($('#dashState'), '열지 못했어요. 다시 눌러 주세요.', true); }
 };
 $$('[data-t]').forEach(b => b.onclick = async () => {
@@ -180,13 +181,22 @@ $('#toggleOpen').onclick = async () => {
 $('#copyJoin').onclick = () => copy(joinUrl(room.code), $('#dashState'), '연수생용 주소를 복사했어요.');
 
 // ── 그리기 ──────────────────────────────────────────────────────────────
+let paintJob = null;
 function paint() {
+  if (paintJob) return;
+  paintJob = setTimeout(() => { paintJob = null; paintNow(); }, 120);
+}
+function paintNow() {
   people.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko'));
-  paintTiles(); paintFlow(); paintPeople(); paintAnswers(); paintWorks(); paintSurvey();
+  paintTiles(); paintFlow();
+  if (tab === 'people') paintPeople();
+  if (tab === 'answers') paintAnswers();
+  if (tab === 'works') paintWorks();
+  if (tab === 'survey') paintSurvey();
 }
 function deployText(p) {
-  const d = p.deploy || {}, t = d.tab === 'firebase' ? 'firebase' : 'netlify', c = d[t] || { done: 0, total: t === 'firebase' ? 9 : 6 };
-  return { label: t === 'firebase' ? 'Firebase' : 'Netlify', done: c.done || 0, total: c.total || 1, finished: (c.done || 0) >= (c.total || 1) };
+  const d = p.deploy || {}, t = ['canva','gemini','firebase','netlify'].includes(d.tab) ? d.tab : 'netlify', c = d[t] || { done: 0, total: t === 'firebase' ? 9 : t === 'gemini' ? 4 : 6 };
+  return { label: ({canva:'Canva 게시',gemini:'Canvas 공유',firebase:'Firebase',netlify:'HTML 배포'})[t], done: c.done || 0, total: c.total || 1, finished: (c.done || 0) >= (c.total || 1) };
 }
 function paintTiles() {
   const n = people.length, on = people.filter(online).length;
@@ -302,6 +312,7 @@ $$('.tabs [data-tab]').forEach(b => b.onclick = () => {
   tab = b.dataset.tab;
   $$('.tabs [data-tab]').forEach(x => x.setAttribute('aria-selected', x === b));
   $$('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== tab; });
+  paint();
 });
 $$('dialog [data-close]').forEach(b => b.onclick = () => b.closest('dialog').close());
 $$('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));

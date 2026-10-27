@@ -276,3 +276,39 @@ dialog p{font-size:14px;margin:0 0 12px}
   padding:10px 16px;border-radius:8px;border:2px solid var(--ink);background:var(--deep);color:var(--on-deep);font-size:14px;font-weight:700;box-shadow:4px 4px 0 var(--shadow)}
 .roomform{display:grid;gap:12px}
 @media (max-width:620px){.inroom .nav .status{display:none}.roomchip{max-width:none;flex:1 1 auto}}
+
+/* 처음 사용하는 선생님을 위한 도구 선택과 단계별 안내 */
+.practice-intro{border-bottom:2px solid var(--line);padding-bottom:24px;margin-bottom:12px}
+.practice-intro h2{margin:8px 0 14px;font-size:25px;line-height:1.45}
+.practice-intro h2::before{display:none}
+.practice-intro p,.tool-stage p{margin:12px 0}
+.practice-eyebrow{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--blue-ink)}
+.practice-modes,.practice-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 12px}
+.practice-modes button,.practice-tools button{min-width:0;min-height:78px;text-align:left;padding:16px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.practice-modes button b,.practice-tools strong{display:block;font-size:18px;line-height:1.5}
+.practice-modes small,.practice-tools small{display:block;font-size:13px;line-height:1.6;margin-top:4px}
+.practice-modes [aria-pressed=true]{background:var(--blue);color:var(--on-blue);border-color:var(--ink);box-shadow:3px 3px 0 var(--shadow)}
+.practice-tools [aria-pressed=true]{background:var(--sky);border-color:var(--blue)}
+.practice-note{font-size:14px;line-height:1.8;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+.practice-ready{background:var(--soft);border-radius:10px;padding:18px;margin:20px 0}
+.practice-ready ol,.tool-stage ol{padding-left:24px;margin:12px 0}.practice-ready li,.tool-stage li{padding:5px 0}
+.practice-intro details,.practice-help,.practice-builder,.tool-stage,.dpanel details{border:1px solid var(--line);border-radius:10px;padding:16px;margin:18px 0;background:var(--card)}
+.practice-intro summary,.practice-help summary,.practice-builder>summary,.dpanel summary{font-size:17px;font-weight:700;cursor:pointer;min-height:32px;line-height:1.7}
+.practice-intro dt{font-weight:700;margin-top:12px}.practice-intro dd{margin:4px 0 0}
+.guide-heading{margin-top:16px;padding-top:12px}.guide-heading h3{font-size:25px;line-height:1.4;margin:8px 0 12px;font-family:var(--display);font-weight:400}
+#toolGuideProgress{font-size:15px;font-weight:700;color:var(--blue-ink)}
+.tool-stage{padding:0;overflow:hidden}.tool-stage>summary{font-size:18px;font-weight:700;cursor:pointer;min-height:60px;padding:16px;line-height:1.6}
+.tool-stage>summary>span{display:inline-grid;place-items:center;background:var(--sky);border-radius:7px;width:30px;height:30px;margin-right:10px;color:var(--blue-ink)}
+.tool-stage-body{padding:0 18px 18px;line-height:1.85;font-size:16px}.tool-stage-body .stage-done{padding:12px;background:var(--soft);font-weight:700;border-radius:8px;font-size:15px}
+.guide-check{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);margin-top:20px;padding-top:16px;font-size:15px;font-weight:700;cursor:pointer}.guide-check input{width:20px;height:20px;accent-color:var(--blue)}
+.practice-prompt{border:1px solid var(--line);background:var(--soft);border-radius:10px;margin:18px 0;overflow:hidden}
+.practice-prompt>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px}
+.practice-prompt pre{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--body);font-size:16px;line-height:1.9;margin:0;padding:18px}
+.practice-builder[open]{display:grid;gap:16px}.practice-builder>summary{font-size:20px;color:var(--blue-ink)}
+.practice-deploy-intro{padding:16px;background:var(--soft);border:1px solid var(--line);border-radius:10px}.practice-deploy-intro p{margin:8px 0}
+.tool-summary{font-size:12px;color:var(--blue-ink);font-weight:700;margin-top:5px}
+.dpanel .dsteps span{overflow-wrap:anywhere}.dpanel .state{display:block;margin:16px 0}.dpanel details p{line-height:1.85;font-size:15px}
+.btn,.pill,.chips button,.practice-modes button,.practice-tools button{min-height:44px}
+.builder a{white-space:normal;text-align:center}
+@media(max-width:620px){.practice-modes,.practice-tools{gap:8px}.practice-modes button,.practice-tools button{padding:12px}.practice-modes b,.practice-tools strong{font-size:16px!important}.practice-modes small,.practice-tools small{font-size:12px}.tool-stage-body{padding:0 14px 16px}.practice-prompt pre{padding:14px;word-break:normal}.practice-builder{padding:14px}.practice-intro h2{font-size:23px}.guide-heading h3{font-size:22px}.practice-prompt>div{flex-wrap:wrap}.tool-summary{max-width:100%;overflow-wrap:anywhere}}
+@media print{.practice-modes,.practice-tools,.guide-check,.practice-prompt button,[data-go-step],[data-open-builder]{display:none!important}.tool-stage,.practice-builder{break-inside:auto}.practice-prompt pre{font-size:10pt}.practice-intro,.tool-stage-body{font-size:11pt}}

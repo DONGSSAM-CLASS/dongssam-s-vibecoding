@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>역사 연도 퀴즈 · 실습용 예제</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f6fc;color:#102b4e;font:18px/1.75 system-ui,'Malgun Gothic',sans-serif;word-break:keep-all}main{max-width:640px;margin:40px auto;padding:28px;background:white;border:2px solid #284c7c;border-radius:16px}h1{font-size:28px;line-height:1.4}h2{font-size:24px}button{font:inherit;background:#e5effe;color:#102b4e;border:2px solid #2d5b94;border-radius:10px;padding:12px 20px;min-height:48px;cursor:pointer;margin:6px 6px 6px 0}button:focus-visible{outline:3px solid #4c8df6;outline-offset:3px}button:disabled{opacity:.6;cursor:default}.options{display:grid;gap:10px}.options button{margin:0;text-align:left}.note{font-size:15px;color:#415d7c}[hidden]{display:none!important}#feedback{padding:16px;background:#eef4fc;border-radius:10px;margin-top:18px}@media(max-width:640px){main{margin:16px;padding:20px}h1{font-size:25px}}
+</style>
+</head>
+<body><main>
+<h1>역사 연도 퀴즈</h1>
+<p class="note">실습용 예제입니다. 인터넷 연결 없이도 이 파일을 브라우저에서 열어 사용할 수 있습니다.</p>
+<section id="start"><p>문제 3개를 풀고 정답과 해설을 확인해 보세요.</p><button type="button" id="startBtn">퀴즈 시작</button></section>
+<section id="play" hidden><p id="progress"></p><h2 id="question"></h2><div id="options" class="options"></div><div id="feedback" role="status" hidden></div><button type="button" id="nextBtn" hidden>다음 문제</button></section>
+<section id="result" hidden><h2>끝까지 풀었어요</h2><p id="score" role="status"></p><button type="button" id="resetBtn">다시 풀기</button></section>
+<p class="note">점수는 서버에 저장되지 않습니다. 수업에 쓰기 전 문항과 해설을 교과서와 대조하세요.</p>
+</main><script>
+'use strict';
+const questions=[
+ {q:'임진왜란이 시작된 해는?',a:['1392년','1592년','1919년'],correct:1,explain:'임진왜란은 1592년에 시작됐습니다.'},
+ {q:'훈민정음이 반포된 해는?',a:['1446년','1592년','1945년'],correct:0,explain:'훈민정음은 1446년에 반포됐습니다.'},
+ {q:'우리나라가 광복을 맞은 해는?',a:['1910년','1919년','1945년'],correct:2,explain:'1945년 8월 15일 광복을 맞았습니다.'}
+];
+const byId=id=>document.getElementById(id);let index=0,score=0,answered=false;
+function render(){answered=false;byId('progress').textContent=(index+1)+' / '+questions.length+'문제';byId('question').textContent=questions[index].q;byId('options').replaceChildren();byId('feedback').hidden=true;byId('nextBtn').hidden=true;questions[index].a.forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.addEventListener('click',()=>answer(i));byId('options').append(b);});byId('nextBtn').textContent=index===questions.length-1?'결과 보기':'다음 문제';}
+function answer(i){if(answered)return;answered=true;const q=questions[index],right=i===q.correct;if(right)score++;byId('feedback').textContent=(right?'정답이에요. ':'아쉽지만 정답은 '+q.a[q.correct]+'입니다. ')+q.explain;byId('feedback').hidden=false;byId('nextBtn').hidden=false;Array.from(byId('options').children).forEach(b=>{b.disabled=true;});}
+function start(){index=0;score=0;byId('start').hidden=true;byId('result').hidden=true;byId('play').hidden=false;render();}
+byId('startBtn').addEventListener('click',start);byId('resetBtn').addEventListener('click',start);byId('nextBtn').addEventListener('click',()=>{if(!answered)return;if(index<questions.length-1){index++;render();}else{byId('play').hidden=true;byId('result').hidden=false;byId('score').textContent='3문제 중 '+score+'문제를 맞혔습니다.';}});
+</script></body></html>

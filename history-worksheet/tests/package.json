@@ -4,7 +4,9 @@
   "type": "module",
   "description": "학습지 테스트: 보안 규칙(rules.test.mjs)과 브라우저 동작(e2e.mjs)",
   "scripts": {
-    "test": "cd .. && firebase emulators:exec --only auth,firestore --project demo-worksheet \"node tests/rules.test.mjs && node tests/e2e.mjs\""
+    "test": "cd .. && firebase emulators:exec --only auth,firestore --project demo-worksheet \"node tests/rules.test.mjs && node tests/e2e.mjs\"",
+    "test:prompt": "node promptkit.test.mjs",
+    "test:load": "cd .. && firebase emulators:exec --only firestore --project demo-worksheet \"node tests/rules.test.mjs && node tests/room-load.test.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",

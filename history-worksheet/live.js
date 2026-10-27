@@ -80,7 +80,9 @@
       $('#roomBox').close();
       toast(`수업방 ${code}에 들어왔어요.`);
     } catch (err) {
-      setState($('#roomState'), err.code === 'permission-denied' ? '이 수업방에 들어갈 수 없어요. 번호를 다시 확인해 주세요.' : (err.message || '들어가지 못했어요. 잠시 뒤 다시 해 주세요.'), true);
+      const code=String(err.code || '');
+      const message=code.includes('permission-denied') ? '이 수업방에 들어갈 수 없어요. 번호와 입장 가능 여부를 진행자에게 확인해 주세요.' : code.includes('too-many-requests') || code.includes('quota') || code.includes('resource-exhausted') ? '동시에 들어오는 사람이 많아 수업방 연결이 제한됐어요. 아래 ‘수업방 없이 실습 계속하기’를 누르면 만든 내용은 이 기기에 저장되며 실습을 이어갈 수 있어요.' : code.includes('network') || code.includes('unavailable') ? '인터넷 연결이 원활하지 않아요. 수업방 없이 실습을 이어가거나 잠시 뒤 다시 들어와 주세요.' : /[가-힣]/.test(err.message || '') ? err.message : '수업방에 연결하지 못했어요. 번호를 확인하거나 수업방 없이 실습을 이어가 주세요.';
+      setState($('#roomState'), message, true);
       room = store.get(ROOM_KEY, null);
     }
     $('#roomGo').disabled = false;
@@ -148,13 +150,14 @@
     const ans = {};
     SENT.forEach(f => { const v = String(a[f] || '').trim(); if (v) ans[f] = v.slice(0, 2000); });
     const kind = (window.PromptKit.KINDS.find(k => k.id === a.pk) || window.PromptKit.KINDS[0]);
+    ans.tool = ({canva:'Canva AI',gemini:'Gemini',codex:'Codex',claude:'Claude Code'})[a.tool] || 'Gemini';
     if (a.p9) { ans.pk = kind.n; ans.pl = a.pl === 'adv' ? '심화' : '기초'; }
     const mine = liveWorks.find(w => w.id === fb.uid);
     try {
       await sub('people').doc(fb.uid).set({
         name: room.name, updatedAt: fb.FV.serverTimestamp(),
         stepIndex: i, stepId: step.dataset.step, stepTitle: step.dataset.title, seen: W.seen,
-        answers: ans, deploy: { tab: a.dtab === 'firebase' ? 'firebase' : 'netlify', ...W.deployCounts() },
+        answers: ans, deploy: { tab: ['canva','gemini','firebase','netlify'].includes(a.dtab) ? a.dtab : (a.tool === 'canva' ? 'canva' : a.tool === 'gemini' ? 'gemini' : 'firebase'), ...W.deployCounts() },
         quiz: W.quizScore(), surveyDone: !!(a.star || String(a.s2 || '').trim() || String(a.s3 || '').trim()),
         ...(worksReady ? { work: mine ? { name: mine.name, url: mine.url } : null } : {})
       }, { merge: true });
